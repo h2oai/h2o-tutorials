@@ -1,2 +1,2 @@
-# h2o-world-2015-training
+# H2O World 2015 Training 
 Tutorials and training material
