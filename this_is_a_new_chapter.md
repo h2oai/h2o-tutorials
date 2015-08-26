@@ -1,1 +1,1 @@
-This is a new section in a chapter
+This is a new chapter
