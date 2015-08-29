@@ -165,14 +165,15 @@ To use the template:
 4. Compile
 
 ### Copy the java from H2O into the project
-From the `generated_model` directory:
 
-* copy the `h2o-model.jar` file into the project's `localjars` directory
-* copy the `GBMModel.java` file into `src/main/java/com/h2o/hive/udf/`
+```bash
+$ cp generated_model/h2o-genmodel.jar localjars
+$ cp generated_model/GBMModel.java src/main/java/ai/h2o/hive/udf/GBMModel.java
+```
 
 ### Update the POJO to Be a Part of the Same Package as the UDF ###
 
-To the top of  `GBMModel.java`, add:
+To the top of `GBMModel.java`, add:
 
 ```Java
 package ai.h2o.hive.udf;
@@ -191,7 +192,7 @@ And plug these into the `<properties>`  section of the `pom.xml` file.  Currentl
 
 ###Compile
 
-```Bash
+```bash
 $ mvn compile
 $ mvn package
 ```
