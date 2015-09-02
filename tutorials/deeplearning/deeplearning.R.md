@@ -38,7 +38,7 @@
 
 ######While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Automatic data standardization and handling of categorical variables and missing values and per-neuron adaptive learning rates reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
 
-    dlmodel <- h2o.deeplearning(x=1:784, y=785, data=train_hex, validation=test_hex,
+    dlmodel <- h2o.deeplearning(x=1:784, y=785, training_frame=train_hex, validation_frame=test_hex,
                                 hidden=c(50,50), epochs=0.1, activation="Tanh")
     
 ######Let's look at the model summary, and the confusion matrix and classification error (on the validation set, since it was provided) in particular:
