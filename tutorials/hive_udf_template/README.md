@@ -81,7 +81,7 @@ Looking at the data, we can see that 8 columns are using integer codes to repres
 ```
 
 ### Creating several models in H2O
-Now that the data has been prepared, let's build a set of models using [GBM](http://docs.h2o.ai/datascience/gbm.html).  Here we will select the columns used as predictors and results,  specify the validation data set, and then buld a model.
+Now that the data has been prepared, let's build a set of models using [GBM](http://h2o-release.s3.amazonaws.com/h2o/rel-simons/7/docs-website/h2o-docs/index.html#Data%20Science%20Algorithms-GBM).  Here we will select the columns used as predictors and results, specify the validation data set, and then build a model.
 
 ```r
 > predset <- c(("RELP", "SCHL", "COW", "MAR", "INDP", "RAC1P", "SEX", "POBP", "AGEP", "WKHP", "LOG_CAPGAIN", "LOG_CAPLOSS")
@@ -97,6 +97,7 @@ Now that the data has been prepared, let's build a set of models using [GBM](htt
                              validation_frame = adult_2013_test,
                              importance = TRUE)
 > log_wagp_gbm
+
 Model Details:
 ==============
 
