@@ -240,7 +240,7 @@ Keep in mind that your UDF is only loaded in Hive for as long as you are using i
 Now the moment we've been working towards:
 
 ```r
- hive> SELECT scoredata(AGEP, COW, SCHL, MAR, INDP, RELP, RAC1P, SEX, AGEP, WKHP, POBP, LOG_CAPGAIN, LOG_CAPLOSS) FROM adult_data_set LIMIT 10;
+ hive> SELECT scoredata(AGEP, COW, SCHL, MAR, INDP, RELP, RAC1P, SEX, WKHP, POBP, LOG_CAPGAIN, LOG_CAPLOSS) FROM adult_data_set LIMIT 10;
 OK
 10.476669
 10.201586
