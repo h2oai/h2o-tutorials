@@ -37,7 +37,8 @@ public class UDFExampleTest {
             new DeferredJavaObject("0"), new DeferredJavaObject("1"),new DeferredJavaObject("2"), // RELP, RAC1P, SEX
             new DeferredJavaObject(40), new DeferredJavaObject("1"), new DeferredJavaObject(0.0), // WKHP, POBP, LOG_CAPGAIN
             new DeferredJavaObject(0.0)}); // LOG_CAPLOSS
-    Assert.assertEquals(10.43278662820711D, resultInspector.get(result1), Math.ulp(resultInspector.get(result1)));
+    double tolerance = 1e-8;
+    Assert.assertEquals(10.43278662820711D, resultInspector.get(result1), tolerance);
     // Wrong number of arguments
 
     try {
