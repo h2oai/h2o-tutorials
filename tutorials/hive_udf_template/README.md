@@ -192,6 +192,8 @@ And plug these into the `<properties>`  section of the `pom.xml` file.  Currentl
 
 ###Compile
 
+> Caution:  This tutorial was written using Maven 3.0.4.  Older 2.x versions of Maven may not work.
+
 ```bash
 $ mvn compile
 $ mvn package
