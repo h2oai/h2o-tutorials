@@ -231,7 +231,7 @@ Note that for correct class loading, you will need to load the h2o-model.jar bef
 ```hive
 > ADD JAR h2o-genmodel.jar;
 > ADD JAR ScoreData-1.0-SNAPSHOT.jar;
-> CREATE TEMPORARY FUNCTION scoredata AS ‘com.h2o.hive.udf.ScoreDataUDF’;
+> CREATE TEMPORARY FUNCTION scoredata AS 'ai.h2o.hive.udf.ScoreDataUDF';
 ```
 
 Keep in mind that your UDF is only loaded in Hive for as long as you are using it.  If you `quit;` and then join Hive again, you will have to re-enter the last three lines.
