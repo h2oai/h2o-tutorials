@@ -3,3 +3,8 @@ pojo_webapp.iml
 pojo_webapp.ipr
 pojo_webapp.iws
 
+.Rhistory
+build
+lib/h2o-genmodel.jar
+src/main/java/org/gradle/MyModel.java
+tmp
