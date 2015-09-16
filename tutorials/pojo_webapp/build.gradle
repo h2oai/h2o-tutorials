@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     compile name: 'h2o-genmodel'
-    providedCompile "javax.servlet:servlet-api:2.5"
+    compile "javax.servlet:servlet-api:2.5"
 }
 
 war {

@@ -8,3 +8,4 @@ build
 lib/h2o-genmodel.jar
 src/main/java/org/gradle/MyModel.java
 tmp
+out

@@ -1,4 +1,4 @@
-# H2O generated model POJO WebApp Example
+# H2O generated POJO model WebApp Example
 
 This example shows a generated Java POJO being called using a REST API from a JavaScript Web application.
 
@@ -60,16 +60,38 @@ $ ./gradlew jettyRunWar
 <http://localhost:8080/pojo_webapp>
 
 
-
 ## Underneath the hood
 
 Make a prediction with curl and get a JSON response.
 
 ```
-$ curl -v "http://localhost:8080/pojo_webapp/predict?feature1=blah&feature2=blah?feature3=blah"
+$ curl "http://localhost:8080/pojo_webapp/predict?pclass=1&sex=male&age=25&fare=1"
 {
-    "response" : "blah"
+  labelIndex : 0,
+  label : "0",
+  "classProbabilities" : [
+    0.684132522471987,
+    0.3158674775280131
+  ]
 }
+```
+
+```
+$ curl "http://localhost:8080/pojo_webapp/predict?pclass=3&sex=male&age=40&fare=1000"
+{
+  labelIndex : 0,
+  label : "0",
+  "classProbabilities" : [
+    0.8946904250568489,
+    0.10530957494315105
+  ]
+}
+```
+
+```
+$ curl "http://localhost:8080/pojo_webapp/predict?pclass=3&sex=junk&age=40&fare=1000"
+[... HTTP error response simplified below ...]
+Error 406 Unknown categorical level (sex,junk)
 ```
 
 ## References

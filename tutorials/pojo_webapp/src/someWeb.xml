@@ -4,11 +4,11 @@
 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
          version="2.4">
     <servlet>
-        <servlet-name>Hello</servlet-name>
-        <servlet-class>org.gradle.HelloServlet</servlet-class>
+        <servlet-name>Predict</servlet-name>
+        <servlet-class>org.gradle.PredictServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Hello</servlet-name>
-        <url-pattern>/hello</url-pattern>
+        <servlet-name>Predict</servlet-name>
+        <url-pattern>/predict</url-pattern>
     </servlet-mapping>
 </web-app>
