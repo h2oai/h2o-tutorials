@@ -2,6 +2,7 @@
 build:
 	rm -fr tmp
 	R -f script.R
+	mkdir -p lib
 	cp tmp/h2o-genmodel.jar lib
 	echo "package org.gradle;" > tmp/package.java
 	echo "" >> tmp/package.java
