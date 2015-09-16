@@ -16,9 +16,7 @@ public class PredictServlet extends HttpServlet {
     EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
 
     // Make the prediction.
-    BinomialModelPrediction p = model.predictBinomial(row);
-
-    return p;
+    return model.predictBinomial(row);
   }
 
   public void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
