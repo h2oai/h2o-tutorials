@@ -42,8 +42,8 @@ public class PredictServlet extends HttpServlet {
       // Build a JSON response for the prediction.
       StringBuilder sb = new StringBuilder();
       sb.append("{\n");
-      sb.append("  labelIndex : ").append(p.labelIndex).append(",\n");
-      sb.append("  label : \"").append(p.label).append("\",\n");
+      sb.append("  \"labelIndex\" : ").append(p.labelIndex).append(",\n");
+      sb.append("  \"label\" : \"").append(p.label).append("\",\n");
       sb.append("  \"classProbabilities\" : ").append("[\n");
       for (int i = 0; i < p.classProbabilities.length; i++) {
         double d = p.classProbabilities[i];
