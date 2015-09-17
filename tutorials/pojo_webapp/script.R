@@ -24,6 +24,7 @@ h2o.init(nthreads = -1)
 df = h2o.importFile("data/titanic.csv")
 dim(df)
 df$survived = as.factor(df$survived)
+df$pclass = as.factor(df$pclass)
 summary(df)
 
 # Build model
