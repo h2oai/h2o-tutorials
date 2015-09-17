@@ -15,7 +15,7 @@ $(document).ready(function(){
     var fare = $fareField.val();
 
     var data = {
-      pclass: fare,
+      pclass: pclass,
       sex: sex,
       age: age,
       fare: fare
