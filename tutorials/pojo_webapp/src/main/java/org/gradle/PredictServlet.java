@@ -11,7 +11,7 @@ import hex.genmodel.easy.*;
 
 public class PredictServlet extends HttpServlet {
   private BinomialModelPrediction predict (RowData row) throws Exception {
-    // Improve performance by not instantiating the model every call.
+    // Potential improvement for performance by not instantiating a new model every time.
     MyModel rawModel = new MyModel();
     EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
 
@@ -31,7 +31,9 @@ public class PredictServlet extends HttpServlet {
       String[] values = entry.getValue();
       for (String value : values) {
         System.out.println("Key: " + key + " Value: " + value);
-        row.put(key, value);
+        if (value.length() > 0) {
+          row.put(key, value);
+        }
       }
     }
 
@@ -69,6 +71,7 @@ public class PredictServlet extends HttpServlet {
     }
     catch (Exception e) {
       // Prediction failed.
+      System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
     }
   }
