@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Storm Demo Live</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" type="text/javascript"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <script>
+
+        // use to randomly place rain drops along the cloud
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+    </script>
+
+    <style>
+        #demo {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #cloud,
+        #woof,
+        #predict,
+        #meow {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #cloud {
+            z-index: 10;
+        }
+        #predict { z-index: 5; }
+
+        #cur {
+            position: relative;
+            top:45px;
+            left:10%;
+            width: 400px;
+            height:200px;
+            z-index:900;
+        }
+
+        #cat_cnt {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            z-index:900;
+        }
+
+        #ccnt {
+            position: absolute;
+            top: 15px;
+            left: 100%;
+            z-index:900;
+            font-size: 90px;
+        }
+
+        #dcnt {
+            position: absolute;
+            top: 15px;
+            left: 200%;
+            z-index:900;
+            font-size: 90px;
+        }
+
+        #dog_cnt {
+            position: absolute;
+            top: 10px;
+            left: 160%;
+            z-index:900;
+        }
+
+    </style>
+</head>
+<body>
+
+
+  <div id = "demo">
+      <div id="cloud"><img src="./cloud.png" style="width:100%;height:228px"></div>
+      <div id="meow"></div>
+      <div id="woof"></div>
+      <div id="predict"></div>
+      <div id="cur_val" style="display:none;">cat</div>
+      <div id="old" style="display:none;"></div>
+  </div>
+  <div id="cur">
+      <img id="cur_pic" src="./cat.png" style="display:none;">
+      <img id="cat_cnt" src="./cat.png">
+      <div id="ccnt" style="color: #ffffff;">0</div>
+      <img id="dog_cnt" src="./dog.png">
+      <div id="dcnt" style="color: #ffffff;">0</div>
+  </div>
+  <script>
+      var w = innerWidth;
+      var h = innerHeight;
+
+      // simple method to GET the latest predictions from Storm
+      function gogogo() {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function () {
+              if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                  var txt = xmlhttp.responseText;
+                  txt = txt.split(',');
+                  var predict  = txt[1];
+                  if (predict === undefined) return;
+                  var isCat = predict == "cat";
+                  var dogObs = isCat ? 0 : 1;
+                  var catObs = isCat ? 1 : 0;
+                  $('#dcnt').text(function(i, txt) { return parseInt($("#dcnt").text(), 10) + dogObs});
+                  $('#ccnt').text(function(i, txt) { return parseInt($("#ccnt").text(), 10) + catObs});
+                  $('#cur_val').text(predict);
+                  document.getElementById("cur_pic").src="./".concat(predict).concat(".png");
+              }
+          };
+          xmlhttp.open("GET", "./out", true);
+          xmlhttp.send();
+      }
+
+      function rain() {
+
+          // data for each vis
+          var data = Array.apply(null, new Array(50)).map(Number.prototype.valueOf,0).map(function() { return getRandomInt(30, window.innerWidth - 100)} );
+          var data2= Array.apply(null, new Array(50)).map(Number.prototype.valueOf,0).map(function() { return getRandomInt(30, window.innerWidth - 100)} );
+          var data3= [60,innerWidth/5,innerWidth*2/5,3*innerWidth/5, 4*innerWidth/5, innerWidth];
+
+          // visualization references
+          var vis = d3.select("#meow").append("svg").attr("width", w+100).attr("height",innerHeight+100).style("display", "inline");
+          var vis2 =d3.select("#woof").append("svg").attr("width", w+100).attr("height",innerHeight+100).style("display", "inline");
+          var vis3 = d3.select("#predict").append("svg").attr("width", w+100).attr("height",innerHeight+100).style("display", "inline").attr("id", "pred");
+
+          // set of objects in each visualization
+          var ones = vis.selectAll("rect").data(data);
+          var zeros=vis2.selectAll("circle").data(data2);
+          var imgs = vis3.selectAll("image").data(data3);
+
+          // loop!
+          setInterval(function() {
+              // get the most recent prediction...
+              gogogo();
+
+              // drop the 'cat.png' or 'dog.png' based on the $("#cur_val").text() value
+              imgs.enter()
+                      .append("svg:image")
+                      .attr("xlink:href",  function() { return "./".concat($("#cur_val").text()).concat(".png") })
+                      .attr("x", function(d) { return d; })
+                      .attr("y", "0")
+                      .attr("width", "300")
+                      .attr("height", "150")
+                      .transition()
+                      .delay(function () {
+                          return getRandomInt(0, 1000);
+                      })
+                      .each("end", function () {
+                          d3.select(this).transition().duration(1500).attr("y", innerHeight+200);
+                          d3.select(this).transition().delay(2000).duration(1).style("opacity", 0).ease("exp").remove();
+                      });
+
+              // build the straight line drops of rain
+              ones.enter().append("rect")
+                      .attr("x", function (d) {
+                          return d;
+                      })
+                      .attr("y", 50)
+                      .attr("width", 2)
+                      .attr("height", 10)
+                      .style("border", "1px solid black")
+                      .transition()
+                      .delay(function () {
+                          return getRandomInt(0, 1000);
+                      })
+                      .each("end", function () {
+                          d3.select(this).transition().duration(1500).attr("y", innerHeight+200);
+                          d3.select(this).transition().delay(2000).duration(1).style("opacity", 0).ease("exp").remove();
+                      });
+
+              // build the circle drops of rain
+              zeros.enter().append("circle")
+                      .attr("cx", function(d) { return d; })
+                      .attr("cy", 200)
+                      .attr("r", 5)
+                      .attr("width", 2)
+                      .attr("height", 25)
+                      .attr("fill", "white")
+                      .attr("stroke", "black")
+                      .style("border", "1px solid black")
+                      .transition()
+                      .delay(function () {
+                          return getRandomInt(500, 2000);
+                      })
+                      .each("end", function () {
+                          d3.select(this).transition().duration(2000).attr("cy", innerHeight+200);
+                          d3.select(this).transition().delay(2000).duration(1).style("opacity", 0).ease("exp").remove();
+                      });
+
+          }, 1000);
+      }
+
+      // launch the whole thing...
+      $(document).ready(function() {rain();});
+  </script>
+
+</body>
+</html>
