@@ -34,8 +34,8 @@
     homedir <- "/data/h2o-training/mnist/"
     TRAIN = "train.csv.gz"
     TEST = "test.csv.gz"
-    train_hex <- h2o.importFile(h2oServer, path = paste0(homedir,TRAIN), header = F, sep = ',', key = 'train.hex')
-    test_hex <- h2o.importFile(h2oServer, path = paste0(homedir,TEST), header = F, sep = ',', key = 'test.hex')
+    train_hex <- h2o.importFile(h2oServer, path = paste0(homedir,TRAIN), header = F, sep = ',', destination_frame = 'train.hex')
+    test_hex <- h2o.importFile(h2oServer, path = paste0(homedir,TEST), header = F, sep = ',', destination_frame = 'test.hex')
 
 
 ######While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Automatic data standardization and handling of categorical variables and missing values and per-neuron adaptive learning rates reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
