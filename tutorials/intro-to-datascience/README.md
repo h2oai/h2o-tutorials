@@ -24,7 +24,7 @@ This tutorial is designed to provide an introduction to concepts in the fields o
 
 One of the earliest uses of the term "data science" occured in the title of the 1996 [ International Federation of Classification Societies (IFCS)](http://www.classification-society.org/ifcs/index.html) conference in Kobe, Japan. 
 
-![IFCS Conference 1996](images/datascience_poster_1996ifcs.jpg)
+![IFCS Conference 1996](images/datascience_poster_1996ifcs.png)
 
 The term re-emerged and became popularized by [William Cleveland](http://www.stat.purdue.edu/~wsc/) (then at Bell Labs) when he published, "[Data Science: An Action Plan for Expanding the Technical Areas of the Field of Statistics.](http://www.stat.purdue.edu/~wsc/papers/datascience.pdf)" in 2001.  
 
