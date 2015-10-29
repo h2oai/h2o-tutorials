@@ -1,8 +1,12 @@
+> # !!! UNDER CONSTRUCTION !!!
+> (But open the book anyway, we're adding content...)
+
+
 # Introduction to Data Science, Machine Learning & Predictive Analytics
 - Overview
 - What is Data Science?
 - Data Science Tasks
-  - Problem Formulation
+  - Problem Formulation (motivation)
   - Collect & Process Data
   - Machine Learning
   - Insights & Action
@@ -120,6 +124,8 @@ There are a few concepts that you should become familiar with when first explori
 - Training Data:
 - Features:
 - Models:
+- Model Validation:
+- Overfitting: ?
 - Supervised Learning:
 - Unsupervised Learning:
 
@@ -165,6 +171,10 @@ Here are a few feature extraction methods:
 ## Data Science Pipelines
 
 ![DS Google Trends](images/ml_workflow.png)
+
+Data scientist built a black-box model.  Need a cluster to productionize model.  Network pipeline bringing data in (IT and Hardware involved)
+
+TO DO: Add a slide about how this fits into the IT pipeline and business.
 
 
 ## References
