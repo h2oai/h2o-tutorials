@@ -19,26 +19,30 @@
 
 ## Overview
 
-This tutorial introduces the Generalized Low Rank Model (GLRM), a new machine learning approach for reconstructing missing values and identifying important features in heterogeneous data. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline to make better predictions.
+This tutorial introduces the Generalized Low Rank Model (GLRM) [[1](#references)], a new machine learning approach for reconstructing missing values and identifying important features in heterogeneous data. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline to make better predictions.
 
 ## What is a Low Rank Model?
 
+Across business and research, analysts seek to understand large collections of data with numeric and categorical values. Many entries in this table may be noisy or even missing altogether. Low rank models facilitate the understanding of tabular data by producing a condensed vector representation for every row and column in the data set.
+
+Specifically, given a data table A with m rows and n columns, a GLRM consists of a decomposition of A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a low, user-specified number of columns k. The matrix Y has k rows and number of columns d equal to the total dimension of the embedded features in A. For example, if A has 3 numeric columns and 1 categorical column with 4 distinct levels (e.g., red, yellow, blue and green), then Y will have 7 columns. When A contains only numeric features, the number of columns in A and Y will be identical (d = n).
+
 #### TODO: Finish up this section and include LaTeX image!
 
-Given a data table A with m rows and n columns, a GLRM will decompose A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a small, user-specified number of columns k. Similarly, the matrix Y has k rows and the same number of columns as A, when categorical columns are expanded into indicator variables. The number k is chosen to be much less than both m and n, indicating the amount of compression by the low rank model representation: the smaller is k, the more compression.
+Both X and Y have practical interpretations. Each row of Y is an archetypal feature formed from the columns of A, and each row of X corresponds to a row of A projected into this reduced feature space. We can approximately reconstruct A from the matrix product XY, which has rank k. The number k is chosen to be much less than both m and n: a typical value for 1 million rows and 2,000 columns of numeric data is k = 15. The smaller is k, the more compression we gain from our low rank representation.
 
-Both X and Y have practical interpretations. Each row of Y is an archetypal feature formed from the columns of A, and each row of X corresponds to a row of A projected into this reduced feature space. Thus, we can approximately reconstruct A from the matrix product XY.
+GLRMs are an extension of well-known matrix factorization methods such as Principal Components Analysis (PCA). While PCA is limited to numeric data, GLRMs can handle mixed numeric, categorical, ordinal, and Boolean data with an arbitrary number of missing values. It allows the user to apply regularization to X and Y, imposing restrictions like non-negativity appropriate to a particular data science context. Thus, it is an extremely flexible approach to analyzing and interpreting heterogeneous data sets.
 
 ## Why use Low Rank Models?
 
-- **Memory:** By saving only the X and Y matrices, we can significantly reduce the amount of memory required to store a large dataset. A file that is 10 GB can be compressed down to 100 MB. When we need the original data again, we can reconstruct it on the fly from X and Y with minimal loss in accuracy.
+- **Memory:** By saving only the X and Y matrices, we can significantly reduce the amount of memory required to store a large data set. A file that is 10 GB can be compressed down to 100 MB. When we need the original data again, we can reconstruct it on the fly from X and Y with minimal loss in accuracy.
 - **Speed:** We can use GLRM to compress data with high-dimensional, heterogeneous features into a few numeric columns. This leads to a huge speed-up in model-building and prediction, especially by machine learning algorithms that scale poorly with the size of the feature space. Below, we will see an example with 10x speed-up and no accuracy loss in deep learning.
 - **Feature Engineering:** The Y matrix represents the most important combinations of features from the training data. These condensed features, called archetypes, can be analyzed, visualized and incorporated into various data science applications. 
-- **Missing Data Imputation:** Reconstructing a dataset from X and Y will automatically impute missing values. This imputation is accomplished by intelligently leveraging the information contained in the known values of each feature, as well as user-provided parameters such as the loss function.
+- **Missing Data Imputation:** Reconstructing a data set from X and Y will automatically impute missing values. This imputation is accomplished by intelligently leveraging the information contained in the known values of each feature, as well as user-provided parameters such as the loss function.
 
 ## Example 1: Visualizing Walking Stances
 
-For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by Hamner and Delp (2013) [2]. Each of the 151 row of the dataset contains the (x, y, z) coordinates of major body parts recorded at a specific point in time.
+For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by _Hamner and Delp (2013)_ [[2](#references)]. Each of the 151 row of the data set contains the (x, y, z) coordinates of major body parts recorded at a specific point in time.
 
 #### Basic Model Building
 
@@ -48,11 +52,11 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 	pathToData <- "/data/h2o-training/glrm/subject01_walk1.csv"
 	gait.hex <- h2o.importFile(path = pathToData, destination_frame = "gait.hex")
 
-###### Get a summary of the imported dataset.
+###### Get a summary of the imported data set.
 	dim(gait.hex)
 	summary(gait.hex)
 
-###### Build a basic GLRM using quadratic loss and no regularization. Since this dataset has no missing values, this is equivalent to principal components analysis (PCA). We skip the first column since it is the time index, set the rank k = 10, and allow the algorithm to run for a maximum of 1,000 iterations.
+###### Build a basic GLRM using quadratic loss and no regularization. Since this data set has no missing values, this is equivalent to principal components analysis (PCA). We skip the first column since it is the time index, set the rank k = 10, and allow the algorithm to run for a maximum of 1,000 iterations.
 	gait.glrm <- h2o.glrm(training_frame = gait.hex, cols = 2:ncol(gait.hex), k = 10, loss = "Quadratic", 
 	                      regularization_x = "None", regularization_y = "None", max_iterations = 1000)
 
@@ -100,12 +104,12 @@ Suppose that due to a sensor malfunction, our walking stance data has missing va
 	pathToMissingData <- "/data/h2o-training/glrm/subject01_walk1_miss15.csv"
 	gait.miss <- h2o.importFile(path = pathToMissingData, destination_Frame = "gait.miss")
 
-###### Get a summary of the imported dataset.
+###### Get a summary of the imported data set.
 	dim(gait.miss)
 	summary(gait.miss)
 	sum(is.na(gait.miss))
 
-###### Build a basic GLRM with quadratic loss and no regularization, validating on our original dataset with no missing values. We change the algorithm initialization method, increase the maximum number of iterations to 2,000, and reduce the minimum step size to 1e-6 to ensure it converges.
+###### Build a basic GLRM with quadratic loss and no regularization, validating on our original data set with no missing values. We change the algorithm initialization method, increase the maximum number of iterations to 2,000, and reduce the minimum step size to 1e-6 to ensure it converges.
 	gait.glrm2 <- h2o.glrm(training_frame = gait.miss, validation_frame = gait.hex, cols = 2:ncol(gait.miss), k = 10, init = "SVD", svd_method = "GramSVD",
 	                      loss = "Quadratic", regularization_x = "None", regularization_y = "None", max_iterations = 2000, min_step_size = 1e-6)
 	plot(gait.glrm2)
@@ -125,13 +129,13 @@ Suppose that due to a sensor malfunction, our walking stance data has missing va
 
 ## Example 2: Compressing Zip Codes
 
-For our second example, we will be using two datasets. The first is compliance actions carried out by the U.S. Labor Department's [Wage and Hour Division (WHD)](http://ogesdw.dol.gov/views/data_summary.php) from 2014-2015. This includes information on each investigation, including the zip code tabulation area (ZCTA) at which the firm is located, number of violations found, and civil penalties assessed. We want to predict whether a firm is a repeat and/or willful violator. In order to do this, we need to encode the categorical ZCTA column in a meaningful way. One common approach is to replace ZCTA with indicator variables for every unique level, but due to its high cardinality (there are over 32,000 ZCTAs!), this is slow and leads to overfitting.
+For our second example, we will be using two data sets. The first is compliance actions carried out by the U.S. Labor Department's [Wage and Hour Division (WHD)](http://ogesdw.dol.gov/views/data_summary.php) from 2014-2015. This includes information on each investigation, including the zip code tabulation area (ZCTA) at which the firm is located, number of violations found, and civil penalties assessed. We want to predict whether a firm is a repeat and/or willful violator. In order to do this, we need to encode the categorical ZCTA column in a meaningful way. One common approach is to replace ZCTA with indicator variables for every unique level, but due to its high cardinality (there are over 32,000 ZCTAs!), this is slow and leads to overfitting.
 
-Instead, we will use GLRM to condense ZCTAs into a few numeric columns representing the demographics of that area. Our second dataset is the 2009-2013 [American Community Survey (ACS)](http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?src=bkmk) 5-year estimates of household characteristics. Each row contains information for a unique ZCTA, such as average household size, number of children, education level and ethnicity. By transforming the WHD data with GLRM, we not only address the speed and overfitting issue, but also transfer knowledge between similar ZCTAs in our model.
+Instead, we will use GLRM to condense ZCTAs into a few numeric columns representing the demographics of that area. Our second data set is the 2009-2013 [American Community Survey (ACS)](http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?src=bkmk) 5-year estimates of household characteristics. Each row contains information for a unique ZCTA, such as average household size, number of children, education level and ethnicity. By transforming the WHD data with GLRM, we not only address the speed and overfitting issue, but also transfer knowledge between similar ZCTAs in our model.
 
 #### Condensing Categorical Data
 
-###### Initialize the H2O server and import the ACS dataset.
+###### Initialize the H2O server and import the ACS data set.
 	library(h2o)
 	h2o.init()
 	pathToACSData <- "/data/h2o-training/glrm/ACS_13_5YR_DP02_cleaned.zip"
@@ -141,11 +145,11 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 	acs_zcta_col <- acs_orig$ZCTA5
 	acs_full <- acs_orig[,-which(colnames(acs_orig) == "ZCTA5")]
 
-###### Get a summary of the ACS dataset.
+###### Get a summary of the ACS data set.
 	dim(acs_full)
 	summary(acs_full)
 
-###### Build a GLRM to reduce ZCTA demographics to k = 10 archetypes. We standardize the data before performing the fit to ensure differences in scale between columns don't unduly affect the algorithm. For the loss function, we select quadratic again, but this time, we apply regularization to X and Y in order to sparsify the resulting features.
+###### Build a GLRM to reduce ZCTA demographics to k = 10 archetypes. We standardize the data before performing the fit to ensure differences in scale don't unduly affect the algorithm. For the loss function, we select quadratic again, but this time, apply regularization to X and Y in order to sparsify the compressed features.
 	acs_model <- h2o.glrm(training_frame = acs_full, k = 10, transform = "STANDARDIZE", 
 	                      loss = "Quadratic", regularization_x = "Quadratic", 
 	                      regularization_y = "L1", max_iterations = 100, gamma_x = 0.25, gamma_y = 0.5)
@@ -172,9 +176,9 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 
 #### Runtime and Accuracy Comparison
 
-We now build a deep learning model on the WHD dataset to predict repeat and/or willful violators. For comparison purposes, we train our model using the original data, the data with the ZCTA column replaced by the compressed GLRM representation (the X matrix), and the data with the ZCTA column replaced by all the demographic features in the ACS dataset.
+We now build a deep learning model on the WHD data set to predict repeat and/or willful violators. For comparison purposes, we train our model using the original data, the data with the ZCTA column replaced by the compressed GLRM representation (the X matrix), and the data with the ZCTA column replaced by all the demographic features in the ACS data set.
 
-###### Import WHD dataset and get a summary.
+###### Import WHD data set and get a summary.
 	pathToWHDData <- "/data/h2o-training/glrm/whd_zcta_cleaned.zip"
 	whd_zcta <- h2o.uploadFile(path = pathToWHDData, col.types = c(rep("enum", 7), rep("numeric", 97)))
 	dim(whd_zcta)
@@ -185,20 +189,20 @@ We now build a deep learning model on the WHD dataset to predict repeat and/or w
 	train <- whd_zcta[split <= 0.8,]
 	test <- whd_zcta[split > 0.8,]
 
-###### Build a deep learning model on original WHD data to predict repeat and/or willful violators. Our response is a categorical column with four levels: N/A = neither repeat nor willful, R = repeat, W = willful, and RW = repeat and willful violator, so we specify a multinomial distribution.
+###### Build a deep learning model on original WHD data to predict repeat/willful violators. Our response is a categorical column with four levels: N/A = neither repeat nor willful, R = repeat, W = willful, and RW = repeat and willful violator, so we specify a multinomial distribution.
 	myY <- "flsa_repeat_violator"
 	myX <- setdiff(5:ncol(train), which(colnames(train) == myY))
 	orig_time <- system.time(dl_orig <- h2o.deeplearning(x = myX, y = myY, training_frame = train, 
 	                                                     validation_frame = test, distribution = "multinomial",
 	                                                     epochs = 0.1, hidden = c(50,50,50)))
 
-###### Replace each ZCTA in the WHD data with the row of the X matrix corresponding to its compressed demographic representation. At the end of the merge, our single categorical column will be replaced by k = 10 numeric columns.
+###### Replace each ZCTA in the WHD data with the row of the X matrix corresponding to its compressed demographic representation. At the end, our single categorical column will be replaced by k = 10 numeric columns.
 	zcta_arch_x$zcta5_cd <- acs_zcta_col
 	whd_arch <- h2o.merge(whd_zcta, zcta_arch_x, all.x = TRUE, all.y = FALSE)
 	whd_arch$zcta5_cd <- NULL
 	summary(whd_arch)
 
-###### Split the reduced WHD data into test and train, and build a deep learning model to predict repeat and/or willful violators.
+###### Split the reduced WHD data into test and train, and build a deep learning model to predict repeat/willful violators.
 	train_mod <- whd_arch[split <= 0.8,]
 	test_mod  <- whd_arch[split > 0.8,]
 	myX <- setdiff(5:ncol(train_mod), which(colnames(train_mod) == myY))
@@ -206,7 +210,7 @@ We now build a deep learning model on the WHD dataset to predict repeat and/or w
 	                                                   validation_frame = test_mod, distribution = "multinomial",
 	                                                   epochs = 0.1, hidden = c(50,50,50)))
 
-###### Compare the performance between the two models. We see that the model built on the reduced WHD dataset finishes almost 10 times faster than the model using the original dataset, and it yields a lower log-loss error. 
+###### Compare the performance between the two models. We see that the model built on the reduced WHD data set finishes almost 10 times faster than the model using the original data set, and it yields a lower log-loss error. 
 	data.frame(original = c(orig_time[3], h2o.logloss(dl_orig, train = TRUE), h2o.logloss(dl_orig, valid = TRUE)),
            	   reduced  = c(mod_time[3], h2o.logloss(dl_mod, train = TRUE), h2o.logloss(dl_mod, valid = TRUE)),
            	   row.names = c("runtime", "train_logloss", "test_logloss"))
