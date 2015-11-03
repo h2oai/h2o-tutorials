@@ -19,15 +19,21 @@
 
 ## Overview
 
-This tutorial introduces the Generalized Low Rank Model (GLRM), a machine learning method for compressing data, imputing missing values and identifying key features. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline.
+This tutorial introduces the Generalized Low Rank Model (GLRM), a new machine learning approach for reconstructing missing values and identifying important features in heterogeneous data. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline to make better predictions.
 
 ## What is a Low Rank Model?
+
+#### TODO: Finish up this section and include LaTeX image!
+
+Given a data table A with m rows and n columns, a GLRM will decompose A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a small, user-specified number of columns k. Similarly, the matrix Y has k rows and the same number of columns as A, when categorical columns are expanded into indicator variables. The number k is chosen to be much less than both m and n, indicating the amount of compression by the low rank model representation: the smaller is k, the more compression.
+
+Both X and Y have practical interpretations. Each row of Y is an archetypal feature formed from the columns of A, and each row of X corresponds to a row of A projected into this reduced feature space. Thus, we can approximately reconstruct A from the matrix product XY.
 
 ## Why use Low Rank Models?
 
 - **Memory:** By saving only the X and Y matrices, we can significantly reduce the amount of memory required to store a large dataset. A file that is 10 GB can be compressed down to 100 MB. When we need the original data again, we can reconstruct it on the fly from X and Y with minimal loss in accuracy.
-- **Speed:** We can use GLRM to compress data with high-dimensional, mixed-type features into a few numeric columns. This leads to a huge speed-up in model-building and prediction, especially by machine learning algorithms that scale poorly with the size of the feature space. Below, we will see an example with 10x speed-up and no accuracy loss in deep learning.
-- **Feature Engineering:** The Y matrix represents the most important combinations of features from the training data. These condensed features, called "archetypes", can be analyzed, visualized and used in fitting other machine learning models. 
+- **Speed:** We can use GLRM to compress data with high-dimensional, heterogeneous features into a few numeric columns. This leads to a huge speed-up in model-building and prediction, especially by machine learning algorithms that scale poorly with the size of the feature space. Below, we will see an example with 10x speed-up and no accuracy loss in deep learning.
+- **Feature Engineering:** The Y matrix represents the most important combinations of features from the training data. These condensed features, called archetypes, can be analyzed, visualized and incorporated into various data science applications. 
 - **Missing Data Imputation:** Reconstructing a dataset from X and Y will automatically impute missing values. This imputation is accomplished by intelligently leveraging the information contained in the known values of each feature, as well as user-provided parameters such as the loss function.
 
 ## Example 1: Visualizing Walking Stances
@@ -145,6 +151,10 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 	                      regularization_y = "L1", max_iterations = 100, gamma_x = 0.25, gamma_y = 0.5)
 	plot(acs_model)
 
+###### The rows of the X matrix map each ZCTA into a combination of demographic archetypes.
+	zcta_arch_x <- h2o.getFrame(acs_model@model$representation_name)
+	head(zcta_arch_x)
+
 ###### Plot a few interesting ZCTAs on the first two archetypes. We should see cities with similar demographics, such as Sunnyvale and Cupertino, grouped close together, while very different cities, such as the rural town McCune and the upper east side of Manhattan, fall far apart on the graph.
 	idx <- ((acs_zcta_col == "10065") |   # Manhattan, NY (Upper East Side)
         	(acs_zcta_col == "11219") |   # Manhattan, NY (East Harlem)
@@ -162,11 +172,44 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 
 #### Runtime and Accuracy Comparison
 
+We now build a deep learning model on the WHD dataset to predict repeat and/or willful violators. For comparison purposes, we train our model using the original data, the data with the ZCTA column replaced by the compressed GLRM representation (the X matrix), and the data with the ZCTA column replaced by all the demographic features in the ACS dataset.
+
 ###### Import WHD dataset and get a summary.
 	pathToWHDData <- "/data/h2o-training/glrm/whd_zcta_cleaned.zip"
 	whd_zcta <- h2o.uploadFile(path = pathToWHDData, col.types = c(rep("enum", 7), rep("numeric", 97)))
 	dim(whd_zcta)
 	summary(whd_zcta)
+
+###### Split the WHD data into test and train with a 20/80 ratio.
+	split <- h2o.runif(whd_zcta)
+	train <- whd_zcta[split <= 0.8,]
+	test <- whd_zcta[split > 0.8,]
+
+###### Build a deep learning model on original WHD data to predict repeat and/or willful violators. Our response is a categorical column with four levels: N/A = neither repeat nor willful, R = repeat, W = willful, and RW = repeat and willful violator, so we specify a multinomial distribution.
+	myY <- "flsa_repeat_violator"
+	myX <- setdiff(5:ncol(train), which(colnames(train) == myY))
+	orig_time <- system.time(dl_orig <- h2o.deeplearning(x = myX, y = myY, training_frame = train, 
+	                                                     validation_frame = test, distribution = "multinomial",
+	                                                     epochs = 0.1, hidden = c(50,50,50)))
+
+###### Replace each ZCTA in the WHD data with the row of the X matrix corresponding to its compressed demographic representation. At the end of the merge, our single categorical column will be replaced by k = 10 numeric columns.
+	zcta_arch_x$zcta5_cd <- acs_zcta_col
+	whd_arch <- h2o.merge(whd_zcta, zcta_arch_x, all.x = TRUE, all.y = FALSE)
+	whd_arch$zcta5_cd <- NULL
+	summary(whd_arch)
+
+###### Split the reduced WHD data into test and train, and build a deep learning model to predict repeat and/or willful violators.
+	train_mod <- whd_arch[split <= 0.8,]
+	test_mod  <- whd_arch[split > 0.8,]
+	myX <- setdiff(5:ncol(train_mod), which(colnames(train_mod) == myY))
+	mod_time <- system.time(dl_mod <- h2o.deeplearning(x = myX, y = myY, training_frame = train_mod, 
+	                                                   validation_frame = test_mod, distribution = "multinomial",
+	                                                   epochs = 0.1, hidden = c(50,50,50)))
+
+###### Compare the performance between the two models. We see that the model built on the reduced WHD dataset finishes almost 10 times faster than the model using the original dataset, and it yields a lower log-loss error. 
+	data.frame(original = c(orig_time[3], h2o.logloss(dl_orig, train = TRUE), h2o.logloss(dl_orig, valid = TRUE)),
+           	   reduced  = c(mod_time[3], h2o.logloss(dl_mod, train = TRUE), h2o.logloss(dl_mod, valid = TRUE)),
+           	   row.names = c("runtime", "train_logloss", "test_logloss"))
 
 ## References
 
