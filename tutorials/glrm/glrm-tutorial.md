@@ -7,7 +7,7 @@
 	- Memory
 	- Speed
 	- Feature Engineering
-	- Missing Data
+	- Missing Data Imputation
 - Example 1: Visualizing Walking Stances
 	- Basic Model Building
 	- Plotting Archetypal Features
@@ -19,20 +19,20 @@
 
 ## Overview
 
-This tutorial introduces the **Generalized Low Rank Model (GLRM)**, a machine learning method for compressing data, imputing missing values and identifying key features. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline.
+This tutorial introduces the Generalized Low Rank Model (GLRM), a machine learning method for compressing data, imputing missing values and identifying key features. It demonstrates how to build a GLRM in H2O and integrate it into a data science pipeline.
 
 ## What is a Low Rank Model?
 
 ## Why use Low Rank Models?
 
 - **Memory:** By saving only the X and Y matrices, we can significantly reduce the amount of memory required to store a large dataset. A file that is 10 GB can be compressed down to 100 MB. When we need the original data again, we can reconstruct it on the fly from X and Y with minimal loss in accuracy.
-- **Feature Engineering:** The Y matrix represents the most important combinations of features from the training data. These condensed features, called "archetypes", can be analyzed, visualized and used in fitting other machine learning models. 
 - **Speed:** We can use GLRM to compress data with high-dimensional, mixed-type features into a few numeric columns. This leads to a huge speed-up in model-building and prediction, especially by machine learning algorithms that scale poorly with the size of the feature space. Below, we will see an example with 10x speed-up and no accuracy loss in deep learning.
-- **Missing Data:** Reconstructing a dataset from X and Y will automatically impute missing values. This imputation is accomplished by intelligently leveraging the information contained in the known values of each feature, as well as user-provided parameters such as the loss function.
+- **Feature Engineering:** The Y matrix represents the most important combinations of features from the training data. These condensed features, called "archetypes", can be analyzed, visualized and used in fitting other machine learning models. 
+- **Missing Data Imputation:** Reconstructing a dataset from X and Y will automatically impute missing values. This imputation is accomplished by intelligently leveraging the information contained in the known values of each feature, as well as user-provided parameters such as the loss function.
 
 ## Example 1: Visualizing Walking Stances
 
-For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by Hamner and Delp (2013) [2]. Each of the 151 row of the dataset contains the (x, y, z) coordinates of major body parts recorded at a specific time.
+For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by Hamner and Delp (2013) [2]. Each of the 151 row of the dataset contains the (x, y, z) coordinates of major body parts recorded at a specific point in time.
 
 #### Basic Model Building
 
@@ -118,6 +118,55 @@ Suppose that due to a sensor malfunction, our walking stance data has missing va
 	points(time.df[idx_miss], lacro.df[idx_miss,1], col = 2, pch = 4, lty = 2)
 
 ## Example 2: Compressing Zip Codes
+
+For our second example, we will be using two datasets. The first is compliance actions carried out by the U.S. Labor Department's [Wage and Hour Division (WHD)](http://ogesdw.dol.gov/views/data_summary.php) from 2014-2015. This includes information on each investigation, including the zip code tabulation area (ZCTA) at which the firm is located, number of violations found, and civil penalties assessed. We want to predict whether a firm is a repeat and/or willful violator. In order to do this, we need to encode the categorical ZCTA column in a meaningful way. One common approach is to replace ZCTA with indicator variables for every unique level, but due to its high cardinality (there are over 32,000 ZCTAs!), this is slow and leads to overfitting.
+
+Instead, we will use GLRM to condense ZCTAs into a few numeric columns representing the demographics of that area. Our second dataset is the 2009-2013 [American Community Survey (ACS)](http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?src=bkmk) 5-year estimates of household characteristics. Each row contains information for a unique ZCTA, such as average household size, number of children, education level and ethnicity. By transforming the WHD data with GLRM, we not only address the speed and overfitting issue, but also transfer knowledge between similar ZCTAs in our model.
+
+#### Condensing Categorical Data
+
+###### Initialize the H2O server and import the ACS dataset.
+	library(h2o)
+	h2o.init()
+	pathToACSData <- "/data/h2o-training/glrm/ACS_13_5YR_DP02_cleaned.zip"
+	acs_orig <- h2o.uploadFile(path = pathToACSData, col.types = c("enum", rep("numeric", 149)))
+
+###### Save and drop the zip code tabulation area column.
+	acs_zcta_col <- acs_orig$ZCTA5
+	acs_full <- acs_orig[,-which(colnames(acs_orig) == "ZCTA5")]
+
+###### Get a summary of the ACS dataset.
+	dim(acs_full)
+	summary(acs_full)
+
+###### Build a GLRM to reduce ZCTA demographics to k = 10 archetypes. We standardize the data before performing the fit to ensure differences in scale between columns don't unduly affect the algorithm. For the loss function, we select quadratic again, but this time, we apply regularization to X and Y in order to sparsify the resulting features.
+	acs_model <- h2o.glrm(training_frame = acs_full, k = 10, transform = "STANDARDIZE", 
+	                      loss = "Quadratic", regularization_x = "Quadratic", 
+	                      regularization_y = "L1", max_iterations = 100, gamma_x = 0.25, gamma_y = 0.5)
+	plot(acs_model)
+
+###### Plot a few interesting ZCTAs on the first two archetypes. We should see cities with similar demographics, such as Sunnyvale and Cupertino, grouped close together, while very different cities, such as the rural town McCune and the upper east side of Manhattan, fall far apart on the graph.
+	idx <- ((acs_zcta_col == "10065") |   # Manhattan, NY (Upper East Side)
+        	(acs_zcta_col == "11219") |   # Manhattan, NY (East Harlem)
+        	(acs_zcta_col == "66753") |   # McCune, KS
+        	(acs_zcta_col == "84104") |   # Salt Lake City, UT
+        	(acs_zcta_col == "94086") |   # Sunnyvale, CA
+        	(acs_zcta_col == "95014"))    # Cupertino, CA
+	city_arch <- as.data.frame(zcta_arch_x[idx,1:2])
+	xeps <- (max(city_arch[,1]) - min(city_arch[,1])) / 10
+	yeps <- (max(city_arch[,2]) - min(city_arch[,2])) / 10
+	xlims <- c(min(city_arch[,1]) - xeps, max(city_arch[,1]) + xeps)
+	ylims <- c(min(city_arch[,2]) - yeps, max(city_arch[,2]) + yeps)
+	plot(city_arch[,1], city_arch[,2], xlim = xlims, ylim = ylims, xlab = "First Archetype", ylab = "Second Archetype", main = "Archetype Representation of Zip Code Tabulation Areas")
+	text(city_arch[,1], city_arch[,2], labels = c("Upper East Side", "East Harlem", "McCune", "Salt Lake City", "Sunnyvale", "Cupertino"), pos = 1)
+
+#### Runtime and Accuracy Comparison
+
+###### Import WHD dataset and get a summary.
+	pathToWHDData <- "/data/h2o-training/glrm/whd_zcta_cleaned.zip"
+	whd_zcta <- h2o.uploadFile(path = pathToWHDData, col.types = c(rep("enum", 7), rep("numeric", 97)))
+	dim(whd_zcta)
+	summary(whd_zcta)
 
 ## References
 
