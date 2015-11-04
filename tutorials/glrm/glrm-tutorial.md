@@ -25,9 +25,9 @@ This tutorial introduces the Generalized Low Rank Model (GLRM) [[1](#references)
 
 Across business and research, analysts seek to understand large collections of data with numeric and categorical values. Many entries in this table may be noisy or even missing altogether. Low rank models facilitate the understanding of tabular data by producing a condensed vector representation for every row and column in the data set.
 
-Specifically, given a data table A with m rows and n columns, a GLRM consists of a decomposition of A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a low, user-specified number of columns k. The matrix Y has k rows and number of columns d equal to the total dimension of the embedded features in A. For example, if A has 3 numeric columns and 1 categorical column with 4 distinct levels (e.g., red, yellow, blue and green), then Y will have 7 columns. When A contains only numeric features, the number of columns in A and Y will be identical (d = n).
+Specifically, given a data table A with m rows and n columns, a GLRM consists of a decomposition of A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a low, user-specified number of columns k. The matrix Y has k rows and number of columns d equal to the total dimension of the embedded features in A. For example, if A has 3 numeric columns and 1 categorical column with 4 distinct levels (e.g., red, yellow, blue and green), then Y will have 7 columns. When A contains only numeric features, the number of columns in A and Y will be identical.
 
-#### TODO: Finish up this section and include LaTeX image!
+![GLRM Matrix Decomposition](images/glrm_matrix_decomposition.png)
 
 Both X and Y have practical interpretations. Each row of Y is an archetypal feature formed from the columns of A, and each row of X corresponds to a row of A projected into this reduced feature space. We can approximately reconstruct A from the matrix product XY, which has rank k. The number k is chosen to be much less than both m and n: a typical value for 1 million rows and 2,000 columns of numeric data is k = 15. The smaller is k, the more compression we gain from our low rank representation.
 
@@ -42,7 +42,7 @@ GLRMs are an extension of well-known matrix factorization methods such as Princi
 
 ## Example 1: Visualizing Walking Stances
 
-For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by _Hamner and Delp (2013)_ [[2](#references)]. Each of the 151 row of the data set contains the (x, y, z) coordinates of major body parts recorded at a specific point in time.
+For our first example, we will use data on [Subject 01's walking stances](https://simtk.org/project/xml/downloads.xml?group_id=603) from an experiment carried out by _Hamner and Delp (2013)_ [[2](#references)]. Each of the 151 rows of the data set contains the (x, y, z) coordinates of major body parts recorded at a specific point in time.
 
 #### Basic Model Building
 
