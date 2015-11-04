@@ -40,122 +40,67 @@ test <- h2o.assign(splits[[3]], "test.hex")
 response <- "Cover_Type"
 predictors <- setdiff(names(df), response)
 
-// ~17% validation set error
-m <- h2o.deeplearning(model_id="dl_model", training_frame = train, validation_frame = valid, 
+## ~17% 17s
+m <- h2o.deeplearning(model_id="dl_model_defaults", training_frame = train, validation_frame = valid, 
                       x=predictors, y=response, variable_importances=T, epochs=1)
-
 m
 summary(m)
-
-m <- h2o.deeplearning(model_id="dl_model", 
-                      hidden=c(10,10,10),
-                      training_frame = train, nfold=5,
-                      x=predictors, y=response, epochs=1)
-m
-
-m <- h2o.deeplearning(training_frame = as.h2o(iris), x=1:4, y=5, nfold=2)
-
-## Which variables were most important?
 h2o.varimp(m)
 
-// 7.77
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=1e-6, 
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-3,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
-// 7.63
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=1e-6, 
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-2,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
 
-// 11.8
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=1e-7, 
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-2,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
-// 8.3
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=1e-5, 
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-2,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
-// 7.3
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=2e-6, 
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-2,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
-// 8.2
-m <- h2o.deeplearning(hidden=c(128,128,128), epochs=20, adaptive_rate = F, rate=0.02, rate_annealing=3e-6, rate_decay = 1.2,
-                      initial_weight_distribution = "Normal", initial_weight_scale = 1e-2,
-                      momentum_start = 0.5, momentum_stable = 0.9, momentum_ramp = 1e7, max_w2 = 10,
-                      model_id="dl_model", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response) 
+## smaller network, train longer ~15% 20s
+m <- h2o.deeplearning(model_id="dl_model_faster", training_frame = train, validation_frame = valid,
+                      x=predictors, y=response, 
+                      hidden=c(32,32,32), epochs=20)
+## show convergence
+plot(m)
 
-// 6.96 2m27s
+## early stopping as soon as misclassification doesn't improve by at least 1%
 m <- h2o.deeplearning(
-  model_id="dl_model", 
+  model_id="dl_model_faster", 
+  training_frame = train, 
+  validation_frame = valid,
+  x=predictors,
+  y=response,
+  hidden=c(32,32,32),
+  epochs=1000000,
+  stopping_rounds=1,
+  stopping_metric="misclassification",
+  stopping_tolerance=0.01
+)
+summary(m)
+
+## with some tuning: ~6% in 160s
+m <- h2o.deeplearning(
+  model_id="dl_model_tuned", 
   training_frame = train, 
   validation_frame = valid, 
   x=predictors, 
   y=response, 
-  train_samples_per_iteration=-1,
-  shuffle_training_data=T,
-  hidden=c(128,128,128),  ## more hidden layers -> more complex interactions
-  epochs=20, ## long enough to converge
-  stopping_metric = "misclassification",
-  stopping_tolerance=1e-2,
-  stopping_rounds=3,
-  score_validation_samples=10000,
-  adaptive_rate=F,   ## manual tuning of learning rate
+  hidden=c(100,100,100),          ## more hidden layers -> more complex interactions
+  epochs=100,                     ## long enough to converge
+  stopping_metric="logloss",
+  stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
+  stopping_rounds=2,
+  score_validation_samples=10000, ## downsample validation set for faster scoring
+  score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
+  adaptive_rate=F,                ## manually tuned learning rate
   rate=0.02, 
-  rate_annealing=2e-6, 
-  initial_weight_distribution = "Normal", 
-  initial_weight_scale = 1e-2, 
-  momentum_start = 0.5, 
-  momentum_stable = 0.9, 
+  rate_annealing=2e-6,            ## manually tuned momentum
+  momentum_start = 0.2, 
+  momentum_stable = 0.4, 
   momentum_ramp = 1e7, 
-  max_w2 = 10 
+  l2=1e-5,                        ## add some L2 regularization
+  max_w2 = 10                     ## helps stability for Rectifier
 ) 
 
-//8.3 1m37s
-m <- h2o.deeplearning(
-  model_id="dl_model", 
-  training_frame = train, 
-  validation_frame = valid, 
-  x=predictors, 
-  y=response, 
-  train_samples_per_iteration=-1,
-  shuffle_training_data=F,
-  hidden=c(100,100,100),  ## more hidden layers -> more complex interactions
-  epochs=20, ## long enough to converge
-  stopping_metric = "misclassification",
-  stopping_tolerance=1e-2,
-  stopping_rounds=3,
-  score_validation_samples=10000,
-  score_duty_cycle=0.025,
-  adaptive_rate=F,   ## manual tuning of learning rate
-  rate=0.02, 
-  rate_annealing=2e-6, 
-  initial_weight_distribution = "Normal", 
-  initial_weight_scale = 1e-2, 
-  momentum_start = 0.5, 
-  momentum_stable = 0.9, 
-  momentum_ramp = 1e7, 
-  max_w2 = 10 
-) 
-
-m
-
-h2o.performance(m, train=T)
-h2o.performance(m, valid=T)
+summary(m)
+h2o.confusionMatrix(h2o.performance(m, train=T)) ## training
+h2o.confusionMatrix(h2o.performance(m, valid=T)) ## sampled validation
+h2o.confusionMatrix(m, valid) ## full validation
 h2o.confusionMatrix(m, test)
 
-## Confirm manually by looking at the predictions
+## Manually compute test set error from predictions
 p <- h2o.predict(m, test)
 p
 test$Accuracy <- p$predict == test$Cover_Type
@@ -164,12 +109,45 @@ test$Accuracy <- p$predict == test$Cover_Type
 plot(m)
 
 
+## Grid search
+if (FALSE) {
+  g <- list()
+  g$activation <- c("Rectifier", "Maxout")
+  numlayers <- sample(2:5,1)
+  g$hidden <- list(rep(sample(200:1000,1),2), rep(sample(100:200,1),3), rep(sample(30:100,1),4))
+  g$l1 <- c(0, runif(sample(1:3),0,1e-3))
+  g$l2 <- c(0, runif(sample(1:3),0,1e-3))
+  g$input_dropout_ratio <- c(0,runif(2, 0, 0.1))
+  print(g)
+  
+  hyper_params <- list(
+    activation = g$activation, 
+    hidden = g$hidden, 
+    l1 = g$l1, 
+    l2 = g$l2, 
+    input_dropout_ratio = g$input_dropout_ratio
+  )
+  
+  h2o.grid(
+    "deeplearning",
+    model_id="dl_grid", 
+    training_frame = train, 
+    validation_frame = valid, 
+    x=predictors, 
+    y=response,
+    hyper_params = hyper_params
+  )
+}
+
+## Part 3 - Some data visualization
+
 ## Scalable scatter plots (binned histograms are made by the H2O cluster)
-plot(h2o.tabulate(data = df, x="Elevation",                       y="Cover_Type"))
-plot(h2o.tabulate(data = df, x="Horizontal_Distance_To_Roadways", y="Cover_Type"))
-plot(h2o.tabulate(data = df, x="Soil_Type",                       y="Cover_Type"))
-plot(h2o.tabulate(data = df, x="Horizontal_Distance_To_Roadways", y="Elevation"))
-plot(h2o.tabulate(data = df, x="Horizontal_Distance_To_Roadways", y="Elevation"))
+plot(h2o.tabulate(df, "Elevation",                       "Cover_Type"))
+plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Cover_Type"))
+plot(h2o.tabulate(df, "Soil_Type",                       "Cover_Type"))
+plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation"))
+plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation"))
+
 
 ## Plot Accuracy vs Elevation
 x <- "Elevation"
