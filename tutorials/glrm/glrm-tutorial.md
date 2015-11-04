@@ -1,5 +1,3 @@
-> # UNDER CONSTRUCTION
-
 # Generalized Low Rank Models
 - Overview
 - What is a Low Rank Model?
@@ -25,7 +23,7 @@ This tutorial introduces the Generalized Low Rank Model (GLRM) [[1](#references)
 
 Across business and research, analysts seek to understand large collections of data with numeric and categorical values. Many entries in this table may be noisy or even missing altogether. Low rank models facilitate the understanding of tabular data by producing a condensed vector representation for every row and column in the data set.
 
-Specifically, given a data table A with m rows and n columns, a GLRM consists of a decomposition of A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a small, user-specified number of columns k. The matrix Y has k rows and d columns, where d is equal to the total dimension of the embedded features in A. For example, if A has 4 numeric columns and 1 categorical column with 3 distinct levels (e.g., _setosa_, _versicolor_ and _virginica_), then Y will have 7 columns. When A contains only numeric features, the number of columns in A and Y will be identical.
+Specifically, given a data table A with m rows and n columns, a GLRM consists of a decomposition of A into numeric matrices X and Y. The matrix X has the same number of rows as A, but only a small, user-specified number of columns k. The matrix Y has k rows and d columns, where d is equal to the total dimension of the embedded features in A. For example, if A has 4 numeric columns and 1 categorical column with 3 distinct levels (e.g., _red_, _blue_ and _green_), then Y will have 7 columns. When A contains only numeric features, the number of columns in A and Y will be identical.
 
 ![GLRM Matrix Decomposition](images/glrm_matrix_decomposition.png)
 
