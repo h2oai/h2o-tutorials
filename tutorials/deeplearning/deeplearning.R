@@ -110,23 +110,21 @@ plot(m)
 
 
 ## Grid search
-if (FALSE) {
-  g <- list()
-  g$activation <- c("Rectifier", "Maxout")
+if (TRUE) {
   numlayers <- sample(2:5,1)
-  g$hidden <- list(rep(sample(200:1000,1),2), rep(sample(100:200,1),3), rep(sample(30:100,1),4))
-  g$l1 <- c(0, runif(sample(1:3),0,1e-3))
-  g$l2 <- c(0, runif(sample(1:3),0,1e-3))
-  g$input_dropout_ratio <- c(0,runif(2, 0, 0.1))
-  print(g)
-  
   hyper_params <- list(
-    activation = g$activation, 
-    hidden = g$hidden, 
-    l1 = g$l1, 
-    l2 = g$l2, 
-    input_dropout_ratio = g$input_dropout_ratio
+    activation = c("Rectifier"),
+    hidden = list(rep(sample(200:1000,1),2), rep(sample(100:200,1),3), rep(sample(30:100,1),4)),
+    l1 = c(0, runif(sample(1:3),0,1e-3)),
+    l2 = c(0, runif(sample(1:3),0,1e-3)),
+    input_dropout_ratio = c(0,runif(2, 0, 0.1)),
+    rate=runif(sample(3:5),0.002,0.02), 
+    rate_annealing=10^runif(sample(3:6),1,3)*1e-8,
+    momentum_start=runif(sample(3:5),0,0.5), 
+    momentum_stable =runif(sample(3:5),0.5,0.999),
+    momentum_ramp = runif(sample(3),0,100)*1e6
   )
+  hyper_params
   
   h2o.grid(
     "deeplearning",
@@ -135,6 +133,14 @@ if (FALSE) {
     validation_frame = valid, 
     x=predictors, 
     y=response,
+    epochs=1000,
+    stopping_metric="logloss",
+    stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
+    stopping_rounds=2,
+    score_validation_samples=10000, ## downsample validation set for faster scoring
+    score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
+    adaptive_rate=F,                ## manually tuned learning rate
+    max_w2 = 10,                    ## helps stability for Rectifier
     hyper_params = hyper_params
   )
 }
