@@ -111,18 +111,16 @@ plot(m)
 
 ## Grid search
 if (TRUE) {
-  numlayers <- sample(2:5,1)
   hyper_params <- list(
-    activation = c("Rectifier"),
-    hidden = list(rep(sample(200:1000,1),2), rep(sample(100:200,1),3), rep(sample(30:100,1),4)),
-    l1 = c(0, runif(sample(1:3),0,1e-3)),
-    l2 = c(0, runif(sample(1:3),0,1e-3)),
-    input_dropout_ratio = c(0,runif(2, 0, 0.1)),
-    rate=runif(sample(3:5),0.002,0.02), 
-    rate_annealing=10^runif(sample(3:6),1,3)*1e-8,
-    momentum_start=runif(sample(3:5),0,0.5), 
-    momentum_stable =runif(sample(3:5),0.5,0.999),
-    momentum_ramp = runif(sample(3),0,100)*1e6
+    hidden = list(c(64,64,64),c(128,128,128),c(512,512)),
+    l1 = c(0, 1e-5),
+    l2 = c(0, 1e-5),
+    input_dropout_ratio = c(0,0.05),
+    rate=c(0.005,0.01,0.02),
+    rate_annealing=c(1e-8,1e-7,1e-6),
+    momentum_start=c(0.25,0.5,0.75),
+    momentum_stable =c(0.75,0.9,0.99),
+    momentum_ramp = c(1e6, 1e7, 1e8)
   )
   hyper_params
   
@@ -140,7 +138,8 @@ if (TRUE) {
     score_validation_samples=10000, ## downsample validation set for faster scoring
     score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
     adaptive_rate=F,                ## manually tuned learning rate
-    max_w2 = 10,                    ## helps stability for Rectifier
+    activation = c("Rectifier"),
+    max_w2 = 10,                    ## can help improve stability for Rectifier
     hyper_params = hyper_params
   )
 }
