@@ -47,7 +47,7 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 ###### Initialize the H2O server and import our walking stance data.
 	library(h2o)
 	h2o.init(nthreads = -1, max_mem_size = "2G")   # Use all available cores and 2 GB of memory
-	gait.hex <- h2o.importFile(path = "../data/glrm/subject01_walk1.csv", destination_frame = "gait.hex")
+	gait.hex <- h2o.importFile(path = "../data/subject01_walk1.csv", destination_frame = "gait.hex")
 
 ###### Get a summary of the imported data set.
 	dim(gait.hex)
@@ -98,7 +98,7 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 Suppose that due to a sensor malfunction, our walking stance data has missing values randomly interspersed. We can use GLRM to reconstruct these missing values from the existing data.
 
 ###### Import walking stance data containing 15% missing values and get a summary.
-	gait.miss <- h2o.importFile(path = "../data/glrm/subject01_walk1_miss15.csv", destination_Frame = "gait.miss")
+	gait.miss <- h2o.importFile(path = "../data/subject01_walk1_miss15.csv", destination_Frame = "gait.miss")
 	dim(gait.miss)
 	summary(gait.miss)
 
@@ -134,7 +134,7 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 ###### Initialize the H2O server and import the ACS data set.
 	library(h2o)
 	h2o.init(nthreads = -1, max_mem_size = "2G")   # Use all available cores and 2 GB of memory
-	acs_orig <- h2o.importFile(path = "../data/glrm/ACS_13_5YR_DP02_cleaned.zip", col.types = c("enum", rep("numeric", 149)))
+	acs_orig <- h2o.importFile(path = "../data/ACS_13_5YR_DP02_cleaned.zip", col.types = c("enum", rep("numeric", 149)))
 
 ###### Save and drop the zip code tabulation area column.
 	acs_zcta_col <- acs_orig$ZCTA5
@@ -175,7 +175,7 @@ Instead, we will use GLRM to condense ZCTAs into a few numeric columns represent
 We now build a deep learning model on the WHD data set to predict repeat and/or willful violators. For comparison purposes, we train our model using the original data, the data with the ZCTA column replaced by the compressed GLRM representation (the X matrix), and the data with the ZCTA column replaced by all the demographic features in the ACS data set.
 
 ###### Import WHD data set and get a summary.
-	whd_zcta <- h2o.importFile(path = "../data/glrm/whd_zcta_cleaned.zip", col.types = c(rep("enum", 7), rep("numeric", 97)))
+	whd_zcta <- h2o.importFile(path = "../data/whd_zcta_cleaned.zip", col.types = c(rep("enum", 7), rep("numeric", 97)))
 	dim(whd_zcta)
 	summary(whd_zcta)
 
