@@ -41,21 +41,19 @@ response <- "Cover_Type"
 predictors <- setdiff(names(df), response)
 
 ## ~17% 17s
-m <- h2o.deeplearning(model_id="dl_model_defaults", training_frame = train, validation_frame = valid, 
-                      x=predictors, y=response, variable_importances=T, epochs=1)
+m <- h2o.deeplearning(model_id="dl_model_defaults", 
+                      training_frame = train, 
+                      validation_frame = valid, 
+                      x=predictors, y=response, 
+                      variable_importances=T, 
+                      epochs=1)
 m
 summary(m)
 h2o.varimp(m)
 
-
-## smaller network, train longer ~15% 20s
-m <- h2o.deeplearning(model_id="dl_model_faster", training_frame = train, validation_frame = valid,
-                      x=predictors, y=response, 
-                      hidden=c(32,32,32), epochs=20)
-## show convergence
-plot(m)
-
-## early stopping as soon as misclassification doesn't improve by at least 1%
+## smaller network, run until convergence
+## (stop if misclassification on 10k validation rows does not improve by at least 1%)
+## ~15% in 30s
 m <- h2o.deeplearning(
   model_id="dl_model_faster", 
   training_frame = train, 
@@ -64,36 +62,69 @@ m <- h2o.deeplearning(
   y=response,
   hidden=c(32,32,32),
   epochs=1000000,
+  score_validation_samples = 10000,
   stopping_rounds=1,
   stopping_metric="misclassification",
   stopping_tolerance=0.01
 )
 summary(m)
 
-## with some tuning: ~6% in 160s
+## show convergence
+plot(m)
+
+## with some tuning: ~8% in 40s
 m <- h2o.deeplearning(
   model_id="dl_model_tuned", 
   training_frame = train, 
   validation_frame = valid, 
   x=predictors, 
   y=response, 
+  overwrite_with_best_model=F,
   hidden=c(100,100,100),          ## more hidden layers -> more complex interactions
-  epochs=100,                     ## long enough to converge
-  stopping_metric="logloss",
-  stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
-  stopping_rounds=2,
+  epochs=10,                     ## long enough to converge
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
   rate=0.02, 
-  rate_annealing=2e-6,            ## manually tuned momentum
-  momentum_start = 0.2, 
+  rate_annealing=2e-6,            
+  momentum_start = 0.2,           ## manually tuned momentum
   momentum_stable = 0.4, 
   momentum_ramp = 1e7, 
   l2=1e-5,                        ## add some L2 regularization
   max_w2 = 10                     ## helps stability for Rectifier
 ) 
 
+## Optional - continue training the previous model
+if (FALSE) {
+  max_epochs <- 1000 ##Takes a few minutes
+} else {
+  max_epochs <- 20   ##Takes about 30s
+}
+m <- h2o.deeplearning(
+  model_id="dl_model_tuned_continued", 
+  checkpoint="dl_model_tuned", 
+  training_frame = train, 
+  validation_frame = valid, 
+  x=predictors, 
+  y=response, 
+  hidden=c(100,100,100),          ## more hidden layers -> more complex interactions
+  epochs=max_epochs,              ## hopefully long enough to converge (otherwise restart again)
+  stopping_metric="logloss",
+  stopping_tolerance=1e-2,        ## stop when validation logloss does not improve by >=1% for 2 scoring events
+  stopping_rounds=2,
+  score_validation_samples=10000, ## downsample validation set for faster scoring
+  score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
+  adaptive_rate=F,                ## manually tuned learning rate
+  rate=0.02, 
+  rate_annealing=2e-6,            
+  momentum_start = 0.2,           ## manually tuned momentum
+  momentum_stable = 0.4, 
+  momentum_ramp = 1e7, 
+  l2=1e-5,                        ## add some L2 regularization
+  max_w2 = 10                     ## helps stability for Rectifier
+) 
+
+## Now score on the full validation set and the test test
 summary(m)
 h2o.confusionMatrix(h2o.performance(m, train=T)) ## training
 h2o.confusionMatrix(h2o.performance(m, valid=T)) ## sampled validation
@@ -110,7 +141,7 @@ plot(m)
 
 
 ## Grid search
-if (TRUE) {
+if (FALSE) {
   hyper_params <- list(
     hidden = list(c(64,64,64),c(128,128,128),c(512,512)),
     l1 = c(0, 1e-5),
@@ -122,7 +153,7 @@ if (TRUE) {
     momentum_stable =c(0.75,0.9,0.99),
     momentum_ramp = c(1e6, 1e7, 1e8)
   )
-  hyper_params
+  hyper_params # 3*2*2*2*3*3*3*3*3 = 5832 combinations
   
   h2o.grid(
     "deeplearning",
