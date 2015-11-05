@@ -44,7 +44,7 @@ demo(h2o.deeplearning)
 
 While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Early stopping, automatic data standardization and handling of categorical variables and missing values and adaptive learning rates (per weight) reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
 
-### Let's have some fun first
+### Let's have some fun first: Decision Boundaries
 To get familiar with the nature of Deep Learning (DL) in comparison to H2O's tree methods (GBM/DRF) and linear modeling (GLM), we plot contour plots of the probability density to see how they separate two spirals in 2D:
 
 ```{r}
@@ -382,13 +382,13 @@ summary(dlmodel)
 N-fold cross-validation is especially useful with early stopping, as the main model will pick the ideal number of epochs from the convergence behavior of the nfolds cross-validation models.
 
 ##Regression and Binary Classification
-If we want to turn the multi-class problem above into a binomial model, we need to find a binary response.  Here, we create one as follows:
+Assume we want to turn the multi-class problem above into a binary classification problem. We create a binary response as follows:
 
 ```{r}
 train$bin_response <- ifelse(train[,response]=="class_1", 0, 1)
 ```
 
-Let's build a quick model and inspect the model metrics in the output:
+Let's build a quick model and inspect the model:
 
 ```{r}
 dlmodel <- h2o.deeplearning(
@@ -397,12 +397,13 @@ dlmodel <- h2o.deeplearning(
   training_frame=train,
   hidden=c(10,10),
   epochs=0.1
-  #balance_classes=T    ## enable this for high class imbalance
 )
 summary(dlmodel)
 ```
 
-We find a regression model (`H2ORegressionModel`) that contains only 1 output neuron, instead of 2. The reason is that the response was a numerical feature (numbers 0 and 1), and it must first be turned into a categorical feature to perform classification:
+We find a regression model (`H2ORegressionModel`) that contains only 1 output neuron, instead of 2. The reason is that the response was a numerical feature (numbers 0 and 1), and H2O Deep Learning was run with `distribution=AUTO`, which defaulted to a Gaussian regression problem for a real-valued response.
+
+To perform classification, the response must first be turned into a categorical (factor):
 
 ```{r}
 train$bin_response <- as.factor(train$bin_response) ## Turn into categorical levels "0"/"1"
@@ -417,6 +418,8 @@ dlmodel <- h2o.deeplearning(
 summary(dlmodel) ## Now the model metrics contain AUC for binary classification
 plot(h2o.performance(dlmodel)) ## display ROC curve
 ```
+
+Now the model performs (binary) classification, and has multiple (2) output neurons.
 
 ##H2O Deep Learning Tips & Tricks
 ####Activation Functions
