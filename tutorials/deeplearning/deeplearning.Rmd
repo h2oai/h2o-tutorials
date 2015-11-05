@@ -9,32 +9,32 @@
   - Grid Search
 
 # Introduction
-This tutorial shows how a [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This file is available in plain R, R markdown and regular markdown formats.
+This tutorial shows how a [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This file is available in plain R, R markdown and regular markdown formats. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources) and on our [Github Repository](http://github.com/h2oai/h2o-3/).
 
-The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
+### H2O R Package
+
+Load the H2O R package:
 
 ```{r}
+## R installation instructions are at http://h2o.ai/download
 library(h2o)
-args(h2o.deeplearning)
-help(h2o.deeplearning)
 ```
-
-As you can see, there are a lot of parameters!  Luckily, as you'll see later, you only need to know a few to get the most out of Deep Learning. More information can be found in the [H2O Deep Learning booklet](https://t.co/kWzyFMGJ2S) and in our [slides](http://www.slideshare.net/0xdata/presentations).   
-
-We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
-
-```{r}
-example(h2o.deeplearning)
-demo(h2o.deeplearning)
-```
-
 
 ### Start H2O
-
-Start up a 1-node H2O server on your local machine, and allow it to use up to 2GB of memory
+Start up a 1-node H2O server on your local machine, and allow it to use up to 2GB of memory:
 
 ```{r}
 h2o.init(nthreads=-1, max_mem_size = "2G")
+```
+
+The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
+We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
+
+```{r}
+args(h2o.deeplearning)
+help(h2o.deeplearning)
+example(h2o.deeplearning)
+demo(h2o.deeplearning)
 ```
 
 While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Early stopping, automatic data standardization and handling of categorical variables and missing values and adaptive learning rates (per weight) reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
@@ -74,9 +74,9 @@ df <- h2o.importFile("/users/arno/h2o-world-2015-training/tutorials/data/covtype
 dim(df)
 df
 splits <- h2o.splitFrame(df, c(0.6,0.2), seed=1234)
-train <- h2o.assign(splits[[1]], "train.hex")
-valid <- h2o.assign(splits[[2]], "valid.hex")
-test <- h2o.assign(splits[[3]], "test.hex")
+train  <- h2o.assign(splits[[1]], "train.hex")
+valid  <- h2o.assign(splits[[2]], "valid.hex")
+test   <- h2o.assign(splits[[3]], "test.hex")
 ```
 
 Here's a scalable way to do scatter plots via binning (works for categorical and numeric columns) to get more familiar with the dataset.
@@ -85,7 +85,7 @@ Here's a scalable way to do scatter plots via binning (works for categorical and
 plot(h2o.tabulate(df, "Elevation",                       "Cover_Type"))
 plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Cover_Type"))
 plot(h2o.tabulate(df, "Soil_Type",                       "Cover_Type"))
-plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation"))
+plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation" ))
 ```
 
 ### Run Deep Learning
@@ -150,7 +150,7 @@ If `adaptive_rate` is disabled, several manual learning rate parameters become i
 
 
 ### Tuning
-
+With some tuning, it is possible to reach to below 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models.
 ```{r}
 m3 <- h2o.deeplearning(
   model_id="dl_model_tuned", 
@@ -296,6 +296,7 @@ for (i in 1:10) {
 ```
   
 We continue to look for the model with the lowest validation misclassification rate:
+
 ```{r}
 if (is.null(best_err)) best_err <- 1      ##start with the best reference model from the grid search above, if available
 for (i in 1:length(models)) {
@@ -315,6 +316,7 @@ best_params$input_dropout_ratio
     
 ###Checkpointing
 Let's continue training the best model, for 2 more epochs. Note that since many important parameters such as `epochs, l1, l2, max_w2, score_interval, train_samples_per_iteration, input_dropout_ratio, hidden_dropout_ratios, score_duty_cycle, classification_stop, regression_stop, variable_importances, force_load_balance` can be modified between checkpoint restarts, it is best to specify as many parameters as possible explicitly.
+
 ```{r}
 #max_epochs <- 1000 ##Takes a few minutes
 max_epochs <- 12 ## Add two more epochs
@@ -373,13 +375,17 @@ dlmodel <- h2o.deeplearning(
 summary(dlmodel)
 ```
 
-###Binary Classification
-To turn the multi-class problem above into a binomial model, we create a new binary response variable as follows:
+N-fold cross-validation is especially useful with early stopping, as the main model will pick the ideal number of epochs from the convergence behavior of the nfolds cross-validation models.
+
+###Regression and Binary Classification
+If we want to turn the multi-class problem above into a binomial model, we need to find a binary response.  Here, we create one as follows:
+
 ```{r}
-train$bin_response <- ifelse(train[,response]=="class_1", 0, 1) ## numerical 0/1
+train$bin_response <- ifelse(train[,response]=="class_1", 0, 1)
 ```
 
 Let's build a quick model and inspect the model metrics in the output:
+
 ```{r}
 dlmodel <- h2o.deeplearning(
   x=predictors,
@@ -391,7 +397,9 @@ dlmodel <- h2o.deeplearning(
 )
 summary(dlmodel)
 ```
+
 We find a regression model (`H2ORegressionModel`) that contains only 1 output neuron, instead of 2. The reason is that the response was a numerical feature (numbers 0 and 1), and it must first be turned into a categorical feature to perform classification:
+
 ```{r}
 train$bin_response <- as.factor(train$bin_response) ## Turn into categorical levels "0"/"1"
 dlmodel <- h2o.deeplearning(
@@ -417,7 +425,7 @@ L1 and L2 penalties can be applied by specifying the `l1` and `l2` parameters. I
 By default, `overwrite_with_best_model` is set to TRUE and the model returned after training for the specified number of epochs is the model that has the best training set error, or, if a validation set is provided, the lowest validation set error. This is equivalent to early stopping, except that the determination to stop is made in hindsight, similar to a full grid search over the number of epochs at the granularity of the scoring intervals. Note that for N-fold cross-validation, `overwrite_with_best_model` is disabled to give fair results (all N cross-validation models must run to completion to avoid overfitting on the validation set). Also note that the training or validation set errors can be based on a subset of the training or validation data, depending on the values for `score_validation_samples` or `score_training_samples`, see below. For actual early stopping on a predefined error rate on the *training data* (accuracy for classification or MSE for regression), specify `classification_stop` or `regression_stop`.
 
 - Training Samples per (MapReduce) Iteration
-This parameter is explained in Section 2.2.4 of the [H2O Deep Learning booklet](https://t.co/kWzyFMGJ2S), and becomes important in multi-node operation. It controls the number of rows trained on for each MapReduce iteration. Cluster nodes then communicate via the network to agree on the best neural net model coefficients (weights/biases) between iterations, and have the opportunity to perform scoring (controlled by other parameters below).
+This parameter is explained in Section 2.2.4 of the [H2O Deep Learning booklet](http://h2o.ai/resources), and becomes important in multi-node operation. It controls the number of rows trained on for each MapReduce iteration. Cluster nodes then communicate via the network to agree on the best neural net model coefficients (weights/biases) between iterations, and have the opportunity to perform scoring (controlled by other parameters below).
 
 - Categorical Data
 For categorical data, a feature with K factor levels is automatically one-hot encoded (horizontalized) into K-1 input neurons. Hence, the input neuron layer can grow substantially for datasets with high factor counts. In these cases, it might make sense to reduce the number of hidden neurons in the first hidden layer, such that large numbers of factor levels can be handled. In the limit of 1 neuron in the first hidden layer, the resulting model is similar to logistic regression with stochastic gradient descent, except that for classification problems, there's still a softmax output layer, and that the activation function is not necessarily a sigmoid (`Tanh`). If variable importances are computed, it is recommended to turn on `use_all_factor_levels` (K input neurons for K levels). The experimental option `max_categorical_features` uses feature hashing to reduce the number of input neurons via the hash trick at the expense of hash collisions and reduced accuracy.
@@ -435,4 +443,4 @@ Note that the default value of `score_duty_cycle=0.1` limits the amount of time 
 
 Stratified sampling of the validation dataset can help with scoring on datasets with class imbalance.  Note that this option also requires `balance_classes` to be enabled (used to over/under-sample the training dataset, based on the max. relative size of the resulting training dataset, `max_after_balance_size`):
     
-### More information can be found in the [H2O Deep Learning booklet](https://t.co/kWzyFMGJ2S) and in our [slides](http://www.slideshare.net/0xdata/presentations).
+### More information can be found in the [H2O Deep Learning booklet](http://h2o.ai/resources) and in our [slides](http://www.slideshare.net/0xdata/presentations).
