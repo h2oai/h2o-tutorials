@@ -1,18 +1,19 @@
 # Classification and Regression with H2O Deep Learning
 
-# Deep Learning
 - Introduction
+  - Installation and Startup
   - Decision Boundaries
-- Cover Type Dataset Example
+- Cover Type Dataset
   - Exploratory Data Analysis
-  - Deep Learning
+  - Deep Learning Model
   - Hyper-Parameter Search
   - Checkpointing
-  - Model Save/Load
+  - Cross-Validation
+  - Model Save & Load
 - Regression and Binary Classificiation
 - Deep Learning Tips & Tricks
 
-# Introduction
+## Introduction
 This tutorial shows how a [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This file is available in plain R, R markdown and regular markdown formats. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [Github Repository](http://github.com/h2oai/h2o-3/).
 
 ### H2O R Package
@@ -69,7 +70,7 @@ plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
 par(mfrow = c(1,1)) # reset canvas
 ```  
 
-### Demo: Cover Type Dataset
+## Cover Type Dataset
 We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
@@ -92,7 +93,7 @@ plot(h2o.tabulate(df, "Soil_Type",                       "Cover_Type"))
 plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation" ))
 ```
 
-### Run Deep Learning
+### First Run of H2O Deep Learning
 Let's run our first Deep Learning model on the covtype dataset. 
 We want to predict the `Cover_Type` column, a categorical feature with 7 levels, and the Deep Learning model will be tasked to perform (multi-class) classification. It uses the other 12 predictors of the dataset, of which 10 are numerical, and 2 are categorical with a total of 44 levels. We can expect the Deep Learning model to have 56 input neurons (after automatic one-hot encoding).
 
@@ -380,7 +381,7 @@ summary(dlmodel)
 
 N-fold cross-validation is especially useful with early stopping, as the main model will pick the ideal number of epochs from the convergence behavior of the nfolds cross-validation models.
 
-###Regression and Binary Classification
+##Regression and Binary Classification
 If we want to turn the multi-class problem above into a binomial model, we need to find a binary response.  Here, we create one as follows:
 
 ```{r}
@@ -417,7 +418,7 @@ summary(dlmodel) ## Now the model metrics contain AUC for binary classification
 plot(h2o.performance(dlmodel)) ## display ROC curve
 ```
 
-###H2O Deep Learning Tips & Tricks
+##H2O Deep Learning Tips & Tricks
 ####Activation Functions
 While sigmoids have been used historically for neural networks, H2O Deep Learning implements `Tanh`, a scaled and shifted variant of the sigmoid which is symmetric around 0. Since its output values are bounded by -1..1, the stability of the neural network is rarely endangered. However, the derivative of the tanh function is always non-zero and back-propagation (training) of the weights is more computationally expensive than for rectified linear units, or `Rectifier`, which is `max(0,x)` and has vanishing gradient for `x<=0`, leading to much faster training speed for large networks and is often the fastest path to accuracy on larger problems. In case you encounter instabilities with the `Rectifier` (in which case model building is automatically aborted), try a limited value to re-scale the weights: `max_w2=10`. The `Maxout` activation function is least computationally effective, but can lead to higher accuracy. It is a generalized version of the Rectifier with two channels: `max(Ax+b, Cx+d)`.
 
