@@ -11,7 +11,7 @@ More information about machine learning with H2O
 
 - **GitHub repository for H2O**: https://github.com/h2oai
 
-- **
+
 
 ##Python
 
