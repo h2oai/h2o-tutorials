@@ -42,7 +42,7 @@ h2o.removeAll() ## clean slate - just in case the cluster was already running
 The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
 We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
 
-```{r help}
+```r
 args(h2o.deeplearning)
 help(h2o.deeplearning)
 example(h2o.deeplearning)

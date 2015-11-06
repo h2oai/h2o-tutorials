@@ -36,10 +36,10 @@ h2o.removeAll() ## clean slate - just in case the cluster was already running
 #The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
 #We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
 #
-#args(h2o.deeplearning)
-#help(h2o.deeplearning)
-#example(h2o.deeplearning)
-##demo(h2o.deeplearning)  #requires user interaction
+args(h2o.deeplearning)
+help(h2o.deeplearning)
+example(h2o.deeplearning)
+#demo(h2o.deeplearning)  #requires user interaction
 #
 #While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Early stopping, automatic data standardization and handling of categorical variables and missing values and adaptive learning rates (per weight) reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
 #
