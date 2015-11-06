@@ -14,7 +14,7 @@
 * Deep Learning Tips & Tricks
 
 ## Introduction
-This tutorial shows how a [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This file is available in plain R, R markdown and regular markdown formats. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/).
+This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This tutorial covers usage of H2O from R. A python version of this tutorial will be available as well in a separate document. This file is available in plain R, R markdown and regular markdown formats, and the plots are available as PDF files. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/).
 
 First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
 
@@ -101,7 +101,7 @@ for (epochs in c(200,500,1000)) {
 }
 ```
 
-Now, we explore different network architectures:
+You can see how the network learns the structure of the spirals with enough training time. We explore different network architectures next:
 
 ```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
@@ -112,7 +112,7 @@ for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
 }
 ```
 
-Next, we compare between different activation functions, including one with 50% dropout regularization in the hidden layers:
+It is clear that different configurations can achieve similar performance, and that tuning will be required for optimal performance. Next, we compare between different activation functions, including one with 50% dropout regularization in the hidden layers:
 
 ```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
@@ -123,7 +123,9 @@ for (act in c("Tanh","Maxout","Rectifier","RectifierWithDropout")) {
 }
 ```
 
-More information about the parmameters can be found in the [H2O Deep Learning booklet](http://h2o.ai/resources/).
+Clearly, the dropout rate was too high or the number of epochs was too low for the last configuration, which often ends up performing the best on larger datasets where generalization is important.
+
+More information about the parameters can be found in the [H2O Deep Learning booklet](http://h2o.ai/resources/).
 
 ## Cover Type Dataset
 We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
