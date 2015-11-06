@@ -144,7 +144,7 @@ test   <- h2o.assign(splits[[3]], "test.hex")  # 20%
 Here's a scalable way to do scatter plots via binning (works for categorical and numeric columns) to get more familiar with the dataset.
 
 ```{r covtype_scatterplots}
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(1,1)) # reset canvas
 plot(h2o.tabulate(df, "Elevation",                       "Cover_Type"))
 plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Cover_Type"))
