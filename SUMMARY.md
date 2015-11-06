@@ -9,3 +9,5 @@
 * [Ensembles: Stacking, Super Learner](tutorials/ensembles-stacking/README.md)
 * [Model Selection](tutorials/model-selection/README.md)
 * [Streaming](tutorials/streaming/storm/README.md)
+* Resources
+
