@@ -7,4 +7,4 @@
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
 * [Streaming](tutorials/streaming/storm/README.md)
 * [Model Selection](tutorials/model-selection/README.md)
-
+* [Deep Learning](tutorials/deeplearning/deeplearning.Rmd)
