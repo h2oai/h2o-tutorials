@@ -32,10 +32,11 @@ library(h2o)
 ```
 
 ### Start H2O
-Start up a 1-node H2O server on your local machine, and allow it to use up to 2GB of memory:
+Start up a 1-node H2O server on your local machine, and allow it to use all CPU cores and up to 2GB of memory:
 
 ```{r}
 h2o.init(nthreads=-1, max_mem_size="2G")
+h2o.removeAll() ## clean slate - just in case the cluster was already running
 ```
 
 The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
@@ -45,7 +46,7 @@ We can run the example from the man page using the `example` function, or run a 
 args(h2o.deeplearning)
 help(h2o.deeplearning)
 example(h2o.deeplearning)
-demo(h2o.deeplearning)
+#demo(h2o.deeplearning)
 ```
 
 While H2O Deep Learning has many parameters, it was designed to be just as easy to use as the other supervised training methods in H2O. Early stopping, automatic data standardization and handling of categorical variables and missing values and adaptive learning rates (per weight) reduce the amount of parameters the user has to specify. Often, it's just the number and sizes of hidden layers, the number of epochs and the activation function and maybe some regularization techniques.
@@ -54,11 +55,12 @@ While H2O Deep Learning has many parameters, it was designed to be just as easy 
 To get familiar with the nature of Deep Learning (DL) in comparison to H2O's tree methods (GBM/DRF) and linear modeling (GLM), we plot contour plots of the probability density to see how they separate two spirals in 2D:
 
 ```{r}
+dev.new(noRStudioGD=FALSE) ##direct plotting output to a new window
 spiral <- h2o.importFile(paste0(ROOT_PATH, "/data/spiral.csv"))
 grid   <- h2o.importFile(paste0(ROOT_PATH, "/data/grid.csv"))
 # Define helper to plot contours
 plotC <- function(name, model, data=spiral, g=grid) {
-  data <- as.data.frame(data) #pull data local
+  data <- as.data.frame(data) #get data from into R
   pred <- as.data.frame(h2o.predict(model, g))
   n=0.5*(sqrt(nrow(g))-1); d <- 1.5; h <- d*(-n:n)/n
   plot(data[,-3],pch=19,col=data[,3],cex=1.0,
@@ -67,20 +69,31 @@ plotC <- function(name, model, data=spiral, g=grid) {
           dim=c(2*n+1,2*n+1)),col="blue",lwd=2,add=T)
 }
 par(mfrow=c(2,2)) # set up the canvas for 2x2 plots
-#plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e1))
-#plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e2))
 plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e3))
 plotC("GBM", h2o.gbm         (1:2,3,spiral))
 plotC("DRF", h2o.randomForest(1:2,3,spiral))
 plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
-par(mfrow=c(1,1)) # reset canvas
 ```  
+
+Let's investigate some more Deep Learning models:
+```{r}
+for (epochs in c(1,200,500,1000)) {
+  plotC( paste0("DL ",epochs," epochs"), h2o.deeplearning(1:2,3,spiral,epochs=epochs))
+}
+```
+
+```{r}
+for (activation in c("Tanh", "Maxout", "Rectifier", "RectifierWithDropout")) {
+  plotC( paste0("DL ",activation," activation"), h2o.deeplearning(1:2,3,spiral,epochs=1000))
+}
+```
 
 ## Cover Type Dataset
 We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
 ```{r}
+par(mfrow=c(1,1)) # reset canvas
 df <- h2o.importFile(paste0(ROOT_PATH, "/data/covtype.full.csv"))
 dim(df)
 df
