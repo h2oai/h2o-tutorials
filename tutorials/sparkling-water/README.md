@@ -225,15 +225,15 @@
            idfModel: IDFModel,
            h2oContext: H2OContext,
            hamThreshold: Double = 0.5):String = {
-    val msgRdd = sc.parallelize(Seq(msg))
-    val msgVector: DataFrame = idfModel.transform(
-                                hashingTF.transform (
-                                  tokenize (msgRdd))).map(v => SMS("?", v)).toDF
-    val msgTable: H2OFrame = h2oContext.asH2OFrame(msgVector)
-    msgTable.remove(0) // remove first column
-    val prediction = dlModel.score(msgTable)
+      val msgRdd = sc.parallelize(Seq(msg))
+      val msgVector: DataFrame = idfModel.transform(
+                                  hashingTF.transform (
+                                    tokenize (msgRdd))).map(v => SMS("?", v)).toDF
+      val msgTable: H2OFrame = h2oContext.asH2OFrame(msgVector)
+      msgTable.remove(0) // remove first column
+      val prediction = dlModel.score(msgTable)
 
-    if (prediction.vecs()(1).at(0) < hamThreshold) "SPAM DETECTED!" else "HAM"
+      if (prediction.vecs()(1).at(0) < hamThreshold) "SPAM DETECTED!" else "HAM"
   }   
   ```
   
