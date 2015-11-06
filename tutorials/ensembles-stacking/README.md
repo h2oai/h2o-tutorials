@@ -89,7 +89,7 @@ First you need to install the H2O R package if you don't already have it install
 The recommended way of installing the **h2oEnsemble** R package is directly from GitHub using the [devtools](https://cran.r-project.org/web/packages/devtools/index.html) package (however, [H2O World](http://h2oworld.h2o.ai/) tutorial attendees should install the package from the provided USB stick).
 
 #### Install from GitHub
-```{r install_h2oEnsemble}
+```r
 library(devtools)
 install_github("h2oai/h2o-3/h2o-r/ensemble/h2oEnsemble-package")
 ```
@@ -102,7 +102,7 @@ This is an example of binary classification using the `h2o.ensemble` function, w
 
 
 ### Start H2O Cluster
-```{r start_h2o}
+```r
 library(h2oEnsemble)  # This will load the `h2o` R package as well
 h2o.init(nthreads = -1)  # Start an H2O cluster with nthreads = num cores on your machine
 h2o.removeAll() # Clean slate - just in case the cluster was already running
@@ -113,12 +113,12 @@ h2o.removeAll() # Clean slate - just in case the cluster was already running
 
 First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
 
-```{r set_path}
+```r
 ROOT_PATH <- "/Users/me/h2oai/world/h2o-world-2015-training/tutorials"
 ```
 
 Import a sample binary outcome train and test set into the H2O cluster.
-```{r import_data}
+```r
 train <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_10k.csv"))
 test <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_test_5k.csv"))
 y <- "C1"
@@ -127,7 +127,7 @@ x <- setdiff(names(train), y)
 
 For binary classification, the response should be encoded as factor (aka "enum" in Java).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
 
-```{r convert_response}
+```r
 train[,y] <- as.factor(train[,y])  
 test[,y] <- as.factor(test[,y])
 ```
@@ -136,7 +136,7 @@ test[,y] <- as.factor(test[,y])
 ### Specify Base Learners & Metalearner
 For this example, we will use the default base learner library, which includes the H2O GLM, Random Forest, GBM and Deep Learner (all using default model parameter values).  We will also use the default metalearner, the H2O GLM.
 
-```{r}
+```r
 learner <- c("h2o.glm.wrapper", "h2o.randomForest.wrapper", 
              "h2o.gbm.wrapper", "h2o.deeplearning.wrapper")
 metalearner <- "h2o.glm.wrapper"
@@ -145,7 +145,7 @@ metalearner <- "h2o.glm.wrapper"
 
 ### Train an Ensemble
 Train the ensemble using 5-fold CV to generate level-one data.  Note that more CV folds will take longer to train, but should increase performance.
-```{r train_ensemble}
+```r
 fit <- h2o.ensemble(x = x, y = y, 
                     training_frame = train, 
                     family = "binomial", 
@@ -157,7 +157,7 @@ fit <- h2o.ensemble(x = x, y = y,
 
 ### Predict 
 Generate predictions on the test set.
-```{r predict_ensemble}
+```r
 pred <- predict(fit, test)
 predictions <- as.data.frame(pred$pred)[,3]  #third column, p1 is P(Y==1)
 labels <- as.data.frame(test[,y])[,1]
@@ -192,7 +192,7 @@ Additional note: In a future version, performance metrics such as AUC will be co
 
 Now let's try again with a more extensive set of base learners.  Here is an example of how to generate a custom learner wrappers:
 
-```{r custom_learners}
+```r
 h2o.glm.1 <- function(..., alpha = 0.0) h2o.glm.wrapper(..., alpha = alpha)
 h2o.glm.2 <- function(..., alpha = 0.5) h2o.glm.wrapper(..., alpha = alpha)
 h2o.glm.3 <- function(..., alpha = 1.0) h2o.glm.wrapper(..., alpha = alpha)
@@ -221,7 +221,7 @@ h2o.deeplearning.7 <- function(..., hidden = c(100,100), activation = "Rectifier
 
 Let's grab a subset of these learners for our base learner library and re-train the ensemble.
 
-```{r}
+```r
 learner <- c("h2o.glm.wrapper",
              "h2o.randomForest.1", "h2o.randomForest.2",
              "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8",
@@ -229,7 +229,7 @@ learner <- c("h2o.glm.wrapper",
 ```
 
 Train with new library:
-```
+```r
 fit <- h2o.ensemble(x = x, y = y, 
                     training_frame = train,
                     validation_frame = NULL,
@@ -240,14 +240,14 @@ fit <- h2o.ensemble(x = x, y = y,
 ```
 
 Evaluate the performance: 
-```{r}
+```r
 cvAUC::AUC(predictions = predictions , labels = labels)
 # 0.7904223
 ```
 We see an increase in performance by including a more diverse library.
 
 Base learner test AUC (for comparison)
-```{r}
+```r
 L <- length(learner)
 auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
 data.frame(learner, auc)
@@ -268,7 +268,7 @@ data.frame(learner, auc)
 So what happens to the ensemble if we remove some of the weaker learners?  Let's remove the GLM and DL from the learner library and see what happens
 
 Here is a more stripped down version of the ensemble:
-```{r}
+```r
 learner <- c("h2o.randomForest.1", "h2o.randomForest.2",
              "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8")
 
@@ -290,7 +290,7 @@ cvAUC::AUC(predictions = predictions , labels = labels)
 # 0.7887694
 ```
 
-We actually lose performance by removing the weak learners!
+We actually lose performance by removing the weak learners!  This demonstrates the power of stacking.
 
 
 
