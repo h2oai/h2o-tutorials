@@ -17,7 +17,7 @@ More information about machine learning with H2O
 
 - **About Python**: https://www.python.org/
 
-- **Latest Python documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Pydoc.html
+- **Latest Python H2O documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Pydoc.html
 
 
 ##R
@@ -26,10 +26,12 @@ More information about machine learning with H2O
 
 - **Download R**: https://cran.r-project.org/mirrors.html
 
-- **Latest R API documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Rdoc.html 
+- **Latest R API H2O documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Rdoc.html 
 
 ##Sparkling Water
 
 - **About Spark**: http://spark.apache.org/
 
-- **Developer documentation**: https://github.com/h2oai/sparkling-water/blob/master/DEVEL.md
+- **Download Spark**: http://spark.apache.org/downloads.html
+
+- **Sparkling Water Developer documentation**: https://github.com/h2oai/sparkling-water/blob/master/DEVEL.md
