@@ -1,0 +1,7 @@
+#!/bin/bash
+
+## Turn R Markdown into regular Markdown
+sed -e 's/```{r.*}/```/' deeplearning.Rmd > deeplearning.md
+
+## Turn R Markdown into plain R
+sed -e '1,\%```{r.*}%s:^:#:;/^```/,\%```{r.*}%s:^:#:;/```/d' deeplearning.Rmd > deeplearning.R
