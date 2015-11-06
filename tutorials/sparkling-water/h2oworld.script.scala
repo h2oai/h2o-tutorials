@@ -93,12 +93,21 @@ def buildDLModel(trainHF: Frame, validHF: Frame,
   val dlModel = dl.trainModel.get
 
   // Force computation of model metrics on both datasets
-  dlModel.score(train).delete()
-  dlModel.score(valid).delete()
+  dlModel.score(trainHF).delete()
+  dlModel.score(validHF).delete()
 
   // And return resulting model
   dlModel
 }
+
+// Create SQL support
+import org.apache.spark.sql._
+implicit val sqlContext = SQLContext.getOrCreate(sc)
+import sqlContext.implicits._
+//
+// Start H2O services
+import org.apache.spark.h2o._
+val h2oContext = new H2OContext(sc).start()
 
 // Data load
 val dataRDD = load(DATAFILE)
@@ -120,26 +129,26 @@ var (hashingTF, idfModel, tfidfRDD) = buildIDFModel(tokensRDD)
 val resultDF = hamSpamRDD.zip(tfidfRDD).map(v => SMS(v._1, v._2)).toDF
 
 // Publish Spark DataFrame as H2OFrame  
-val table = h2oContext.asH2OFrame(resultDF, "messages_table")
+val tableHF = h2oContext.asH2OFrame(resultDF, "messages_table")
 
 // Transform target column into categorical!
-table.replace(table.find("target"), table.vec("target").toCategoricalVec()).remove()
-table.update(null)
+tableHF.replace(tableHF.find("target"), tableHF.vec("target").toCategoricalVec()).remove()
+tableHF.update(null)
 
 // Split table into training and validation parts
 val keys = Array[String]("train.hex", "valid.hex")
 val ratios = Array[Double](0.8)
-val frs = split(table, keys, ratios)
-val (train, valid) = (frs(0), frs(1))
-table.delete()
+val frs = split(tableHF, keys, ratios)
+val (trainHF, validHF) = (frs(0), frs(1))
+tableHF.delete()
 
 // Build final DeepLearning model
-val dlModel = buildDLModel(train, valid)(h2oContext)
+val dlModel = buildDLModel(trainHF, validHF)(h2oContext)
 
 // Collect model metrics and evaluate model quality
 import water.app.ModelMetricsSupport
-val trainMetrics = ModelMetricsSupport.binomialMM(dlModel, train)
-val validMetrics = ModelMetricsSupport.binomialMM(dlModel, valid)
+val trainMetrics = ModelMetricsSupport.binomialMM(dlModel, trainHF)
+val validMetrics = ModelMetricsSupport.binomialMM(dlModel, validHF)
 println(trainMetrics.auc._auc)
 println(validMetrics.auc._auc)
 
