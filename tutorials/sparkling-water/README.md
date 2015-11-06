@@ -18,7 +18,7 @@
 **Goal**: For a given text message, identify if it is spam or not.
 
   1. Extract data
-  2. Transform, tokenize messages
+  2. Transform & tokenize messages
   3. Build Spark's [Tf-IDF model](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) and expand messages to feature vectors
   4. Create and evaluate [H2O's Deep Learning model](https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/tutorials/dl/dl.md)
   5. Use the models to detect spam messages
@@ -108,7 +108,7 @@
   }
   ```
   
-  > **Wikipedia** defines TF-IDF as: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general.
+  > **Wikipedia** defines TF-IDF as: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general."
   
 8. Configure H2O's DeepLearning model builder:
   ```scala
@@ -169,7 +169,7 @@
 
   > At this point, you can use the H2O UI and see the status of the H2O cloud by typing `getCloud`.
 
-11. Build the final workflow by using all building pieces:
+11. Build the final workflow using all building pieces:
   ```scala
   // Data load
   val dataRDD = load(DATAFILE)
@@ -208,7 +208,7 @@
   val dlModel = buildDLModel(trainHF, validHF)(h2oContext)
   ```
   
-12. Evaluate model quality:
+12. Evaluate the model's quality:
    ```scala
    // Collect model metrics and evaluate model quality
    import water.app.ModelMetricsSupport
@@ -218,7 +218,7 @@
    println(validMetrics.auc._auc)
    ```
 
-   > You can also open H2O UI and type `getPredictions` to visualize model performance or `getModels` to see model output.
+   > You can also open the H2O UI and type `getPredictions` to visualize the model's performance or type `getModels` to see model output.
    
 13. Create a spam detector:
    ```scala
@@ -248,5 +248,5 @@
    isSpam("We tried to contact you re your reply to our offer of a Video Handset? 750 anytime any networks mins? UNLIMITED TEXT?", dlModel, hashingTF, idfModel, h2oContext)
    ```
 
-15. At this point you finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
+15. At this point, you have finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
 
