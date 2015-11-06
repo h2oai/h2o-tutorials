@@ -15,7 +15,7 @@ More information about machine learning with H2O
 
 ##Python
 
-- **Python website**: https://www.python.org/
+- **About Python**: https://www.python.org/
 
 - **Latest Python documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Pydoc.html
 
@@ -29,5 +29,7 @@ More information about machine learning with H2O
 - **Latest R API documentation**: http://h2o-release.s3.amazonaws.com/h2o/latest_stable_Rdoc.html 
 
 ##Sparkling Water
+
+- **About Spark**: http://spark.apache.org/
 
 - **Developer documentation**: https://github.com/h2oai/sparkling-water/blob/master/DEVEL.md
