@@ -6,4 +6,5 @@
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
 * [Streaming](tutorials/streaming/storm/README.md)
 * [POJO](tutorials/pojo_webapp/README.md)
+* [Model Selection](tutorials/model-selection/README.md)
 
