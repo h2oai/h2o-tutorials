@@ -4,4 +4,4 @@
 sed -e 's/```{r}/```r/' deeplearning.Rmd > deeplearning.md
 
 ## Turn R Markdown into plain R
-sed -n '/```{r}/,/```/p' deeplearning.Rmd | sed '/```/d' > deeplearning.R
+sed -e '1,\%```{r}%s:^:#:;/^```/,\%```{r}%s:^:#:;/```/d' deeplearning.Rmd > deeplearning.R
