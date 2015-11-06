@@ -32,6 +32,7 @@
   export MASTER="local-cluster[3,2,4096]"
   bin/sparkling-shell --conf spark.executor.memory=2G 
   ```
+
   > Note: I would recommend to edit your `$SPARK_HOME/conf/log4j.properties` and configure log level to `WARN` to avoid flooding output with Spark INFO messages.
 
 2. Open Spark UI: You can go to [http://localhost:4040/](http://localhost:4040/) to see the Spark status.
@@ -147,7 +148,7 @@
 	// And return resulting model
     dlModel
   }
-    ```
+  ```
 
 9. Initialize `H2OContext` and start H2O services on top of the Spark:
   ```scala
@@ -165,6 +166,7 @@
   ```scala
   h2oContext.openFlow
   ```
+
   > At this point, you can go use H2O UI and see status of H2O cloud by typing `getCloud`.
   
   
