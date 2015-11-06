@@ -10,7 +10,7 @@
   - Checkpointing
   - Cross-Validation
   - Model Save & Load
-- Regression and Binary Classificiation
+- Regression and Binary Classification
 - Deep Learning Tips & Tricks
 
 ## Introduction
@@ -35,13 +35,13 @@ library(h2o)
 Start up a 1-node H2O server on your local machine, and allow it to use up to 2GB of memory:
 
 ```r
-h2o.init(nthreads=-1, max_mem_size = "2G")
+h2o.init(nthreads=-1, max_mem_size="2G")
 ```
 
 The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
 We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
 
-```r
+```{r help}
 args(h2o.deeplearning)
 help(h2o.deeplearning)
 example(h2o.deeplearning)
@@ -64,7 +64,7 @@ plotC <- function(name, model, data=spiral, g=grid) {
   plot(data[,-3],pch=19,col=data[,3],cex=1.0,
        xlim=c(-d,d),ylim=c(-d,d),main=name)
   contour(h,h,z=array(ifelse(pred[,1]=="Red",0,1),
-                      dim=c(2*n+1,2*n+1)),col="blue",lwd=2,add=T)
+          dim=c(2*n+1,2*n+1)),col="blue",lwd=2,add=T)
 }
 par(mfrow=c(2,2)) # set up the canvas for 2x2 plots
 #plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e1))
@@ -73,7 +73,7 @@ plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e3))
 plotC("GBM", h2o.gbm         (1:2,3,spiral))
 plotC("DRF", h2o.randomForest(1:2,3,spiral))
 plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
-par(mfrow = c(1,1)) # reset canvas
+par(mfrow=c(1,1)) # reset canvas
 ```  
 
 ## Cover Type Dataset
@@ -142,11 +142,11 @@ m2 <- h2o.deeplearning(
   validation_frame=valid,
   x=predictors,
   y=response,
-  hidden=c(32,32,32),               ## small network, runs faster
+  hidden=c(32,32,32),                  ## small network, runs faster
   epochs=1000000,
-  score_validation_samples = 10000, ## sample the valiation dataset, faster and accurate enough
+  score_validation_samples=10000,      ## sample the valiation dataset, faster and accurate enough
   stopping_rounds=1,
-  stopping_metric="misclassification",  ## could be "MSE","logloss","r2"
+  stopping_metric="misclassification", ## could be "MSE","logloss","r2"
   stopping_tolerance=0.01
 )
 summary(m2)
@@ -158,31 +158,30 @@ By default, H2O Deep Learning uses an adaptive learning rate ([ADADELTA](http://
 
 If `adaptive_rate` is disabled, several manual learning rate parameters become important: `rate`, `rate_annealing`, `rate_decay`, `momentum_start`, `momentum_ramp`, `momentum_stable` and `nesterov_accelerated_gradient`, the discussion of which we leave to [H2O Deep Learning booklet](http://h2o.ai/resources/).
 
-
 ### Tuning
 With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.
 
 ```r
 m3 <- h2o.deeplearning(
   model_id="dl_model_tuned", 
-  training_frame = train, 
-  validation_frame = valid, 
+  training_frame=train, 
+  validation_frame=valid, 
   x=predictors, 
   y=response, 
   overwrite_with_best_model=F,
-  hidden=c(100,100,100),          ## more hidden layers -> more complex interactions
+  hidden=c(128,128,128),          ## more hidden layers -> more complex interactions
   epochs=10,                      ## to keep it short enough
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
   rate=0.02, 
   rate_annealing=2e-6,            
-  momentum_start = 0.2,           ## manually tuned momentum
-  momentum_stable = 0.4, 
-  momentum_ramp = 1e7, 
+  momentum_start=0.2,             ## manually tuned momentum
+  momentum_stable=0.4, 
+  momentum_ramp=1e7, 
   l1=1e-5,                        ## add some L1/L2 regularization
   l2=1e-5,
-  max_w2 = 10                     ## helps stability for Rectifier
+  max_w2=10                       ## helps stability for Rectifier
 ) 
 summary(m3)
 ```
@@ -194,7 +193,7 @@ h2o.performance(m3, train=T)       ## sampled training data (from model building
 h2o.performance(m3, valid=T)       ## sampled validation data (from model building)
 h2o.performance(m3, data=train)    ## full training data
 h2o.performance(m3, data=valid)    ## full validation data
-h2o.performance(m3, test)          ## full test data
+h2o.performance(m3, data=test)     ## full test data
 ```
 
 To confirm that the reported confusion matrix on the validation set (here, the test set) was correct, we make a prediction on the test set and compare the confusion matrices explicitly:
@@ -212,15 +211,15 @@ Since there are a lot of parameters that can impact model accuracy, hyper-parame
 For speed, we will only train on the first 10,000 rows of the training dataset:
 
 ```r
-sampled_train = train[1:10000,]
+sampled_train=train[1:10000,]
 ```
   
 The simplest hyperparameter search method is a brute-force scan of the full Cartesian product of all combinations specified by a grid search:
 
 ```r
 hyper_params <- list(
-  hidden = list(c(32,32,32),c(64,64)),
-  input_dropout_ratio = c(0,0.05),
+  hidden=list(c(32,32,32),c(64,64)),
+  input_dropout_ratio=c(0,0.05),
   rate=c(0.01,0.02),
   rate_annealing=c(1e-8,1e-7,1e-6)
 )
@@ -228,8 +227,8 @@ hyper_params
 grid <- h2o.grid(
   "deeplearning",
   model_id="dl_grid", 
-  training_frame = sampled_train,
-  validation_frame = valid, 
+  training_frame=sampled_train,
+  validation_frame=valid, 
   x=predictors, 
   y=response,
   epochs=10,
@@ -239,14 +238,14 @@ grid <- h2o.grid(
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
-  momentum_start = 0.5,           ## manually tuned momentum
-  momentum_stable = 0.9, 
-  momentum_ramp = 1e7, 
-  l1 = 1e-5,
-  l2 = 1e-5,
-  activation = c("Rectifier"),
-  max_w2 = 10,                    ## can help improve stability for Rectifier
-  hyper_params = hyper_params
+  momentum_start=0.5,             ## manually tuned momentum
+  momentum_stable=0.9, 
+  momentum_ramp=1e7, 
+  l1=1e-5,
+  l2=1e-5,
+  activation=c("Rectifier"),
+  max_w2=10,                      ## can help improve stability for Rectifier
+  hyper_params=hyper_params
 )
 grid
 ```
@@ -258,15 +257,16 @@ Let's see which model had the lowest validation error:
 scores <- cbind(as.data.frame(unlist((lapply(grid@model_ids, function(x) 
   { h2o.confusionMatrix(h2o.performance(h2o.getModel(x),valid=T))$Error[8] })) )), unlist(grid@model_ids))
 names(scores) <- c("misclassification","model")
-head(scores)
-best_model <- h2o.getModel(as.character(scores$model[1]))
+sorted_scores <- scores[order(scores$misclassification),]
+head(sorted_scores)
+best_model <- h2o.getModel(as.character(sorted_scores$model[1]))
 print(best_model@allparameters)
-best_err <- scores$misclassification[1]
+best_err <- sorted_scores$misclassification[1]
 print(best_err)
 ```
     
-### Hyper-parameter Tuning with Random Search
-Multi-dimensional hyper-parameter optimization (more than 4 parameters) can be more efficient with random parameter search than with the previous grid search. For a random parameter search, we do a loop over models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters.
+### Random Hyper-Parameter Search
+Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build `N` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters.
 
 ```r
 models <- c()
@@ -280,8 +280,8 @@ for (i in 1:10) {
   rand_input_dropout <- runif(1, 0, 0.5)
   dlmodel <- h2o.deeplearning(
     model_id=paste0("dl_random_model_", i),
-    training_frame = sampled_train,
-    validation_frame = valid, 
+    training_frame=sampled_train,
+    validation_frame=valid, 
     x=predictors, 
     y=response,
 #    epochs=100,                    ## for real parameters: set high enough to get to convergence
@@ -291,7 +291,7 @@ for (i in 1:10) {
     stopping_rounds=2,
     score_validation_samples=10000, ## downsample validation set for faster scoring
     score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
-    max_w2 = 10,                    ## can help improve stability for Rectifier
+    max_w2=10,                      ## can help improve stability for Rectifier
 
     ### Random parameters
     activation=rand_activation, 
@@ -308,7 +308,7 @@ for (i in 1:10) {
 We continue to look for the model with the lowest validation misclassification rate:
 
 ```r
-if (is.null(best_err)) best_err <- 1      ##start with the best reference model from the grid search above, if available
+best_err <- 1      ##start with the best reference model from the grid search above, if available
 for (i in 1:length(models)) {
   err <- h2o.confusionMatrix(h2o.performance(models[[i]],valid=T))$Error[8]
   if (err < best_err) {
@@ -325,19 +325,18 @@ best_params$input_dropout_ratio
 ```            
     
 ###Checkpointing
-Let's continue training the best model, for 2 more epochs. Note that since many important parameters such as `epochs, l1, l2, max_w2, score_interval, train_samples_per_iteration, input_dropout_ratio, hidden_dropout_ratios, score_duty_cycle, classification_stop, regression_stop, variable_importances, force_load_balance` can be modified between checkpoint restarts, it is best to specify as many parameters as possible explicitly.
+Let's continue training the manually tuned model from before, for 2 more epochs. Note that since many important parameters such as `epochs, l1, l2, max_w2, score_interval, train_samples_per_iteration, input_dropout_ratio, hidden_dropout_ratios, score_duty_cycle, classification_stop, regression_stop, variable_importances, force_load_balance` can be modified between checkpoint restarts, it is best to specify as many parameters as possible explicitly.
 
 ```r
-#max_epochs <- 1000 ##Takes a few minutes
 max_epochs <- 12 ## Add two more epochs
 m_cont <- h2o.deeplearning(
   model_id="dl_model_tuned_continued", 
   checkpoint="dl_model_tuned", 
-  training_frame = train, 
-  validation_frame = valid, 
+  training_frame=train, 
+  validation_frame=valid, 
   x=predictors, 
   y=response, 
-  hidden=c(100,100,100),          ## more hidden layers -> more complex interactions
+  hidden=c(128,128,128),          ## more hidden layers -> more complex interactions
   epochs=max_epochs,              ## hopefully long enough to converge (otherwise restart again)
   stopping_metric="logloss",      ## logloss is directly optimized by Deep Learning
   stopping_tolerance=1e-2,        ## stop when validation logloss does not improve by >=1% for 2 scoring events
@@ -347,21 +346,21 @@ m_cont <- h2o.deeplearning(
   adaptive_rate=F,                ## manually tuned learning rate
   rate=0.02, 
   rate_annealing=2e-6,            
-  momentum_start = 0.2,           ## manually tuned momentum
-  momentum_stable = 0.4, 
-  momentum_ramp = 1e7, 
+  momentum_start=0.2,           ## manually tuned momentum
+  momentum_stable=0.4, 
+  momentum_ramp=1e7, 
   l1=1e-5,                        ## add some L1/L2 regularization
   l2=1e-5,
-  max_w2 = 10                     ## helps stability for Rectifier
+  max_w2=10                     ## helps stability for Rectifier
 ) 
 summary(m_cont)
 plot(m_cont)
 ```
 
-Once we are satisfied with the results, we can save the model to disk (on the cluster). Be careful not to use "~" as the path is interpreted by the H2O cluster, not the client.
+Once we are satisfied with the results, we can save the model to disk (on the cluster).
 In this example, the cluster is running on the same file system as the client, so are fine.
 ```r
-path <- h2o.saveModel(m_cont, path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force = T)
+path <- h2o.saveModel(m_cont, path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force=T)
 ```
 
 It can be loaded later with the following command:
