@@ -16,6 +16,12 @@
 ## Introduction
 This tutorial shows how a [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This file is available in plain R, R markdown and regular markdown formats. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [Github Repository](http://github.com/h2oai/h2o-3/).
 
+First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
+
+```{r}
+ROOT_PATH <- "/users/arno/h2o-world-2015-training/tutorials/"
+```
+
 ### H2O R Package
 
 Load the H2O R package:
@@ -48,8 +54,8 @@ While H2O Deep Learning has many parameters, it was designed to be just as easy 
 To get familiar with the nature of Deep Learning (DL) in comparison to H2O's tree methods (GBM/DRF) and linear modeling (GLM), we plot contour plots of the probability density to see how they separate two spirals in 2D:
 
 ```{r}
-spiral <- h2o.importFile("/users/arno/h2o-world-2015-training/tutorials/data/spiral.csv")
-grid   <- h2o.importFile("/users/arno/h2o-world-2015-training/tutorials/data/grid.csv")
+spiral <- h2o.importFile(paste0(ROOT_PATH, "/data/spiral.csv"))
+grid   <- h2o.importFile(paste0(ROOT_PATH, "/data/grid.csv"))
 # Define helper to plot contours
 plotC <- function(name, model, data=spiral, g=grid) {
   data <- as.data.frame(data) #pull data local
@@ -75,7 +81,7 @@ We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
 ```{r}
-df <- h2o.importFile("/users/arno/h2o-world-2015-training/tutorials/data/covtype.full.csv")
+df <- h2o.importFile(paste0(ROOT_PATH, "/data/covtype.full.csv"))
 dim(df)
 df
 splits <- h2o.splitFrame(df, c(0.6,0.2), seed=1234)
@@ -154,7 +160,7 @@ If `adaptive_rate` is disabled, several manual learning rate parameters become i
 
 
 ### Tuning
-With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models.
+With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.
 
 ```{r}
 m3 <- h2o.deeplearning(
@@ -355,11 +361,12 @@ plot(m_cont)
 Once we are satisfied with the results, we can save the model to disk (on the cluster). Be careful not to use "~" as the path is interpreted by the H2O cluster, not the client.
 In this example, the cluster is running on the same file system as the client, so are fine.
 ```{r}
-path <- h2o.saveModel(m_cont, path="/users/arno/mybest_model", force = T)
+path <- h2o.saveModel(m_cont, path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force = T)
 ```
 
 It can be loaded later with the following command:
 ```{r}
+print(path)
 m_loaded <- h2o.loadModel(path)
 summary(m_loaded)
 ```
