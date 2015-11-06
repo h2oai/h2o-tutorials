@@ -27,9 +27,9 @@
 
 1. Run Sparkling shell with an embedded Spark cluster:
   ```
+  cd "path/to/sparkling/water"
   export SPARK_HOME="/path/to/spark/installation"
   export MASTER="local-cluster[3,2,4096]"
-  cd SparklingWater
   bin/sparkling-shell --conf spark.executor.memory=2G 
   ```
   > Note: I would recommend to edit your `$SPARK_HOME/conf/log4j.properties` and configure log level to `WARN` to avoid flooding output with Spark INFO messages.
@@ -140,8 +140,8 @@
     val dlModel = dl.trainModel.get
 
     // Force computation of model metrics on both datasets
-    dlModel.score(train).delete()
-    dlModel.score(valid).delete()
+    dlModel.score(trainHF).delete()
+    dlModel.score(validHF).delete()
 
 	// And return resulting model
     dlModel
