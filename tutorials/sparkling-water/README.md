@@ -67,7 +67,8 @@
   
 6. Input messages tokenizer:
   ```scala
-  // Tokenizer - for each sentence in input RDD it provides array of string representing individual interesting words in the sentence
+  // Tokenizer
+  // For each sentence in input RDD it provides array of string representing individual interesting words in the sentence
   def tokenize(dataRDD: RDD[String]): RDD[Seq[String]] = {
     // Ignore all useless words
     val ignoredWords = Seq("the", "a", "", "in", "on", "at", "as", "not", "for")
@@ -90,7 +91,7 @@
   }
   ```
 
-6. Spark's Tf-IDF model builder. 
+7. Spark's Tf-IDF model builder. 
   ```scala
   def buildIDFModel(tokensRDD: RDD[Seq[String]],
                     minDocFreq:Int = 4,
@@ -108,7 +109,7 @@
   
   > **Wikipedia** says: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general.
   
-7. H2O's DeepLearning model builder:
+8. H2O's DeepLearning model builder:
   ```scala
   def buildDLModel(trainHF: Frame, validHF: Frame,
                  epochs: Int = 10, l1: Double = 0.001, l2: Double = 0.0,
@@ -147,7 +148,8 @@
     dlModel
   }
     ```
-8. Initialize `H2OContext` and start H2O services on top of the Spark:
+
+9. Initialize `H2OContext` and start H2O services on top of the Spark:
   ```scala
    // Create SQL support
    import org.apache.spark.sql._
@@ -159,14 +161,14 @@
    val h2oContext = new H2OContext(sc).start()
   ```
 
-9. Open H2O UI and verify that H2O is running: 
+10. Open H2O UI and verify that H2O is running: 
   ```scala
   h2oContext.openFlow
   ```
   > At this point, you can go use H2O UI and see status of H2O cloud by typing `getCloud`.
   
   
-10. Build the final workflow by using all building pieces:
+11. Build the final workflow by using all building pieces:
   ```scala
   // Data load
   val dataRDD = load(DATAFILE)
@@ -205,7 +207,7 @@
   val dlModel = buildDLModel(trainHF, validHF)(h2oContext)
   ```
   
-11. Evaluate model quality:
+12. Evaluate model quality:
    ```scala
    // Collect model metrics and evaluate model quality
    import water.app.ModelMetricsSupport
@@ -214,9 +216,10 @@
    println(trainMetrics.auc._auc)
    println(validMetrics.auc._auc)
    ```
+
    > You can also open H2O UI and type `getPredictions` to visualize model performance or `getModels` to see model output.
    
-12. Create a spam detector:
+13. Create a spam detector:
    ```scala
    // Spam detector
    def isSpam(msg: String,
@@ -237,11 +240,12 @@
   }   
   ```
   
-13. Try to detect spam:
+14. Try to detect spam:
    ```scala
    isSpam("Michal, h2oworld party tonight in MV?", dlModel, hashingTF, idfModel, h2oContext)
    // 
    isSpam("We tried to contact you re your reply to our offer of a Video Handset? 750 anytime any networks mins? UNLIMITED TEXT?", dlModel, hashingTF, idfModel, h2oContext)
    ```
 
-14. At this point you finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
+15. At this point you finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
+
