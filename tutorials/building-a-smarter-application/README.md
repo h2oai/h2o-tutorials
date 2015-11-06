@@ -3,7 +3,7 @@
 ### Slides
 
 * [PDF](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/building-a-smarter-application/BuildingASmarterApplication.pdf)
-* [Powerpoint](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/building-a-smarter-application/BuildingASmarterApplication.pptx)
+* [PowerPoint](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/building-a-smarter-application/BuildingASmarterApplication.pptx)
 
 ### Code
 
