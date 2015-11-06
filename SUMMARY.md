@@ -2,6 +2,7 @@
 
 * [Introduction](README.md)
 
+
 * [Building a Smarter Application](tutorials/building-a-smarter-application/README.md)
 * [Deep Learning](tutorials/deeplearning/deeplearning.Rmd)
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
