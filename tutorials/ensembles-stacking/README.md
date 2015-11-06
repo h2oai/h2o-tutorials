@@ -167,7 +167,7 @@ labels <- as.data.frame(test[,y])[,1]
 
 Since the response is binomial, we can use Area Under the ROC Curve (AUC) to evaluate the model performance.  We first generate predictions on the test set and then calculate test set AUC using the [cvAUC](https://cran.r-project.org/web/packages/cvAUC/) R package.
 
-```{r ensemble_auc}
+```r
 # Ensemble test AUC 
 library(cvAUC)  # Used to calculate test set AUC
 cvAUC::AUC(predictions = predictions, labels = labels)
