@@ -1,6 +1,8 @@
 ###################################################################################
 ### Goal: demonstrate usage of H2O's Random Forest and GBM algorithms
-### Task: predict 
+### Task: Predicting forest cover type from cartographic variables only
+###       The actual forest cover type for a given observation 
+###       (30 x 30 meter cell) was determined from the US Forest Service (USFS).
 
 ## H2O is an R package
 library(h2o)
@@ -10,9 +12,9 @@ h2o.init(
   max_mem_size = "2G")    ## specify the memory size for the H2O cloud
 
 ## Load a file from disk
-df <- h2o.importFile("covtype.full.csv")
+df <- h2o.importFile("../data/covtype.full.csv")
 
-## To run machine learning, we will create three splits for train/test/valid
+## First, we will create three splits for train/test/valid independent data sets.
 ## We will train a data set on one set and use the others to test the validity
 ##  of model by ensuring that it can predict accurately on data the model has not
 ##  been shown.
@@ -189,18 +191,18 @@ h2o.hit_ratio_table(gbm3,valid = T)[1,2]    ## review the newest model's accurac
 ##  is being run. The default for classification is one-third of the columns.
 ##  The default for regression is the square root of the number of columns.
 
-rf2 <- h2o.randomForest(
-  training_frame = train, 
-  validation_frame = valid, 
-  x=1:12, 
-  y=13, 
-  model_id = "rf_covType2", 
-  ntrees = 200, 
-  max_depth = 30,
-  stopping_rounds = 2,
-  stopping_tolerance = 1e-2,   
-  score_each_iteration = T,
-  seed=3000000)
+rf2 <- h2o.randomForest(        ##
+  training_frame = train,       ##
+  validation_frame = valid,     ##
+  x=1:12,                       ##
+  y=13,                         ##
+  model_id = "rf_covType2",     ## 
+  ntrees = 200,                 ##
+  max_depth = 30,               ## Increase depth, from 20
+  stopping_rounds = 2,          ##
+  stopping_tolerance = 1e-2,    ##
+  score_each_iteration = T,     ##
+  seed=3000000)                 ##
 ###############################################################################
 summary(rf2)
 h2o.hit_ratio_table(gbm3,valid = T)[1,2]    ## review the newest GBM accuracy
@@ -209,6 +211,29 @@ h2o.hit_ratio_table(rf2,valid = T)[1,2]     ## newest random forest accuracy
 ###############################################################################
 
 ## So we now have our accuracy up beyond 95%. 
+## We have witheld an extra test set to ensure that after all the parameter
+##  tuning we have done, repeatedly applied to the validation data, that our
+##  model produces similar results against the third data set. 
+
+## Create predictions using our latest RF model against the test set.
+finalRf_predictions<-h2o.predict(
+  object = rf2
+  ,newdata = test)
+
+## Glance at what that prediction set looks like
+## We see a final prediction in the "predict" column,
+##  and then the predicted probabilities per class.
+finalRf_predictions
+
+## Compare these predictions to the accuracy we got from our experimentation
+h2o.hit_ratio_table(rf2,valid = T)[1,2]             ## validation set accuracy
+mean(finalRf_predictions$predict==test$Cover_Type)  ## test set accuracy
+
+## We have very similar error rates on both sets, so it would not seem
+##  that we have overfit the validation set through our experimentation.
+##
+## This concludes the demo, but what might we try next, if we were to continue?
+##
 ## We could further experiment with deeper trees or a higher percentage of
 ##  columns used (mtries).
 ## Also we could experiment with the nbins and nbins_cats settings to control
