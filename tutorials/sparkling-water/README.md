@@ -7,7 +7,7 @@
  - [Sparkling Water 1.5.4](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-1.5/4/index.html) ([USB](../../SparklingWater))
  - [SMS dataset](https://raw.githubusercontent.com/h2oai/sparkling-water/master/examples/smalldata/smsData.txt) ([USB](../data/smsData.txt))
  
-## Provided USB
+## Provided on USB
  - [Binaries](../../)
  - [SMS dataset](../data/smsData.txt)
  - [Slides](SparklingWater.pdf)
@@ -15,7 +15,7 @@
 
 ## Machine Learning Workflow
 
-**Goal**: For a given text message identify if it is spam or not.
+**Goal**: For a given text message, identify if it is spam or not.
 
   1. Extract data
   2. Transform, tokenize messages
@@ -33,11 +33,11 @@
   bin/sparkling-shell --conf spark.executor.memory=2G 
   ```
 
-  > Note: I would recommend to edit your `$SPARK_HOME/conf/log4j.properties` and configure log level to `WARN` to avoid flooding output with Spark INFO messages.
+  > Note: To avoid flooding output with Spark INFO messages, I recommend editing your `$SPARK_HOME/conf/log4j.properties` and configuring the log level to `WARN`.
 
-2. Open Spark UI: You can go to [http://localhost:4040/](http://localhost:4040/) to see the Spark status.
+2. Open Spark UI: Go to [http://localhost:4040/](http://localhost:4040/) to see the Spark status.
 
-3. Prepare environment
+3. Prepare the environment:
   ```scala
   // Input data
   val DATAFILE="../data/smsData.txt"
@@ -52,13 +52,13 @@
   import water.Key
   ```
   
-4. Define representation of training message:
+4. Define the representation of the training message:
    ```scala
    // Representation of a training message
    case class SMS(target: String, fv: mllib.linalg.Vector)
    ```
 
-5. Define data loader and parser:
+5. Define the data loader and parser:
   ```scala
   def load(dataFile: String): RDD[Array[String]] = {
     // Load file into memory, split on TABs and filter all empty lines
@@ -66,7 +66,7 @@
   }
   ```
   
-6. Input messages tokenizer:
+6. Define the input messages tokenizer:
   ```scala
   // Tokenizer
   // For each sentence in input RDD it provides array of string representing individual interesting words in the sentence
@@ -92,7 +92,7 @@
   }
   ```
 
-7. Spark's Tf-IDF model builder. 
+7. Configure Spark's Tf-IDF model builder: 
   ```scala
   def buildIDFModel(tokensRDD: RDD[Seq[String]],
                     minDocFreq:Int = 4,
@@ -108,9 +108,9 @@
   }
   ```
   
-  > **Wikipedia** says: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general.
+  > **Wikipedia** defines TF-IDF as: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general.
   
-8. H2O's DeepLearning model builder:
+8. Configure H2O's DeepLearning model builder:
   ```scala
   def buildDLModel(trainHF: Frame, validHF: Frame,
                  epochs: Int = 10, l1: Double = 0.001, l2: Double = 0.0,
@@ -150,7 +150,7 @@
   }
   ```
 
-9. Initialize `H2OContext` and start H2O services on top of the Spark:
+9. Initialize `H2OContext` and start H2O services on top of Spark:
   ```scala
    // Create SQL support
    import org.apache.spark.sql._
@@ -167,9 +167,8 @@
   h2oContext.openFlow
   ```
 
-  > At this point, you can go use H2O UI and see status of H2O cloud by typing `getCloud`.
-  
-  
+  > At this point, you can use the H2O UI and see the status of the H2O cloud by typing `getCloud`.
+
 11. Build the final workflow by using all building pieces:
   ```scala
   // Data load
