@@ -78,10 +78,6 @@ h2o.hit_ratio_table(rf1,valid = T)[1,2]
 ##  where the parameters and defaults are described.
 
 gbm1 <- h2o.gbm(
-  training_frame = train, 
-  validation_frame = valid, 
-  x=1:12, 
-  y=13,
   training_frame = train,        ## the H2O frame for training
   validation_frame = valid,      ## the H2O frame for validation (not required)
   x=1:12,                        ## the predictor columns, by column index
