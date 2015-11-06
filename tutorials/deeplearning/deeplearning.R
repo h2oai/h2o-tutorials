@@ -79,7 +79,7 @@ previous=epochs
 plotC(paste0("DL ",epochs," epochs"), 
       h2o.deeplearning(1:2,3,spiral,epochs=epochs,
       model_id=as.character(previous)))
-for (epochs in c(200,500,1000)) {
+for (epochs in c(200,500,750,1000)) {
   plotC(paste0("DL ",epochs," epochs"), 
       h2o.deeplearning(1:2,3,spiral,epochs=epochs,
       model_id=as.character(epochs),
@@ -123,7 +123,7 @@ test   <- h2o.assign(splits[[3]], "test.hex")  # 20%
 #
 #Here's a scalable way to do scatter plots via binning (works for categorical and numeric columns) to get more familiar with the dataset.
 #
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(1,1)) # reset canvas
 plot(h2o.tabulate(df, "Elevation",                       "Cover_Type"))
 plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Cover_Type"))

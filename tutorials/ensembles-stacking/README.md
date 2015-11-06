@@ -1,6 +1,3 @@
-> # !!! UNDER CONSTRUCTION !!!
-> (But open the book anyway, we're adding content...)
-
 # Ensembles: Stacking, Super Learner
 - Overview
 - What is Ensemble Learning?
@@ -13,7 +10,7 @@
 
 In this tutorial, we will discuss ensemble learning with a focus on a type of ensemble learning called stacking or Super Learning.  We present the H2O implementation of the Super Learner algorithm, called "H2O Ensemble."  
 
-Following the introduction to ensemble learning, we will dive into a hands-on code demo of the **h2oEnsemble** R package.
+Following the introduction to ensemble learning, we will dive into a hands-on code demo of the [h2oEnsemble](https://github.com/h2oai/h2o-3/tree/master/h2o-r/ensemble) R package.
 
 
 # What is Ensemble Learning?
@@ -42,16 +39,23 @@ Both bagging and boosting are ensembles that take a collection of weak learners 
 
 ## Stacking / Super Learning
 
-Stacking is a broad class of algorithms that involves training a second-level "metalearner" to ensemble a group of base learners. 
+Stacking is a broad class of algorithms that involves training a second-level "metalearner" to ensemble a group of base learners. The type of ensemble learning implemented in H2O is called "super learning", "stacked regression" or "stacking."
 
-The type of ensemble learning implemented in H2O is called "super learning", "stacked regression" or "stacking."  The Super Learner algorithm learns the optimal combination of the base learner fits. In a 2007 article titled, "[Super Learner](http://dx.doi.org/10.2202/1544-6115.1309)," it was shown that the super learner ensemble represents an asymptotically optimal system for learning.
+### Some Background
+[Leo Breiman](https://en.wikipedia.org/wiki/Leo_Breiman), known for his work on classification and regression trees and the creator of the Random Forest algorithm, formalized stacking in his 1996 paper, ["Stacked Regressions"](http://statistics.berkeley.edu/sites/default/files/tech-reports/367.pdf).  Although the idea originated with [David Wolpert](https://en.wikipedia.org/wiki/David_Wolpert) in 1992 under the name ["Stacked Generalization"](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.56.1533), the modern form of stacking that uses internal k-fold cross-validation was Dr. Breiman's contribution.
+
+However, it wasn't until 2007, that the theoretical background for stacking was developed, taking on the name "Super Learner".  Until this time, the mathematical reasons for why stacking worked were unknown.  The Super Learner algorithm learns the optimal combination of the base learner fits. In an article titled, "[Super Learner](http://dx.doi.org/10.2202/1544-6115.1309)," by [Mark van der Laan](http://www.stat.berkeley.edu/~laan/Laan/laan.html) et al., proved that the Super Learner ensemble represents an asymptotically optimal system for learning.
+
 
 ### Super Learner Algorithm
-Set up the ensemble:
-- Specify a list of L base algorithms (with a specific set of model parameters).
-- Specify a metalearning algorithm
 
-Train the ensemble:
+Here is an outline of the tasks involved in training and testing a Super Learner ensemble.
+
+#### Set up the ensemble
+- Specify a list of L base algorithms (with a specific set of model parameters).
+- Specify a metalearning algorithm.
+
+#### Train the ensemble
 - Train each of the L base algorithms on the training set.
 - Perform k-fold cross-validation on each of these learners and collect the cross-validated predicted values from each of the L algorithms.
 - The N cross-validated predicted values from each of the L algorithms can be combined to form a new N x L matrix.  This matrix, along wtih the original response vector, is called the "level-one" data.
@@ -59,7 +63,7 @@ Train the ensemble:
 
 The "ensemble model" consists of the L base learning models and the metalearning model.
 
-Predict on new data:
+#### Predict on new data
 - To generate ensemble predictions, first generate predictions from the base learners.
 - Feed those predictions into the metalearner to generate the ensemble prediction.
 
@@ -68,47 +72,74 @@ Predict on new data:
 
 The H2O Super Learner ensemble has been implemented as a stand-alone R package called [h2oEnsemble](https://github.com/h2oai/h2o-3/tree/master/h2o-r/ensemble).  The package is an extension to the [h2o](https://cran.r-project.org/web/packages/h2o/index.html) R package that allows the user to train an ensemble containing H2O algorithms.  As in the **h2o** R package, all of the actual computation in **h2oEnsemble** is performed inside the H2O cluster, rather than in R memory.  
 
-The main computational tasks in the Super Learner ensemble algorithm is the training and cross-validation of the base learners and metalearner.  Therefore, implementing the "plumbing" of the ensemble in R (rather than in Java) does not incur a loss of performance.
+The main computational tasks in the Super Learner ensemble algorithm are the training and cross-validation of the base learners and metalearner.  Therefore, implementing the "plumbing" of the ensemble in R (rather than in Java) does not incur a loss of performance.  All training and data processing are performed in the high-performance H2O cluster.
 
 
 ## Install H2O Ensemble
 
-To install the **h2oEnsemble** package, you just need to follow the installation instructions on the [README](https://github.com/h2oai/h2o-3/blob/master/h2o-r/ensemble/README.md#install) file.
+To install the **h2oEnsemble** package, you just need to follow the installation instructions on the [README](https://github.com/h2oai/h2o-3/blob/master/h2o-r/ensemble/README.md#install) file, also documented here for convenience.
+
+### H2O R Package
+
+First you need to install the H2O R package if you don't already have it installed.  The R installation instructions are at: [http://h2o.ai/download](http://h2o.ai/download)
+
+
+### H2O Ensemble R Package
+
+The recommended way of installing the **h2oEnsemble** R package is directly from GitHub using the [devtools](https://cran.r-project.org/web/packages/devtools/index.html) package (however, [H2O World](http://h2oworld.h2o.ai/) tutorial attendees should install the package from the provided USB stick).
+
+#### Install from GitHub
+```r
+library(devtools)
+install_github("h2oai/h2o-3/h2o-r/ensemble/h2oEnsemble-package")
+```
+
 
 
 ## Demo
 
-This is an example of binary classification using `h2o.ensemble`.  This example is also included in the R package documentation for h2o.ensemble
+This is an example of binary classification using the `h2o.ensemble` function, which is available in **h2oEnsemble**.  
 
 
 ### Start H2O Cluster
 ```r
-library(h2oEnsemble)  # Requires version >=0.0.4 of h2oEnsemble
-localH2O <-  h2o.init(nthreads = -1)  # Start an H2O cluster with nthreads = num cores on your machine
+library(h2oEnsemble)  # This will load the `h2o` R package as well
+h2o.init(nthreads = -1)  # Start an H2O cluster with nthreads = num cores on your machine
+h2o.removeAll() # Clean slate - just in case the cluster was already running
 ```
 
 
 ### Load Data into H2O Cluster
+
+First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
+
 ```r
-# Import a sample binary outcome train/test set into R
-train <- h2o.importFile("http://www.stat.berkeley.edu/~ledell/data/higgs_10k.csv")
-test <- h2o.importFile("http://www.stat.berkeley.edu/~ledell/data/higgs_test_5k.csv")
+ROOT_PATH <- "/Users/me/h2oai/world/h2o-world-2015-training/tutorials"
+```
+
+Import a sample binary outcome train and test set into the H2O cluster.
+```r
+train <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_10k.csv"))
+test <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_test_5k.csv"))
 y <- "C1"
 x <- setdiff(names(train), y)
+```
 
-#For binary classification, response should be a factor
+For binary classification, the response should be encoded as factor (aka "enum" in Java).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
+
+```r
 train[,y] <- as.factor(train[,y])  
 test[,y] <- as.factor(test[,y])
 ```
 
 
 ### Specify Base Learners & Metalearner
-For this example, we will use the default base learner library, which includes the H2O GLM, Random Forest, GBM and Deep Learner (all using default model parameter values).
+For this example, we will use the default base learner library, which includes the H2O GLM, Random Forest, GBM and Deep Learner (all using default model parameter values).  We will also use the default metalearner, the H2O GLM.
 
 ```r
 learner <- c("h2o.glm.wrapper", "h2o.randomForest.wrapper", 
              "h2o.gbm.wrapper", "h2o.deeplearning.wrapper")
-metalearner <- "h2o.deeplearning.wrapper"
+metalearner <- "h2o.glm.wrapper"
 ```
 
 
@@ -120,15 +151,15 @@ fit <- h2o.ensemble(x = x, y = y,
                     family = "binomial", 
                     learner = learner, 
                     metalearner = metalearner,
-                    cvControl = list(V = 5, shuffle = TRUE))
+                    cvControl = list(V = 5))
 ```
 
 
 ### Predict 
 Generate predictions on the test set.
 ```r
-pp <- predict(fit, test)
-predictions <- as.data.frame(pp$pred)[,3]  #third column, p1 is P(Y==1)
+pred <- predict(fit, test)
+predictions <- as.data.frame(pred$pred)[,3]  #third column, p1 is P(Y==1)
 labels <- as.data.frame(test[,y])[,1]
 ```
 
@@ -138,50 +169,133 @@ Since the response is binomial, we can use Area Under the ROC Curve (AUC) to eva
 
 ```r
 # Ensemble test AUC 
-library(cvAUC)  # Used to calculate test set AUC (cvAUC version >=1.0.1)
+library(cvAUC)  # Used to calculate test set AUC
 cvAUC::AUC(predictions = predictions, labels = labels)
 # 0.7888723
 
 # Base learner test AUC (for comparison)
 L <- length(learner)
-auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pp$basepred)[,l], labels = labels)) 
+auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
 data.frame(learner, auc)
-#                   learner       auc
-#1          h2o.glm.wrapper 0.6871288
-#2 h2o.randomForest.wrapper 0.7711654
-#3          h2o.gbm.wrapper 0.7817075
-#4 h2o.deeplearning.wrapper 0.7425813
-
-# Note that the ensemble results above are not reproducible since 
-# h2o.deeplearning is not reproducible when using multiple cores,
-# and we did not set a seed for h2o.randomForest.wrapper or h2o.gbm.wrapper.
+#                    learner       auc
+# 1          h2o.glm.wrapper 0.6871288
+# 2 h2o.randomForest.wrapper 0.7711654
+# 3          h2o.gbm.wrapper 0.7817075
+# 4 h2o.deeplearning.wrapper 0.7425813
 ```
+Note that the ensemble results above are not reproducible since `h2o.deeplearning` is not reproducible when using multiple cores, and we did not set a seed for `h2o.randomForest.wrapper`.
+
 Additional note: In a future version, performance metrics such as AUC will be computed automatically, as in the other H2O algos.
 
 
 ### Specifying New Learners
 
-Here is an example of how to generate a base learner library using custom base learners:
+Now let's try again with a more extensive set of base learners.  Here is an example of how to generate a custom learner wrappers:
+
 ```r
-h2o.randomForest.1 <- function(..., ntrees = 1000, nbins = 100, seed = 1) {
-  h2o.randomForest.wrapper(..., ntrees = ntrees, nbins = nbins, seed = seed)
-}
-h2o.deeplearning.1 <- function(..., hidden = c(500,500), activation = "Rectifier", seed = 1) {
-  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-}
-h2o.deeplearning.2 <- function(..., hidden = c(200,200,200), activation = "Tanh", seed = 1) {
-  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-}
-learner <- c("h2o.randomForest.1", "h2o.deeplearning.1", "h2o.deeplearning.2")
+h2o.glm.1 <- function(..., alpha = 0.0) h2o.glm.wrapper(..., alpha = alpha)
+h2o.glm.2 <- function(..., alpha = 0.5) h2o.glm.wrapper(..., alpha = alpha)
+h2o.glm.3 <- function(..., alpha = 1.0) h2o.glm.wrapper(..., alpha = alpha)
+h2o.randomForest.1 <- function(..., ntrees = 200, nbins = 50, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, nbins = nbins, seed = seed)
+h2o.randomForest.2 <- function(..., ntrees = 200, sample_rate = 0.75, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, sample_rate = sample_rate, seed = seed)
+h2o.randomForest.3 <- function(..., ntrees = 200, sample_rate = 0.85, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, sample_rate = sample_rate, seed = seed)
+h2o.randomForest.4 <- function(..., ntrees = 200, nbins = 50, balance_classes = TRUE, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, nbins = nbins, balance_classes = balance_classes, seed = seed)
+h2o.gbm.1 <- function(..., ntrees = 100, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, seed = seed)
+h2o.gbm.2 <- function(..., ntrees = 100, nbins = 50, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, nbins = nbins, seed = seed)
+h2o.gbm.3 <- function(..., ntrees = 100, max_depth = 10, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, max_depth = max_depth, seed = seed)
+h2o.gbm.4 <- function(..., ntrees = 100, col_sample_rate = 0.8, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
+h2o.gbm.5 <- function(..., ntrees = 100, col_sample_rate = 0.7, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
+h2o.gbm.6 <- function(..., ntrees = 100, col_sample_rate = 0.6, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
+h2o.gbm.7 <- function(..., ntrees = 100, balance_classes = TRUE, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, balance_classes = balance_classes, seed = seed)
+h2o.gbm.8 <- function(..., ntrees = 100, max_depth = 3, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, max_depth = max_depth, seed = seed)
+deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.1 <- function(..., hidden = c(500,500), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.2 <- function(..., hidden = c(200,200,200), activation = "Tanh", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.3 <- function(..., hidden = c(500,500), activation = "RectifierWithDropout", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.4 <- function(..., hidden = c(500,500), activation = "Rectifier", epochs = 50, balance_classes = TRUE, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, balance_classes = balance_classes, seed = seed)
+h2o.deeplearning.5 <- function(..., hidden = c(100,100,100), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.6 <- function(..., hidden = c(50,50), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
+h2o.deeplearning.7 <- function(..., hidden = c(100,100), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
 ```
 
 
+Let's grab a subset of these learners for our base learner library and re-train the ensemble.
+
+```r
+learner <- c("h2o.glm.wrapper",
+             "h2o.randomForest.1", "h2o.randomForest.2",
+             "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8",
+             "h2o.deeplearning.1", "h2o.deeplearning.6", "h2o.deeplearning.7")
+```
+
+Train with new library:
+```r
+fit <- h2o.ensemble(x = x, y = y, 
+                    training_frame = train,
+                    validation_frame = NULL,
+                    family = family, 
+                    learner = learner, 
+                    metalearner = metalearner,
+                    cvControl = list(V = 5))
+```
+
+Evaluate the performance: 
+```r
+cvAUC::AUC(predictions = predictions , labels = labels)
+# 0.7904223
+```
+We see an increase in performance by including a more diverse library.
+
+Base learner test AUC (for comparison)
+```r
+L <- length(learner)
+auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
+data.frame(learner, auc)
+
+# learner       auc
+# 1    h2o.glm.wrapper 0.6871288
+# 2 h2o.randomForest.1 0.7809140
+# 3 h2o.randomForest.2 0.7835352
+# 4          h2o.gbm.1 0.7816863
+# 5          h2o.gbm.6 0.7821683
+# 6          h2o.gbm.8 0.7804483
+# 7 h2o.deeplearning.1 0.7160903
+# 8 h2o.deeplearning.6 0.7272538
+# 9 h2o.deeplearning.7 0.7379495
+```
 
 
-TO FINISH...
+So what happens to the ensemble if we remove some of the weaker learners?  Let's remove the GLM and DL from the learner library and see what happens
+
+Here is a more stripped down version of the ensemble:
+```r
+learner <- c("h2o.randomForest.1", "h2o.randomForest.2",
+             "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8")
+
+fit <- h2o.ensemble(x = x, y = y, 
+                     training_frame = train,
+                     validation_frame = NULL,
+                     family = family, 
+                     learner = learner, 
+                     metalearner = metalearner,
+                     cvControl = list(V = 5))
+
+# Generate predictions on the test set
+pred <- predict(fit, test)
+predictions <- as.data.frame(pred$pred)[,3]  #third column, p1 is P(Y==1)
+labels <- as.data.frame(test[,y])[,1]
+
+# Ensemble test AUC 
+cvAUC::AUC(predictions = predictions , labels = labels)
+# 0.7887694
+```
+
+We actually lose performance by removing the weak learners!  This demonstrates the power of stacking.
+
+
+
+
+
 
 ## Roadmap for H2O Ensemble
-H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble)   
-
-
-
+H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble) (tickets with the "Ensemble" tag). 
