@@ -74,7 +74,7 @@ plotC <- function(name, model, data=spiral, g=grid) {
 We build a few different models:
 
 ```r
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e3))
 plotC("GBM", h2o.gbm         (1:2,3,spiral))
@@ -85,7 +85,7 @@ plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
 Let's investigate some more Deep Learning models. First, we explore the evolution over training time (number of passes over the data), and we use checkpointing to continue training the same model:
 
 ```r
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 epochs=1
 previous=epochs
@@ -104,10 +104,9 @@ for (epochs in c(200,500,1000)) {
 Now, we explore different network architectures:
 
 ```r
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
-  print(hidden)
   plotC( paste0("DL hidden=",paste0(hidden, collapse="x")),
          h2o.deeplearning(1:2,3,spiral,hidden=hidden,epochs=500))
 }
@@ -116,7 +115,7 @@ for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
 Next, we compare between different activation functions, including one with 50% dropout regularization in the hidden layers:
 
 ```r
-dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
+#dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (act in c("Tanh","Maxout","Rectifier","RectifierWithDropout")) {
   plotC( paste0("DL ",act," activation"), 
