@@ -79,7 +79,7 @@ previous=epochs
 plotC(paste0("DL ",epochs," epochs"), 
       h2o.deeplearning(1:2,3,spiral,epochs=epochs,
       model_id=as.character(previous)))
-for (epochs in c(200,500,1000)) {
+for (epochs in c(200,500,750,1000)) {
   plotC(paste0("DL ",epochs," epochs"), 
       h2o.deeplearning(1:2,3,spiral,epochs=epochs,
       model_id=as.character(epochs),
