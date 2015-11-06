@@ -1,10 +1,11 @@
 # Summary
 
 * [Introduction](README.md)
-* [Intro to Data Science](tutorials/intro-to-datascience/README.md)
-* [Hive UDF example](tutorials/hive_udf_template/README.md)
-* [Generated POJO model example](tutorials/pojo_webapp/README.md)
-* [GLRM](tutorials/glrm/glrm-tutorial.md)
-* [Streaming](tutorials/streaming/storm/README.md)
-* [Model Selection](tutorials/model-selection/README.md)
+
+* [Building a Smarter Application](tutorials/building-a-smarter-application/README.md)
 * [Deep Learning](tutorials/deeplearning/deeplearning.Rmd)
+* [GLRM](tutorials/glrm/glrm-tutorial.md)
+* [Hive UDF example](tutorials/hive_udf_template/README.md)
+* [Intro to Data Science](tutorials/intro-to-datascience/README.md)
+* [Model Selection](tutorials/model-selection/README.md)
+* [Streaming](tutorials/streaming/storm/README.md)
