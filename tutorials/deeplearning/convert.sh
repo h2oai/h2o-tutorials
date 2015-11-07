@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Turn R Markdown into regular Markdown
-sed -e 's/```{r.*}/```/' deeplearning.Rmd > deeplearning.md
+sed -e 's/```{r.*}/```r/' deeplearning.Rmd > deeplearning.md
 cp deeplearning.md README.md
 
 ## Turn R Markdown into plain R

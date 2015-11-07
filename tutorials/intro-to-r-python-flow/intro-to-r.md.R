@@ -24,7 +24,7 @@
     
     y <- "IsDepDelayed"
     x <- c("Dest", "Origin", "DayofMonth", "Year", "UniqueCarrier", "DayOfWeek", "Month", "Distance")
-    glm_model <- h2o.glm(x = x, y = y, training_frame = airlines.hex, model_id = "glm_model",
+    glm_model <- h2o.glm(x = x, y = y, training_frame = airlines.hex, model_id = "glm_model_from_R",
                          solver = "IRLSM", standardize = T, link = "logit",
                          family = "binomial", alpha = 0.5, lambda = 1e-05)
     
@@ -37,8 +37,8 @@
 ###### Build a binary classfication model using function `h2o.deeplearning` and selecting “bernoulli” for parameter `Distribution`.
 ###### Run 100 passes over the data by setting parameter `epoch` to 100.
     
-    dl_model <- h2o.deeplearning(x = x, y = y, training_frame = airlines.hex, distribution = "bernoulli", model_id = "deeplearning_model2", 
-                                 epochs = 100, target_ratio_comm_to_comp = 0.02, seed = 6765686131094811000, variable_importances = T)
+    dl_model <- h2o.deeplearning(x = x, y = y, training_frame = airlines.hex, distribution = "bernoulli", model_id = "deeplearning_model_from_R", 
+                                 epochs = 100, hidden = c(200,200), target_ratio_comm_to_comp = 0.02, seed = 6765686131094811000, variable_importances = T)
     auc2 <- h2o.auc(object = dl_model)
     print(paste0("AUC of the training set : ", round(auc2, 4)))
     print(h2o.varimp(dl_model))
