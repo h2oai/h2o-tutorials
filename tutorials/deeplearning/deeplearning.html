@@ -3211,8 +3211,7 @@ plot(as.data.frame(h2o.weights(iris_dl,  matrix_id=1))[,1])</code></pre>
 </div>
 <div id="all-done-shutdown-h2o" class="section level3">
 <h3>All done, shutdown H2O</h3>
-<pre class="r"><code>h2o.shutdown()</code></pre>
-<pre><code>## Are you sure you want to shutdown the H2O instance running at http://127.0.0.1:54321/ (Y/N)?</code></pre>
+<pre class="r"><code>h2o.shutdown(prompt=FALSE)</code></pre>
 </div>
 </div>
 </div>
