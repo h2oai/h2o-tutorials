@@ -978,7 +978,7 @@ predictors</code></pre>
 </div>
 <div id="tuning" class="section level3">
 <h3>Tuning</h3>
-<p>With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.</p>
+<p>With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Note that deep tree methods can be more effective for this dataset than Deep Learning, as they directly partition the space into sectors, which seems to be needed here.</p>
 <pre class="r"><code>m3 &lt;- h2o.deeplearning(
   model_id=&quot;dl_model_tuned&quot;, 
   training_frame=train, 
