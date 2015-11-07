@@ -181,7 +181,7 @@ m1 <- h2o.deeplearning(
 summary(m1)
 ```
 
-Inspect the model in [Flow](http://localhost:54321/) for more information about model building etc. by issuing a cell with the content `getModels "dl_model_first"`, and pressing Ctrl-Enter.
+Inspect the model in [Flow](http://localhost:54321/) for more information about model building etc. by issuing a cell with the content `getModel "dl_model_first"`, and pressing Ctrl-Enter.
 
 ### Variable Importances
 Variable importances for Neural Network models are notoriously difficult to compute, and there are many [pitfalls](ftp://ftp.sas.com/pub/neural/importance.html). H2O Deep Learning has implemented the method of [Gedeon](http://cs.anu.edu.au/~./Tom.Gedeon/pdfs/ContribDataMinv2.pdf), and returns relative variable importances in descending order of importance.
