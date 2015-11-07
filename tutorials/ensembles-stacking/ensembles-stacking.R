@@ -98,6 +98,7 @@ install_github("h2oai/h2o-3/h2o-r/ensemble/h2oEnsemble-package")
 #
 #This is an example of binary classification using the `h2o.ensemble` function, which is available in **h2oEnsemble**.  This demo uses a subset of the [HIGGS dataset](https://archive.ics.uci.edu/ml/datasets/HIGGS), which has 28 numeric features and a binary response.  The machine learning task in this example is to distinguish between a signal process which produces Higgs bosons (Y = 1) and a background process which does not (Y = 0).  The dataset contains approximately the same number of positive vs negative examples.  In other words, this is a balanced, rather than imbalanced, dataset.
 #   
+#If run from plain R, execute R in the directory of this script. If run from RStudio, be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current working directory. h2o.importFile() looks for files from the perspective of where H2O was started.
 #
 #### Start H2O Cluster
 library(h2oEnsemble)  # This will load the `h2o` R package as well
@@ -107,13 +108,9 @@ h2o.removeAll() # Clean slate - just in case the cluster was already running
 #
 #### Load Data into H2O Cluster
 #
-#First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
-#
-ROOT_PATH <- "/Users/me/h2oai/world/h2o-world-2015-training/tutorials"
-#
-#Import a sample binary outcome train and test set into the H2O cluster.
-train <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_10k.csv"))
-test <- h2o.importFile(paste0(ROOT_PATH, "/data/higgs_test_5k.csv"))
+#First, import a sample binary outcome train and test set into the H2O cluster.
+train <- h2o.importFile(path = normalizePath("../data/higgs_10k.csv"))
+test <- h2o.importFile(path = normalizePath("../data/higgs_test_5k.csv"))
 y <- "C1"
 x <- setdiff(names(train), y)
 #
@@ -282,3 +279,6 @@ cvAUC::AUC(predictions = predictions , labels = labels)
 #
 ### Roadmap for H2O Ensemble
 #H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble) (tickets with the "Ensemble" tag). 
+#
+#### All done, shutdown H2O
+h2o.shutdown()

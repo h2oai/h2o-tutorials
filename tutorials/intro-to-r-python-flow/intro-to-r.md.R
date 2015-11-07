@@ -1,5 +1,10 @@
 # Predicting Airline Delays with H2O in R
 
+### Note: If run from plain R, execute R in the directory of this script. If run from RStudio, 
+### be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current 
+### working directory. h2o.importFile() looks for files from the perspective of where H2O was 
+### started.
+
 ### Load the H2O R package and start an local H2O cluster
 ###### Connection to an H2O cloud is established through the `h2o.init` function from the `h2o` package. 
 ###### When starting H2O from R, specify `nthreads` equal to -1, in order to utilize all the cores on your machine.
@@ -12,7 +17,7 @@
 ###### We will use the `h2o.importFile` function to do a parallel read of the data into the H2O distributed key-value store. 
 ###### During import of the data, features Year, Month, DayOfWeek, and FlightNum were set to be parsed as enumerator or categorical rather than numeric columns.
 
-    airlines.hex <- h2o.uploadFile(path = normalizePath("../data/allyears2k.csv"), destination_frame = "allyears2k.hex")
+    airlines.hex <- h2o.importFile(path = normalizePath("../data/allyears2k.csv"), destination_frame = "allyears2k.hex")
 
 ###### Get an overview of the airlines dataset quickly by running `summary`.
 
@@ -43,4 +48,7 @@
     print(paste0("AUC of the training set : ", round(auc2, 4)))
     print(h2o.varimp(dl_model))
     print(h2o.scoreHistory(dl_model))
+    
+### All done, shutdown H2O    
+    h2o.shutdown()
     

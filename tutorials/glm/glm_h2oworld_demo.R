@@ -1,3 +1,12 @@
+###################################################################################
+### Goal: demonstrate usage of H2O's GLM algorithm
+
+### Note: If run from plain R, execute R in the directory of this script. If run from RStudio, 
+### be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current 
+### working directory. h2o.importFile() looks for files from the perspective of where H2O was 
+### started.
+
+
 # convenience function to cut a numeric column into intervals, creating a new categorical variable
 # uses h2o.hist to come up with interval boundaries
 # uses h2o.cut to do the split
@@ -67,8 +76,11 @@ add_features <- function(data) {
 }
 
 ### DEMO STARTS HERE ###
-h2o.removeAll() # Let's start with clean cluster
-D = h2o.importFile(paste(getwd(),'data/covtype.full.csv',sep="/"))
+library(h2o)
+h2o.init(nthreads = -1, max_mem_size = "2G")
+h2o.removeAll() ## clean slate - just in case the cluster was already running
+
+D = h2o.importFile(path = normalizePath("../data/covtype.full.csv"))
 # split into Train/Test/Validation
 data = h2o.splitFrame(D,ratios=c(.7,.15),destination_frames = c("train","test","valid"))
 names(data) <- c("Train","Test","Valid")
@@ -125,5 +137,6 @@ m2 = h2o.glm(training_frame = data_ext$Train, validation_frame = data_ext$Valid,
 # 21% err down from 28%
 m2
 
-
+### All done, shutdown H2O    
+h2o.shutdown()
 

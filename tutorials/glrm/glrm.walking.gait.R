@@ -1,13 +1,21 @@
+###################################################################################
+### GLRM Walking Gait Example
+
+### Note: If run from plain R, execute R in the directory of this script. If run from RStudio, 
+### be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current 
+### working directory. h2o.importFile() looks for files from the perspective of where H2O was 
+### started.
+
 library(h2o)
 h2o.init(nthreads = -1, max_mem_size = "2G")
+h2o.removeAll() # Clean slate - just in case the cluster was already running
 
 ## Find and import data into H2O
-locate     <- h2o:::.h2o.locate
 pathToData <- "../data/subject01_walk1.csv"
 pathToMissingData <- "../data//subject01_walk1_miss15.csv"
 
 print("Importing walking gait data set into H2O...")
-gait.hex <- h2o.importFile(path = pathToData, destination_frame = "gait.hex")
+gait.hex <- h2o.importFile(path = normalizePath(pathToData), destination_frame = "gait.hex")
 
 ## Grab a summary of imported frame
 dim(gait.hex)
@@ -76,7 +84,7 @@ legend("topright", legend = c("Original", "Reconstructed"), col = c(1,4), pch = 
 #        Imputing Missing Values        #
 #---------------------------------------#
 print("Importing walking gait dataset with missing values into H2O...")
-gait.miss <- h2o.importFile(path = pathToMissingData, destination_frame = "gait.miss")
+gait.miss <- h2o.importFile(path = normalizePath(pathToMissingData), destination_frame = "gait.miss")
 
 ## Grab a summary of imported frame
 dim(gait.miss)
@@ -105,3 +113,6 @@ legend("topright", legend = c("Original", "Imputed"), col = c(1,4), pch = 1)
 lacro.miss.df <- as.data.frame(gait.miss$L.Acromium.X[1:150])
 idx_miss <- which(is.na(lacro.miss.df))
 points(time.vec[idx_miss], lacro.df[idx_miss,1], col = 2, pch = 4, lty = 2)
+
+### All done, shutdown H2O    
+h2o.shutdown()

@@ -1,12 +1,21 @@
+###################################################################################
+### GLRM Census Labor Violations Example
+
+### Note: If run from plain R, execute R in the directory of this script. If run from RStudio, 
+### be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current 
+### working directory. h2o.importFile() looks for files from the perspective of where H2O was 
+### started.
+
 library(h2o)
 h2o.init(nthreads = -1, max_mem_size = "2G")
+h2o.removeAll() # Clean slate - just in case the cluster was already running
 
 ## Find and import data into H2O
 pathToACSData <- "../data/ACS_13_5YR_DP02_cleaned.zip"
 pathToWHDData <- "../data/whd_zcta_cleaned.zip"
 
 print("Importing ACS 2013 5-year DP02 demographic dataset into H2O...")
-acs_orig <- h2o.importFile(pathToACSData, col.types = c("enum", rep("numeric", 149)))
+acs_orig <- h2o.importFile(path = normalizePath(pathToACSData), col.types = c("enum", rep("numeric", 149)))
 
 ## Save and drop zip code column from training frame
 acs_zcta_col <- acs_orig$ZCTA5
@@ -17,7 +26,7 @@ dim(acs_full)
 summary(acs_full)
 
 print("Importing WHD 2014-2015 labor violations dataset into H2O...")
-whd_zcta <- h2o.importFile(pathToWHDData, col.types = c(rep("enum", 7), rep("numeric", 97)))
+whd_zcta <- h2o.importFile(path = normalizePath(pathToWHDData), col.types = c(rep("enum", 7), rep("numeric", 97)))
 
 ## Grab a summary of WHD frame
 dim(whd_zcta)
@@ -105,3 +114,6 @@ data.frame(original = c(orig_time[3], h2o.logloss(dl_orig, train = TRUE), h2o.lo
            reduced  = c(mod_time[3], h2o.logloss(dl_mod, train = TRUE), h2o.logloss(dl_mod, valid = TRUE)),
            combined = c(comb_time[3], h2o.logloss(dl_comb, train = TRUE), h2o.logloss(dl_comb, valid = TRUE)),
            row.names = c("runtime", "train_logloss", "test_logloss"))
+
+### All done, shutdown H2O    
+h2o.shutdown()
