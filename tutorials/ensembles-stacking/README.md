@@ -168,7 +168,7 @@ The `predict` method for an `h2o.ensemble` fit will return a list of two objects
 
 ### Model Evaluation
 
-Since the response is binomial, we can use Area Under the ROC Curve (AUC) to evaluate the model performance.  We first generate predictions on the test set and then calculate test set AUC using the [cvAUC](https://cran.r-project.org/web/packages/cvAUC/) R package.
+Since the response is binomial, we can use Area Under the ROC Curve ([AUC](https://www.kaggle.com/wiki/AUC)) to evaluate the model performance.  We first generate predictions on the test set and then calculate test set AUC using the [cvAUC](https://cran.r-project.org/web/packages/cvAUC/) R package.
 
 #### Ensemble test set AUC
 ```r
