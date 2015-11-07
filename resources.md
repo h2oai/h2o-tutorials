@@ -6,11 +6,12 @@ More information about machine learning with H2O
 
 - **Documentation for H2O and Sparkling Water**: http://docs.h2o.ai/
 
+- **Glossary of terms**: https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/tutorials/glossary.md
+
 - **Open forum for questions about H2O (Google account required)**: https://groups.google.com/forum/#!forum/h2ostream
 - **Track or file bug reports for H2O **: https://jira.h2o.ai
 
 - **GitHub repository for H2O**: https://github.com/h2oai
-
 
 
 ##Python

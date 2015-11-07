@@ -9,5 +9,6 @@
 * [Ensembles: Stacking, Super Learner](tutorials/ensembles-stacking/README.md)
 * [Model Selection](tutorials/model-selection/README.md)
 * [Streaming](tutorials/streaming/storm/README.md)
+* [Sparkling Water](tutorials/sparkling-water/README.md)
 * [Resources](resources.md)
 
