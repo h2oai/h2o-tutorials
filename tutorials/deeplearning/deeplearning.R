@@ -74,18 +74,19 @@ plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
 #
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
-epochs=1
-previous=epochs
-plotC(paste0("DL ",epochs," epochs"), 
-      h2o.deeplearning(1:2,3,spiral,epochs=epochs,
-      model_id=as.character(previous)))
-for (epochs in c(200,500,750,1000)) {
-  plotC(paste0("DL ",epochs," epochs"), 
-      h2o.deeplearning(1:2,3,spiral,epochs=epochs,
-      model_id=as.character(epochs),
-      checkpoint=as.character(previous))) ##restart from checkpoint
-  previous=epochs
-}
+ep <- c(1,250,500,750)
+plotC(paste0("DL ",ep[1]," epochs"),
+      h2o.deeplearning(1:2,3,spiral,epochs=ep[1],
+                              model_id="dl_1"))
+plotC(paste0("DL ",ep[2]," epochs"),
+      h2o.deeplearning(1:2,3,spiral,epochs=ep[2],
+            checkpoint="dl_1",model_id="dl_2"))
+plotC(paste0("DL ",ep[3]," epochs"),
+      h2o.deeplearning(1:2,3,spiral,epochs=ep[3],
+            checkpoint="dl_2",model_id="dl_3"))
+plotC(paste0("DL ",ep[4]," epochs"),
+      h2o.deeplearning(1:2,3,spiral,epochs=ep[4],
+            checkpoint="dl_3",model_id="dl_4"))
 #
 #You can see how the network learns the structure of the spirals with enough training time. We explore different network architectures next:
 #
