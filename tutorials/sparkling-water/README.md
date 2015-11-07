@@ -202,7 +202,7 @@
   val ratios = Array[Double](0.8)
   val frs = split(tableHF, keys, ratios)
   val (trainHF, validHF) = (frs(0), frs(1))
-  table.delete()
+  tableHF.delete()
 
   // Build final DeepLearning model
   val dlModel = buildDLModel(trainHF, validHF)(h2oContext)
