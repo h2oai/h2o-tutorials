@@ -250,7 +250,7 @@
 
 
     # Look at the help on as_h2o_frame 
-    hc.as_data_frame?
+    hc.as_spark_frame?
     f_weather
 
     H2OContext: ip=172.16.2.98, port=54329
@@ -281,9 +281,9 @@
 
 
     # Copy data frames to Spark from H2O
-    df_weather = hc.as_data_frame(f_weather,)
-    df_census = hc.as_data_frame(f_census)
-    df_crimes = hc.as_data_frame(f_crimes)
+    df_weather = hc.as_spark_frame(f_weather,)
+    df_census = hc.as_spark_frame(f_census)
+    df_crimes = hc.as_spark_frame(f_crimes)
 
 
     # Look at the weather data as parsed in Spark

@@ -70,14 +70,14 @@ print(f_weather.dim)
 # Look at all the null entires in the Weather table
 f_weather[f_weather["meanTemp"].isna()]
 
-# Look at the help on as_h2o_frame 
-hc.as_data_frame?
+# Look at the help on as_spark_frame
+hc.as_spark_frame?
 f_weather
 
 # Copy data frames to Spark from H2O
-df_weather = hc.as_data_frame(f_weather,)
-df_census = hc.as_data_frame(f_census)
-df_crimes = hc.as_data_frame(f_crimes)
+df_weather = hc.as_spark_frame(f_weather,)
+df_census = hc.as_spark_frame(f_census)
+df_crimes = hc.as_spark_frame(f_crimes)
 
 # Look at the weather data as parsed in Spark
 df_weather.show(2)
