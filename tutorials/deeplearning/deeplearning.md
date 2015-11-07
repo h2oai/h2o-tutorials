@@ -14,11 +14,11 @@
 * Deep Learning Tips & Tricks
 
 ## Introduction
-This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This tutorial covers usage of H2O from R. A python version of this tutorial will be available as well in a separate document. This file is available in plain R, R markdown and regular markdown formats, and the plots are available as PDF files. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/).
+This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This tutorial covers usage of H2O from R. A python version of this tutorial will be available as well in a separate document. This file is available in plain R, R markdown and regular markdown formats, and the plots are available as PDF files. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/). The PDF slide deck can be found [on Github](https://github.com/h2oai/h2o-world-2015-training/raw/master/tutorials/deeplearning/deeplearning.pdf).
 
 First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
 
-```
+```r
 ROOT_PATH <- "/users/arno/h2o-world-2015-training/tutorials/"
 ```
 
@@ -26,7 +26,7 @@ ROOT_PATH <- "/users/arno/h2o-world-2015-training/tutorials/"
 
 Load the H2O R package:
 
-```
+```r
 ## R installation instructions are at http://h2o.ai/download
 library(h2o)
 ```
@@ -34,7 +34,7 @@ library(h2o)
 ### Start H2O
 Start up a 1-node H2O server on your local machine, and allow it to use all CPU cores and up to 2GB of memory:
 
-```
+```r
 h2o.init(nthreads=-1, max_mem_size="2G")
 h2o.removeAll() ## clean slate - just in case the cluster was already running
 ```
@@ -42,7 +42,7 @@ h2o.removeAll() ## clean slate - just in case the cluster was already running
 The `h2o.deeplearning` function fits H2O's Deep Learning models from within R.
 We can run the example from the man page using the `example` function, or run a longer demonstration from the `h2o` package using the `demo` function:
 
-```
+```r
 args(h2o.deeplearning)
 help(h2o.deeplearning)
 example(h2o.deeplearning)
@@ -56,7 +56,7 @@ We start with a small dataset representing red and black dots on a plane, arrang
 
 We visualize the nature of H2O Deep Learning (DL), H2O's tree methods (GBM/DRF) and H2O's generalized linear modeling (GLM) by plotting the decision boundary between the red and black spirals:
 
-```
+```r
 spiral <- h2o.importFile(paste0(ROOT_PATH, "/data/spiral.csv"))
 grid   <- h2o.importFile(paste0(ROOT_PATH, "/data/grid.csv"))
 # Define helper to plot contours
@@ -73,7 +73,7 @@ plotC <- function(name, model, data=spiral, g=grid) {
 
 We build a few different models:
 
-```
+```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 plotC( "DL", h2o.deeplearning(1:2,3,spiral,epochs=1e3))
@@ -84,7 +84,7 @@ plotC("GLM", h2o.glm         (1:2,3,spiral,family="binomial"))
 
 Let's investigate some more Deep Learning models. First, we explore the evolution over training time (number of passes over the data), and we use checkpointing to continue training the same model:
 
-```
+```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 ep <- c(1,250,500,750)
@@ -104,7 +104,7 @@ plotC(paste0("DL ",ep[4]," epochs"),
 
 You can see how the network learns the structure of the spirals with enough training time. We explore different network architectures next:
 
-```
+```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
@@ -115,7 +115,7 @@ for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
 
 It is clear that different configurations can achieve similar performance, and that tuning will be required for optimal performance. Next, we compare between different activation functions, including one with 50% dropout regularization in the hidden layers:
 
-```
+```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (act in c("Tanh","Maxout","Rectifier","RectifierWithDropout")) {
@@ -133,7 +133,7 @@ More information about the parameters can be found in the [H2O Deep Learning boo
 We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
-```
+```r
 df <- h2o.importFile(paste0(ROOT_PATH, "/data/covtype.full.csv"))
 dim(df)
 df
@@ -145,7 +145,7 @@ test   <- h2o.assign(splits[[3]], "test.hex")  # 20%
 
 Here's a scalable way to do scatter plots via binning (works for categorical and numeric columns) to get more familiar with the dataset.
 
-```
+```r
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(1,1)) # reset canvas
 plot(h2o.tabulate(df, "Elevation",                       "Cover_Type"))
@@ -158,7 +158,7 @@ plot(h2o.tabulate(df, "Horizontal_Distance_To_Roadways", "Elevation" ))
 Let's run our first Deep Learning model on the covtype dataset. 
 We want to predict the `Cover_Type` column, a categorical feature with 7 levels, and the Deep Learning model will be tasked to perform (multi-class) classification. It uses the other 12 predictors of the dataset, of which 10 are numerical, and 2 are categorical with a total of 44 levels. We can expect the Deep Learning model to have 56 input neurons (after automatic one-hot encoding).
 
-```
+```r
 response <- "Cover_Type"
 predictors <- setdiff(names(df), response)
 predictors
@@ -166,7 +166,7 @@ predictors
 
 To keep it fast, we only run for one epoch (one pass over the training data).
 
-```
+```r
 m1 <- h2o.deeplearning(
   model_id="dl_model_first", 
   training_frame=train, 
@@ -186,14 +186,14 @@ Inspect the model in [Flow](http://localhost:54321/) for more information about 
 ### Variable Importances
 Variable importances for Neural Network models are notoriously difficult to compute, and there are many [pitfalls](ftp://ftp.sas.com/pub/neural/importance.html). H2O Deep Learning has implemented the method of [Gedeon](http://cs.anu.edu.au/~./Tom.Gedeon/pdfs/ContribDataMinv2.pdf), and returns relative variable importances in descending order of importance.
 
-```
+```r
 head(as.data.frame(h2o.varimp(m1)))
 ```
 
 ### Early Stopping
 Now we run another, smaller network, and we let it stop automatically once the misclassification rate converges (specifically, if the moving average of length 2 does not improve by at least 1% for 2 consecutive scoring events). We also sample the validation set to 10,000 rows for faster scoring.
 
-```
+```r
 m2 <- h2o.deeplearning(
   model_id="dl_model_faster", 
   training_frame=train, 
@@ -219,7 +219,7 @@ If `adaptive_rate` is disabled, several manual learning rate parameters become i
 ### Tuning
 With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.
 
-```
+```r
 m3 <- h2o.deeplearning(
   model_id="dl_model_tuned", 
   training_frame=train, 
@@ -246,7 +246,7 @@ summary(m3)
 
 Let's compare the training error with the validation and test set errors
 
-```
+```r
 h2o.performance(m3, train=T)       ## sampled training data (from model building)
 h2o.performance(m3, valid=T)       ## sampled validation data (from model building)
 h2o.performance(m3, data=train)    ## full training data
@@ -256,7 +256,7 @@ h2o.performance(m3, data=test)     ## full test data
 
 To confirm that the reported confusion matrix on the validation set (here, the test set) was correct, we make a prediction on the test set and compare the confusion matrices explicitly:
 
-```
+```r
 pred <- h2o.predict(m3, test)
 pred
 test$Accuracy <- pred$predict == test$Cover_Type
@@ -268,13 +268,13 @@ Since there are a lot of parameters that can impact model accuracy, hyper-parame
 
 For speed, we will only train on the first 10,000 rows of the training dataset:
 
-```
+```r
 sampled_train=train[1:10000,]
 ```
   
 The simplest hyperparameter search method is a brute-force scan of the full Cartesian product of all combinations specified by a grid search:
 
-```
+```r
 hyper_params <- list(
   hidden=list(c(32,32,32),c(64,64)),
   input_dropout_ratio=c(0,0.05),
@@ -310,7 +310,7 @@ grid
                                 
 Let's see which model had the lowest validation error:
 
-```
+```r
 ## Find the best model and its full set of parameters (clunky for now, will be improved)
 scores <- cbind(as.data.frame(unlist((lapply(grid@model_ids, function(x) 
   { h2o.confusionMatrix(h2o.performance(h2o.getModel(x),valid=T))$Error[8] })) )), unlist(grid@model_ids))
@@ -326,7 +326,7 @@ print(best_err)
 ### Random Hyper-Parameter Search
 Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build `N` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters.
 
-```
+```r
 models <- c()
 for (i in 1:10) {
   rand_activation <- c("TanhWithDropout", "RectifierWithDropout")[sample(1:2,1)]
@@ -365,7 +365,7 @@ for (i in 1:10) {
   
 We continue to look for the model with the lowest validation misclassification rate:
 
-```
+```r
 best_err <- 1      ##start with the best reference model from the grid search above, if available
 for (i in 1:length(models)) {
   err <- h2o.confusionMatrix(h2o.performance(models[[i]],valid=T))$Error[8]
@@ -385,7 +385,7 @@ best_params$input_dropout_ratio
 ###Checkpointing
 Let's continue training the manually tuned model from before, for 2 more epochs. Note that since many important parameters such as `epochs, l1, l2, max_w2, score_interval, train_samples_per_iteration, input_dropout_ratio, hidden_dropout_ratios, score_duty_cycle, classification_stop, regression_stop, variable_importances, force_load_balance` can be modified between checkpoint restarts, it is best to specify as many parameters as possible explicitly.
 
-```
+```r
 max_epochs <- 12 ## Add two more epochs
 m_cont <- h2o.deeplearning(
   model_id="dl_model_tuned_continued", 
@@ -417,14 +417,14 @@ plot(m_cont)
 
 Once we are satisfied with the results, we can save the model to disk (on the cluster). In this example, we store the model in a directory called `mybest_deeplearning_covtype_model`, which will be created for us since `force=TRUE`.
 
-```
+```r
 path <- h2o.saveModel(m_cont, 
           path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force=TRUE)
 ```
 
 It can be loaded later with the following command:
 
-```
+```r
 print(path)
 m_loaded <- h2o.loadModel(path)
 summary(m_loaded)
@@ -435,7 +435,7 @@ This model is fully functional and can be inspected, restarted, or used to score
 ###Cross-Validation
 For N-fold cross-validation, specify `nfolds>1` instead of (or in addition to) a validation frame, and `N+1` models will be built: 1 model on the full training data, and N models with each 1/N-th of the data held out (there are different holdout strategies). Those N models then score on the held out data, and their combined predictions on the full training data are scored to get the cross-validation metrics.
     
-```
+```r
 dlmodel <- h2o.deeplearning(
   x=predictors,
   y=response, 
@@ -453,13 +453,13 @@ N-fold cross-validation is especially useful with early stopping, as the main mo
 ##Regression and Binary Classification
 Assume we want to turn the multi-class problem above into a binary classification problem. We create a binary response as follows:
 
-```
+```r
 train$bin_response <- ifelse(train[,response]=="class_1", 0, 1)
 ```
 
 Let's build a quick model and inspect the model:
 
-```
+```r
 dlmodel <- h2o.deeplearning(
   x=predictors,
   y="bin_response", 
@@ -475,7 +475,7 @@ H2O Deep Learning supports regression for distributions other than `Gaussian` su
 
 To perform classification, the response must first be turned into a categorical (factor) feature:
 
-```
+```r
 train$bin_response <- as.factor(train$bin_response) ##make categorical
 dlmodel <- h2o.deeplearning(
   x=predictors,
@@ -523,7 +523,7 @@ We refer to our [H2O Deep Learning R test code examples](https://github.com/h2oa
 ####Exporting Weights and Biases
 The model parameters (weights connecting two adjacent layers and per-neuron bias terms) can be stored as H2O Frames (like a dataset) by enabling `export_weights_and_biases`, and they can be accessed as follows:
 
-```
+```r
 iris_dl <- h2o.deeplearning(1:4,5,as.h2o(iris),
              export_weights_and_biases=T)
 h2o.weights(iris_dl, matrix_id=1)
