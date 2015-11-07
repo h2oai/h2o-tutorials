@@ -7,7 +7,7 @@
  - [Sparkling Water 1.5.4](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-1.5/4/index.html) ([USB](../../SparklingWater))
  - [SMS dataset](https://raw.githubusercontent.com/h2oai/sparkling-water/master/examples/smalldata/smsData.txt) ([USB](../data/smsData.txt))
  
-## Provided USB
+## Provided on USB
  - [Binaries](../../)
  - [SMS dataset](../data/smsData.txt)
  - [Slides](SparklingWater.pdf)
@@ -15,10 +15,10 @@
 
 ## Machine Learning Workflow
 
-**Goal**: For a given text message identify if it is spam or not.
+**Goal**: For a given text message, identify if it is spam or not.
 
   1. Extract data
-  2. Transform, tokenize messages
+  2. Transform & tokenize messages
   3. Build Spark's [Tf-IDF model](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) and expand messages to feature vectors
   4. Create and evaluate [H2O's Deep Learning model](https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/tutorials/dl/dl.md)
   5. Use the models to detect spam messages
@@ -26,17 +26,18 @@
 ### Prepare environment
 
 1. Run Sparkling shell with an embedded Spark cluster:
-  ```
+  ```bash
   cd "path/to/sparkling/water"
   export SPARK_HOME="/path/to/spark/installation"
   export MASTER="local-cluster[3,2,4096]"
   bin/sparkling-shell --conf spark.executor.memory=2G 
   ```
-  > Note: I would recommend to edit your `$SPARK_HOME/conf/log4j.properties` and configure log level to `WARN` to avoid flooding output with Spark INFO messages.
 
-2. Open Spark UI: You can go to [http://localhost:4040/](http://localhost:4040/) to see the Spark status.
+  > Note: To avoid flooding output with Spark INFO messages, I recommend editing your `$SPARK_HOME/conf/log4j.properties` and configuring the log level to `WARN`.
 
-3. Prepare environment
+2. Open Spark UI: Go to [http://localhost:4040/](http://localhost:4040/) to see the Spark status.
+
+3. Prepare the environment:
   ```scala
   // Input data
   val DATAFILE="../data/smsData.txt"
@@ -51,13 +52,13 @@
   import water.Key
   ```
   
-4. Define representation of training message:
+4. Define the representation of the training message:
    ```scala
    // Representation of a training message
    case class SMS(target: String, fv: mllib.linalg.Vector)
    ```
 
-5. Define data loader and parser:
+5. Define the data loader and parser:
   ```scala
   def load(dataFile: String): RDD[Array[String]] = {
     // Load file into memory, split on TABs and filter all empty lines
@@ -65,9 +66,10 @@
   }
   ```
   
-6. Input messages tokenizer:
+6. Define the input messages tokenizer:
   ```scala
-  // Tokenizer - for each sentence in input RDD it provides array of string representing individual interesting words in the sentence
+  // Tokenizer
+  // For each sentence in input RDD it provides array of string representing individual interesting words in the sentence
   def tokenize(dataRDD: RDD[String]): RDD[Seq[String]] = {
     // Ignore all useless words
     val ignoredWords = Seq("the", "a", "", "in", "on", "at", "as", "not", "for")
@@ -90,7 +92,7 @@
   }
   ```
 
-6. Spark's Tf-IDF model builder. 
+7. Configure Spark's Tf-IDF model builder: 
   ```scala
   def buildIDFModel(tokensRDD: RDD[Seq[String]],
                     minDocFreq:Int = 4,
@@ -106,9 +108,9 @@
   }
   ```
   
-  > **Wikipedia** says: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general.
+  > **Wikipedia** defines TF-IDF as: "tf–idf, short for term frequency–inverse document frequency, is a numerical statistic that is intended to reflect how important a word is to a document in a collection or corpus. It is often used as a weighting factor in information retrieval and text mining. The tf-idf value increases proportionally to the number of times a word appears in the document, but is offset by the frequency of the word in the corpus, which helps to adjust for the fact that some words appear more frequently in general."
   
-7. H2O's DeepLearning model builder:
+8. Configure H2O's DeepLearning model builder:
   ```scala
   def buildDLModel(trainHF: Frame, validHF: Frame,
                  epochs: Int = 10, l1: Double = 0.001, l2: Double = 0.0,
@@ -146,8 +148,9 @@
 	// And return resulting model
     dlModel
   }
-    ```
-8. Initialize `H2OContext` and start H2O services on top of the Spark:
+  ```
+
+9. Initialize `H2OContext` and start H2O services on top of Spark:
   ```scala
    // Create SQL support
    import org.apache.spark.sql._
@@ -159,14 +162,14 @@
    val h2oContext = new H2OContext(sc).start()
   ```
 
-9. Open H2O UI and verify that H2O is running: 
+10. Open H2O UI and verify that H2O is running: 
   ```scala
   h2oContext.openFlow
   ```
-  > At this point, you can go use H2O UI and see status of H2O cloud by typing `getCloud`.
-  
-  
-10. Build the final workflow by using all building pieces:
+
+  > At this point, you can use the H2O UI and see the status of the H2O cloud by typing `getCloud`.
+
+11. Build the final workflow using all building pieces:
   ```scala
   // Data load
   val dataRDD = load(DATAFILE)
@@ -188,35 +191,36 @@
   val resultDF = hamSpamRDD.zip(tfidfRDD).map(v => SMS(v._1, v._2)).toDF
 
   // Publish Spark DataFrame as H2OFrame  
-  val table = h2oContext.asH2OFrame(resultDF, "messages_table")
+  val tableHF = h2oContext.asH2OFrame(resultDF, "messages_table")
   
   // Transform target column into categorical!
-  table.replace(table.find("target"), table.vec("target").toCategoricalVec()).remove()
-  table.update(null)
+  tableHF.replace(tableHF.find("target"), tableHF.vec("target").toCategoricalVec()).remove()
+  tableHF.update(null)
 
   // Split table into training and validation parts
   val keys = Array[String]("train.hex", "valid.hex")
   val ratios = Array[Double](0.8)
-  val frs = split(table, keys, ratios)
-  val (train, valid) = (frs(0), frs(1))
+  val frs = split(tableHF, keys, ratios)
+  val (trainHF, validHF) = (frs(0), frs(1))
   table.delete()
 
   // Build final DeepLearning model
-  val dlModel = buildDLModel(train, valid)(h2oContext)
+  val dlModel = buildDLModel(trainHF, validHF)(h2oContext)
   ```
   
-11. Evaluate model quality:
+12. Evaluate the model's quality:
    ```scala
    // Collect model metrics and evaluate model quality
    import water.app.ModelMetricsSupport
-   val trainMetrics = ModelMetricsSupport.binomialMM(dlModel, train)
-   val validMetrics = ModelMetricsSupport.binomialMM(dlModel, valid)
+   val trainMetrics = ModelMetricsSupport.binomialMM(dlModel, trainHF)
+   val validMetrics = ModelMetricsSupport.binomialMM(dlModel, validHF)
    println(trainMetrics.auc._auc)
    println(validMetrics.auc._auc)
    ```
-   > You can also open H2O UI and type `getPredictions` to visualize model performance or `getModels` to see model output.
+
+   > You can also open the H2O UI and type `getPredictions` to visualize the model's performance or type `getModels` to see model output.
    
-12. Create a spam detector:
+13. Create a spam detector:
    ```scala
    // Spam detector
    def isSpam(msg: String,
@@ -237,11 +241,12 @@
   }   
   ```
   
-13. Try to detect spam:
+14. Try to detect spam:
    ```scala
    isSpam("Michal, h2oworld party tonight in MV?", dlModel, hashingTF, idfModel, h2oContext)
    // 
    isSpam("We tried to contact you re your reply to our offer of a Video Handset? 750 anytime any networks mins? UNLIMITED TEXT?", dlModel, hashingTF, idfModel, h2oContext)
    ```
 
-14. At this point you finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
+15. At this point, you have finished your 1st Sparkling Water Machine Learning application. Hack and enjoy! Thank you!   
+

@@ -98,7 +98,7 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 Suppose that due to a sensor malfunction, our walking stance data has missing values randomly interspersed. We can use GLRM to reconstruct these missing values from the existing data.
 
 ###### Import walking stance data containing 15% missing values and get a summary.
-	gait.miss <- h2o.importFile(path = "../data/subject01_walk1_miss15.csv", destination_Frame = "gait.miss")
+	gait.miss <- h2o.importFile(path = "../data/subject01_walk1_miss15.csv", destination_frame = "gait.miss")
 	dim(gait.miss)
 	summary(gait.miss)
 
