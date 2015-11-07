@@ -93,8 +93,8 @@ plotC(paste0("DL ",ep[4]," epochs"),
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
-  plotC( paste0("DL hidden=",paste0(hidden, collapse="x")),
-         h2o.deeplearning(1:2,3,spiral,hidden=hidden,epochs=500))
+  plotC(paste0("DL hidden=",paste0(hidden, collapse="x")),
+        h2o.deeplearning(1:2,3,spiral,hidden=hidden,epochs=500))
 }
 #
 #It is clear that different configurations can achieve similar performance, and that tuning will be required for optimal performance. Next, we compare between different activation functions, including one with 50% dropout regularization in the hidden layers:
@@ -102,8 +102,9 @@ for (hidden in list(c(11,13,17,19),c(42,42,42),c(200,200),c(1000))) {
 #dev.new(noRStudioGD=FALSE) #direct plotting output to a new window
 par(mfrow=c(2,2)) #set up the canvas for 2x2 plots
 for (act in c("Tanh","Maxout","Rectifier","RectifierWithDropout")) {
-  plotC( paste0("DL ",act," activation"), 
-         h2o.deeplearning(1:2,3,spiral,activation=act,hidden=c(100,100),epochs=1000))
+  plotC(paste0("DL ",act," activation"), 
+        h2o.deeplearning(1:2,3,spiral,
+              activation=act,hidden=c(100,100),epochs=1000))
 }
 #
 #Clearly, the dropout rate was too high or the number of epochs was too low for the last configuration, which often ends up performing the best on larger datasets where generalization is important.
