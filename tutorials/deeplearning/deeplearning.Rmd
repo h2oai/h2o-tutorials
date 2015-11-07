@@ -549,5 +549,5 @@ Stratified sampling of the validation dataset can help with scoring on datasets 
 
 ### All done, shutdown H2O
 ```{r Shutdown}
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)
 ```
