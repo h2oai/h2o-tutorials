@@ -296,7 +296,7 @@ print covtype_model_v1
 
 # In[ ]:
 
-var_df = pd.DataFrame(covtype_model_v1.varimp(return_list=True), 
+var_df = pd.DataFrame(covtype_model_v1.varimp(), 
              columns=["Variable", "Relative Importance", "Scaled Importance", "Percentage"])
 print var_df.shape
 var_df.head(10)
@@ -332,8 +332,8 @@ cov_v2_df
 
 # In[ ]:
 
-plt.plot(cov_v2_df['training_MSE'], label="training_mse")
-plt.plot(cov_v2_df['validation_MSE'], label="validation_mse")
+plt.plot(cov_v2_df['training_classification_error'], label="training_classification_error")
+plt.plot(cov_v2_df['validation_classification_error'], label="validation_classification_error")
 plt.title("Covertype Deep Learner (Early Stop)")
 plt.legend();
 
@@ -353,17 +353,17 @@ plt.legend();
 covtype_model_tuned = H2ODeepLearningEstimator(
   model_id="covtype_tuned",
   overwrite_with_best_model=False,
-  hidden=[128,128,128],           # more hidden layers -> more complex interactions
+  hidden=[128,128,128],            # more hidden layers -> more complex interactions
   epochs=10,                       # to keep it short enough
   score_validation_samples=10000,  # downsample validation set for faster scoring
   score_duty_cycle=0.025,          # don't score more than 2.5% of the wall time
-  adaptive_rate=False,                 # manually tuned learning rate
+  adaptive_rate=False,             # manually tuned learning rate
   rate=0.01, 
   rate_annealing=0.000002,            
   momentum_start=0.2,              # manually tuned momentum
   momentum_stable=0.4, 
   momentum_ramp=10000000, 
-  l1=0.00001,                         # add some L1/L2 regularization
+  l1=0.00001,                      # add some L1/L2 regularization
   l2=0.00001,
   max_w2=10                        # helps stability for Rectifier
 )
@@ -380,8 +380,8 @@ cov_tuned_df
 
 # In[ ]:
 
-plt.plot(cov_tuned_df['training_MSE'], label="training_mse")
-plt.plot(cov_tuned_df['validation_MSE'], label="validation_mse")
+plt.plot(cov_tuned_df['training_classification_error'], label="training_classification_error")
+plt.plot(cov_tuned_df['validation_classification_error'], label="validation_classification_error")
 plt.title("Covertype Deep Learner (Tuned)")
 plt.legend();
 
