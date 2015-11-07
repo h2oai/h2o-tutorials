@@ -3,8 +3,8 @@ h2o.init(nthreads = -1, max_mem_size = "2G")
 
 ## Find and import data into H2O
 locate     <- h2o:::.h2o.locate
-pathToData <- locate("smalldata/glrm_test/subject01_walk1.csv")
-pathToMissingData <- locate("smalldata/glrm_test/subject01_walk1_miss15.csv")
+pathToData <- "../data/subject01_walk1.csv"
+pathToMissingData <- "../data//subject01_walk1_miss15.csv"
 
 print("Importing walking gait data set into H2O...")
 gait.hex <- h2o.importFile(path = pathToData, destination_frame = "gait.hex")

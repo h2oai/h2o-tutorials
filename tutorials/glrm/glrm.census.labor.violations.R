@@ -2,9 +2,8 @@ library(h2o)
 h2o.init(nthreads = -1, max_mem_size = "2G")
 
 ## Find and import data into H2O
-locate <- h2o:::.h2o.locate
-pathToACSData <- locate("bigdata/laptop/census/ACS_13_5YR_DP02_cleaned.zip")
-pathToWHDData <- locate("bigdata/laptop/census/whd_zcta_cleaned.zip")
+pathToACSData <- "../data/ACS_13_5YR_DP02_cleaned.zip"
+pathToWHDData <- "../data/whd_zcta_cleaned.zip"
 
 print("Importing ACS 2013 5-year DP02 demographic dataset into H2O...")
 acs_orig <- h2o.importFile(pathToACSData, col.types = c("enum", rep("numeric", 149)))
