@@ -187,7 +187,7 @@ plot(m2)
 #If `adaptive_rate` is disabled, several manual learning rate parameters become important: `rate`, `rate_annealing`, `rate_decay`, `momentum_start`, `momentum_ramp`, `momentum_stable` and `nesterov_accelerated_gradient`, the discussion of which we leave to [H2O Deep Learning booklet](http://h2o.ai/resources/).
 #
 #### Tuning
-#With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.
+#With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as they can more efficiently partition the space (and hence memorize), which seems to be needed here. Deep Learning is better at discovering non-linear interactions between predictors than at cutting up the space.
 #
 m3 <- h2o.deeplearning(
   model_id="dl_model_tuned", 
