@@ -196,7 +196,7 @@ m3 <- h2o.deeplearning(
   validation_frame=valid, 
   x=predictors, 
   y=response, 
-  overwrite_with_best_model=F,
+  overwrite_with_best_model=F,    ## Return the final model after 10 epochs, even if not the best
   hidden=c(128,128,128),          ## more hidden layers -> more complex interactions
   epochs=10,                      ## to keep it short enough
   score_validation_samples=10000, ## downsample validation set for faster scoring
@@ -358,12 +358,12 @@ m_cont <- h2o.deeplearning(
   adaptive_rate=F,                ## manually tuned learning rate
   rate=0.01, 
   rate_annealing=2e-6,            
-  momentum_start=0.2,           ## manually tuned momentum
+  momentum_start=0.2,             ## manually tuned momentum
   momentum_stable=0.4, 
   momentum_ramp=1e7, 
   l1=1e-5,                        ## add some L1/L2 regularization
   l2=1e-5,
-  max_w2=10                     ## helps stability for Rectifier
+  max_w2=10                       ## helps stability for Rectifier
 ) 
 summary(m_cont)
 plot(m_cont)
