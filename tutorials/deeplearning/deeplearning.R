@@ -367,7 +367,7 @@ plot(m_cont)
 #Once we are satisfied with the results, we can save the model to disk (on the cluster). In this example, we store the model in a directory called `mybest_deeplearning_covtype_model`, which will be created for us since `force=TRUE`.
 #
 path <- h2o.saveModel(m_cont, 
-          path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force=TRUE)
+          path="./mybest_deeplearning_covtype_model", force=TRUE)
 #
 #It can be loaded later with the following command:
 #

@@ -414,7 +414,7 @@ Once we are satisfied with the results, we can save the model to disk (on the cl
 
 ```r
 path <- h2o.saveModel(m_cont, 
-          path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force=TRUE)
+          path="./mybest_deeplearning_covtype_model", force=TRUE)
 ```
 
 It can be loaded later with the following command:
