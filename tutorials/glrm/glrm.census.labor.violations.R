@@ -116,4 +116,4 @@ data.frame(original = c(orig_time[3], h2o.logloss(dl_orig, train = TRUE), h2o.lo
            row.names = c("runtime", "train_logloss", "test_logloss"))
 
 ### All done, shutdown H2O    
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)

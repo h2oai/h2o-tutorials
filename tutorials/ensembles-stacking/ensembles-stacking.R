@@ -281,4 +281,4 @@ cvAUC::AUC(predictions = predictions , labels = labels)
 #H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble) (tickets with the "Ensemble" tag). 
 #
 #### All done, shutdown H2O
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)

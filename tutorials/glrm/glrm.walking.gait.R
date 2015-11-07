@@ -115,4 +115,4 @@ idx_miss <- which(is.na(lacro.miss.df))
 points(time.vec[idx_miss], lacro.df[idx_miss,1], col = 2, pch = 4, lty = 2)
 
 ### All done, shutdown H2O    
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)

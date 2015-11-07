@@ -261,4 +261,4 @@ mean(finalRf_predictions$predict==test$Cover_Type)  ## test set accuracy
 
 
 ### All done, shutdown H2O    
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)

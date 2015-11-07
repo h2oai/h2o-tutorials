@@ -50,5 +50,5 @@
     print(h2o.scoreHistory(dl_model))
     
 ### All done, shutdown H2O    
-    h2o.shutdown()
+    h2o.shutdown(prompt=FALSE)
     

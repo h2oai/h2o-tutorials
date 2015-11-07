@@ -450,13 +450,14 @@ h2o.shutdown(prompt=False)
 # ###Further Exploration
 # Due to the limited scope of this talk, only a portion of the code has been ported to Python.  
 # 
-# Additional topics are covered in R: Please see the deeplearning.R file for code samples for the following
-# Hyper-Parameter tuning with Grid Search  
-# Random Hyper-Parameter Search  
-# Checkpointing  
-# Cross-Validation  
-# Regression and Binary Classification  
-# Exporting Weights and Biases
+# Additional topics are covered in R: Please see the deeplearning.R file for code samples for the following:
+# 
+# * Hyper-Parameter tuning with Grid Search  
+# * Random Hyper-Parameter Search  
+# * Checkpointing  
+# * Cross-Validation  
+# * Regression and Binary Classification  
+# * Exporting Weights and Biases
 # 
 
 # 

@@ -138,5 +138,5 @@ m2 = h2o.glm(training_frame = data_ext$Train, validation_frame = data_ext$Valid,
 m2
 
 ### All done, shutdown H2O    
-h2o.shutdown()
+h2o.shutdown(prompt=FALSE)
 
