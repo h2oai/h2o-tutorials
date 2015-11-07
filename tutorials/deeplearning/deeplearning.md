@@ -51,7 +51,7 @@ We start with a small dataset representing red and black dots on a plane, arrang
 We visualize the nature of H2O Deep Learning (DL), H2O's tree methods (GBM/DRF) and H2O's generalized linear modeling (GLM) by plotting the decision boundary between the red and black spirals:
 
 ```r
-#setwd("path/to/tutorials/") ##For RStudio
+#setwd("~/h2o-world-2015-training/tutorials") ##For RStudio
 spiral <- h2o.importFile(path = normalizePath("../data/spiral.csv"))
 grid   <- h2o.importFile(path = normalizePath("../data/grid.csv"))
 # Define helper to plot contours
@@ -227,7 +227,7 @@ m3 <- h2o.deeplearning(
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
-  rate=0.02, 
+  rate=0.01, 
   rate_annealing=2e-6,            
   momentum_start=0.2,             ## manually tuned momentum
   momentum_stable=0.4, 
@@ -397,7 +397,7 @@ m_cont <- h2o.deeplearning(
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
-  rate=0.02, 
+  rate=0.01, 
   rate_annealing=2e-6,            
   momentum_start=0.2,           ## manually tuned momentum
   momentum_stable=0.4, 
