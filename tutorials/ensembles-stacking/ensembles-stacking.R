@@ -223,10 +223,10 @@ fit <- h2o.ensemble(x = x, y = y,
                     metalearner = metalearner,
                     cvControl = list(V = 5))
 
-Generate predictions on the test set:
-#pred <- predict(fit, test)
-#predictions <- as.data.frame(pred$pred)[,3]
-#labels <- as.data.frame(test[,y])[,1]
+# Generate predictions on the test set:
+pred <- predict(fit, test)
+predictions <- as.data.frame(pred$pred)[,3]
+labels <- as.data.frame(test[,y])[,1]
 #
 #Evaluate the test set performance: 
 cvAUC::AUC(predictions = predictions , labels = labels)
