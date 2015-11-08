@@ -16,6 +16,7 @@
 # In[ ]:
 
 import h2o
+import os
 
 
 # ### Start H2O
