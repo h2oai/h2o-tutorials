@@ -1,24 +1,21 @@
+# 1. Define Spark Context
+
+`sc`
+
+`<pyspark.context.SparkContext at 0x102cea1d0>`
 
 
-    # Spark Context
-    sc
-
-
-
-
-    <pyspark.context.SparkContext at 0x102cea1d0>
-
-
-
-
-    # Start H2O Context
+# 2. Start H2O Context
+    
+```
+    
     from pysparkling import *
     sc
     hc= H2OContext(sc).start()
 
     Warning: Version mismatch. H2O is version 3.6.0.2, but the python package is version 3.7.0.99999.
 
-
+```
 
 <div style="overflow:auto"><table style="width:50%"><tr><td>H2O cluster uptime: </td>
 <td>2 seconds 217 milliseconds </td></tr>
@@ -43,27 +40,23 @@
 
 
 
-    # H2o Context
+# 3. Define H2O Context
+
+```
     hc
 
     H2OContext: ip=172.16.2.98, port=54329
+```
 
-
-
-
-
+# 4. Import H2O Python library
     
-
-
-
-
-    # Import H2O Python library
     import h2o
-    # View all the available H2O python functions
+    
+# 5. View all available H2O Python functions
+    
     #dir(h2o)
 
-
-    # Parse Chicago Crime dataset into H2O
+# 6. Parse Chicago Crime dataset into H2O
     column_type = ['Numeric','String','String','Enum','Enum','Enum','Enum','Enum','Enum','Enum','Numeric','Numeric','Numeric','Numeric','Enum','Numeric','Numeric','Numeric','Enum','Numeric','Numeric','Enum']
     f_crimes = h2o.import_file(path ="../data/chicagoCrimes10k.csv",col_types =column_type)
     
@@ -99,7 +92,7 @@
 
 
 
-    # Look at the distribution of IUCR column
+# 7. Look at the distribution of the IUCR column
     f_crimes["IUCR"].table()
 
 
@@ -118,15 +111,7 @@
 </table>
 
 
-
-
-
-    
-
-
-
-
-    # Look at distribution of Arrest column
+#8. Look at the distribution of the Arrest column
     f_crimes["Arrest"].table()
 
 
@@ -136,16 +121,7 @@
 <tr><td>true    </td><td style="text-align: right;">   2928</td></tr>
 </table>
 
-
-
-
-
-    
-
-
-
-
-    # Modify column names to replace blank spaces with underscore
+# 9. Modify column names to replace blank spaces with underscores
     col_names = map(lambda s: s.replace(' ', '_'), f_crimes.col_names)
     f_crimes.set_names(col_names)
 
@@ -164,19 +140,10 @@
 <tr><td style="text-align: right;">    9.95828e+06</td><td>HY146732     </td><td>02/08/2015 11:15:36 PM</td><td>001XX W WACKER DR   </td><td style="text-align: right;">  0460</td><td>BATTERY        </td><td>SIMPLE                      </td><td>HOTEL/MOTEL           </td><td>false   </td><td>false     </td><td style="text-align: right;">   122</td><td style="text-align: right;">         1</td><td style="text-align: right;">    42</td><td style="text-align: right;">              32</td><td>08B       </td><td style="text-align: right;">   1.17538e+06</td><td style="text-align: right;">   1.90209e+06</td><td style="text-align: right;">  2015</td><td>02/15/2015 12:43:39 PM</td><td style="text-align: right;">   41.8867</td><td style="text-align: right;">   -87.6314</td><td>(41.886707818, -87.631396356)</td></tr>
 </table>
 
-
-
-
-
-    
-
-
-
-
-    # Set time zone to UTC for date manipulation
+# 10. Set time zone to UTC for date manipulation
     h2o.set_timezone("Etc/UTC")
     
-    ## Refine date column 
+#11. Refine the date column 
     def refine_date_col(data, col, pattern):
         data[col]         = data[col].as_date(pattern)
         data["Day"]       = data[col].day()
@@ -194,7 +161,7 @@
     f_crimes = f_crimes.drop("Date")
 
 
-    # Parse Census data into H2O
+#12. Parse Census data into H2O
     f_census = h2o.import_file("../data/chicagoCensus.csv",header=1)
     
     ## Update column names in the table
@@ -210,7 +177,7 @@
 
 
 
-    # Parse Weather data into H2O
+# 13. Parse Weather data into H2O
     f_weather = h2o.import_file("../data/chicagoAllWeather.csv")
     f_weather = f_weather[1:]
     print(f_weather.dim)
@@ -222,7 +189,7 @@
 
 
 
-    # Look at all the null entires in the Weather table
+# 14. Look at all the null entires in the Weather table
     f_weather[f_weather["meanTemp"].isna()]
 
 
@@ -240,16 +207,7 @@
 <tr><td style="text-align: right;">      3</td><td style="text-align: right;">    4</td><td style="text-align: right;">  2009</td><td style="text-align: right;">      nan</td><td style="text-align: right;">       nan</td><td style="text-align: right;">      nan</td></tr>
 </table>
 
-
-
-
-
-    
-
-
-
-
-    # Look at the help on as_h2o_frame 
+#15. Look at the help on `as_h2o_frame` 
     hc.as_spark_frame?
     f_weather
 
@@ -272,21 +230,15 @@
 </table>
 
 
-
-
-
-    
-
-
-
-
-    # Copy data frames to Spark from H2O
+#16. Copy data frames to Spark from H2O
     df_weather = hc.as_spark_frame(f_weather,)
     df_census = hc.as_spark_frame(f_census)
     df_crimes = hc.as_spark_frame(f_crimes)
 
 
-    # Look at the weather data as parsed in Spark
+#17. Look at the weather data as parsed in Spark 
+(only showing top 2 rows)
+
     df_weather.show(2)
 
     +-----+---+----+-------+--------+-------+
@@ -295,12 +247,8 @@
     |    1|  1|2001|     23|      14|      6|
     |    1|  2|2001|     18|      12|      6|
     +-----+---+----+-------+--------+-------+
-    only showing top 2 rows
-    
 
-
-
-    # Join columns from Crime, Census and Weather DataFrames in Spark
+#18. Join columns from Crime, Census and Weather DataFrames in Spark
     
     ## Register DataFrames as tables in SQL context
     sqlContext.registerDataFrameAsTable(df_weather, "chicagoWeather")
@@ -323,7 +271,7 @@
     ON a.Community_Area = c.Community_Area_Number""")
 
 
-    # Print the crimeWithWeather data table from Spark
+#19. Print the crimeWithWeather data table from Spark
     crimeWithWeather.show(2)
 
     +----+-----+---+-------+---------+-------+------+-------+----+-----------------+--------------------+--------------+--------+------+--------+----+----+--------+-------+-------+--------+--------------------------------+-----------------+--------------+--------------------------+--------------------------------+---------------------------+--------------------------------------------+
@@ -336,8 +284,7 @@
     
 
 
-
-    #Copy table from Spark to H2O
+#20. Copy table from Spark to H2O
     hc.as_h2o_frame?
     crimeWithWeatherHF = hc.as_h2o_frame(crimeWithWeather,framename="crimeWithWeather")
 
@@ -371,7 +318,7 @@
 
 
 
-    # Assign column types to the CrimeWeatherHF data table in H2O
+#21. Assign column types to the `CrimeWeatherHF` data table in H2O
     crimeWithWeatherHF["Season"]= crimeWithWeatherHF["Season"].asfactor()
     crimeWithWeatherHF["WeekDay"]= crimeWithWeatherHF["WeekDay"].asfactor()
     crimeWithWeatherHF["IUCR"]= crimeWithWeatherHF["IUCR"].asfactor()
@@ -410,7 +357,7 @@
 
 
 
-    # Split final H2O data table into train test and validation sets
+#22. Split final H2O data table into train test and validation sets
     ratios = [0.6,0.2]
     frs = crimeWithWeatherHF.split_frame(ratios,seed=12345)
     train = frs[0]
@@ -421,22 +368,22 @@
     test.frame_id = "Test"
 
 
-    # Import Model Builders from H2O Python
+#23. Import Model Builders from H2O Python
     from h2o.estimators.gbm import H2OGradientBoostingEstimator
     from h2o.estimators.deeplearning import H2ODeepLearningEstimator
 
 
-    # Inspect the avialble gbm parameters
+#24. Inspect the availble GBM parameters
     H2OGradientBoostingEstimator?
 
 
-    # Define Preditors
+#25. Define Predictors
     predictors = crimeWithWeatherHF.names[:]
     response = "Arrest"
     predictors.remove(response)
 
 
-    #Simple GBM model - Predict Arrest
+#26. Create a Simple GBM model to Predict Arrests
     model_gbm = H2OGradientBoostingEstimator(ntrees         =50,
                                             max_depth      =6,
                                             learn_rate     =0.1, 
@@ -449,7 +396,7 @@
                    validation_frame=valid
                    )
     
-    # Simple Deep Learning - Predict Arrest
+#27. Create a Simple Deep Learning model to Predict Arrests
     model_dl = H2ODeepLearningEstimator(variable_importances=True,
                                        loss                ="Automatic")
     
