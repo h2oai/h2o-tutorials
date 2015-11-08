@@ -412,7 +412,7 @@
 
 
 
-    # Print confusion matrices for the train and validation set
+#28. Print confusion matrices for the training and validation datasets
     print(model_gbm.confusion_matrix(train = True))
     print(model_gbm.confusion_matrix(valid = True))
 
@@ -484,7 +484,7 @@
 
 
 
-    #Print variable importance
+#29. Print variable importances
     model_gbm.varimp(True)
 
 
@@ -656,8 +656,7 @@
 
 
 
-
-    # Inspect Deep Learning model output
+#30. Inspect Deep Learning model output
     model_dl
 
     Model Details
@@ -1045,7 +1044,7 @@
 
 
 
-    # Predict on the test set using the gbm model
+#31. Predict on the test set using the GBM model
     predictions = model_gbm.predict(test)
     predictions.show()
 
@@ -1066,7 +1065,7 @@
 
 
 
-    # Look at performance on test set (if it includes true lables)
+#32. Look at test set performance  (if it includes true labels)
     test_performance = model_gbm.model_performance(test)
     test_performance
 
