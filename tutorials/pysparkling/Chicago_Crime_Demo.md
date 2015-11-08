@@ -1144,17 +1144,7 @@
 <td>0.8</td>
 <td>235.0</td></tr></table></div>
 
-
-
-
-
-    
-
-
-
-
-    #Plots
-    # Create Plots of Crime type vs Arrest Rate and Proportion of reported Crime
+#33. Create Plots of Crime type vs Arrest Rate and Proportion of reported Crime
 
 
     # Create table to report Crimetype, Arrest count per crime, total reported count per Crime  
@@ -1245,7 +1235,7 @@
 
 
 
-    # Plot the below in Flow 
+#. Plot in Flow 
     plot (g) -> g(
       g.rect(
         g.position "Crime_Type", "Arrest_rate"
