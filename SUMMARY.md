@@ -10,6 +10,6 @@
 * [Ensembles: Stacking, Super Learner](tutorials/ensembles-stacking/README.md)
 * [Streaming](tutorials/streaming/storm/README.md)
 * [Sparkling Water](tutorials/sparkling-water/README.md)
-* [PySparkling](tutorials/pysparkling/README.md)
+* [PySparkling](tutorials/pysparkling/Chicago_Crime_Demo.md)
 * [Resources](resources.md)
 
