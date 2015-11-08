@@ -4,7 +4,7 @@
  
  - Oracle Java 7+ ([USB](../../))
  - [Spark 1.5.1](http://spark.apache.org/downloads.html) ([USB](../../Spark))
- - [Sparkling Water 1.5.4](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-1.5/4/index.html) ([USB](../../SparklingWater))
+ - [Sparkling Water 1.5.6](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-1.5/6/index.html) ([USB](../../SparklingWater))
  - [SMS dataset](https://raw.githubusercontent.com/h2oai/sparkling-water/master/examples/smalldata/smsData.txt) ([USB](../data/smsData.txt))
  
 ## Provided on USB
@@ -202,7 +202,7 @@
   val ratios = Array[Double](0.8)
   val frs = split(tableHF, keys, ratios)
   val (trainHF, validHF) = (frs(0), frs(1))
-  table.delete()
+  tableHF.delete()
 
   // Build final DeepLearning model
   val dlModel = buildDLModel(trainHF, validHF)(h2oContext)

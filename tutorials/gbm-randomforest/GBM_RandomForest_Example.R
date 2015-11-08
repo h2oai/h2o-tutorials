@@ -4,15 +4,22 @@
 ###       The actual forest cover type for a given observation 
 ###       (30 x 30 meter cell) was determined from the US Forest Service (USFS).
 
+### Note: If run from plain R, execute R in the directory of this script. If run from RStudio, 
+### be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current 
+### working directory. h2o.importFile() looks for files from the perspective of where H2O was 
+### started.
+
+
 ## H2O is an R package
 library(h2o)
 ## Create an H2O cloud 
 h2o.init(
   nthreads=-1,            ## -1: use all available threads
   max_mem_size = "2G")    ## specify the memory size for the H2O cloud
+h2o.removeAll() # Clean slate - just in case the cluster was already running
 
 ## Load a file from disk
-df <- h2o.importFile("../data/covtype.full.csv")
+df <- h2o.importFile(path = normalizePath("../data/covtype.full.csv"))
 
 ## First, we will create three splits for train/test/valid independent data sets.
 ## We will train a data set on one set and use the others to test the validity
@@ -251,3 +258,7 @@ mean(finalRf_predictions$predict==test$Cover_Type)  ## test set accuracy
 ##  the setting of a low learning rate and then building as many trees as 
 ##  needed until the desired convergence is met.
 ## As with random forest, we can also adjust nbins and nbins_cats.
+
+
+### All done, shutdown H2O    
+h2o.shutdown(prompt=FALSE)

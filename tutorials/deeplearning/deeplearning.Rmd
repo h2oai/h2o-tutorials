@@ -14,13 +14,11 @@
 * Deep Learning Tips & Tricks
 
 ## Introduction
-This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This tutorial covers usage of H2O from R. A python version of this tutorial will be available as well in a separate document. This file is available in plain R, R markdown and regular markdown formats, and the plots are available as PDF files. More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/).
+This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_learning) model can be used to do supervised classification and regression. This tutorial covers usage of H2O from R. A python version of this tutorial will be available as well in a separate document. This file is available in plain R, R markdown and regular markdown formats, and the plots are available as PDF files. All documents are available [on Github](https://github.com/h2oai/h2o-world-2015-training/raw/master/tutorials/deeplearning/).
 
-First, set the path to the directory in which the tutorial is located on the server that runs H2O (here, locally):
+If run from plain R, execute R in the directory of this script. If run from RStudio, be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current working directory. h2o.importFile() looks for files from the perspective of where H2O was started.
 
-```{r set_path}
-ROOT_PATH <- "/users/arno/h2o-world-2015-training/tutorials/"
-```
+More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/). The PDF slide deck can be found [on Github](https://github.com/h2oai/h2o-world-2015-training/raw/master/tutorials/deeplearning/H2ODeepLearning.pdf).
 
 ### H2O R Package
 
@@ -57,8 +55,9 @@ We start with a small dataset representing red and black dots on a plane, arrang
 We visualize the nature of H2O Deep Learning (DL), H2O's tree methods (GBM/DRF) and H2O's generalized linear modeling (GLM) by plotting the decision boundary between the red and black spirals:
 
 ```{r setup_spiral}
-spiral <- h2o.importFile(paste0(ROOT_PATH, "/data/spiral.csv"))
-grid   <- h2o.importFile(paste0(ROOT_PATH, "/data/grid.csv"))
+#setwd("~/h2o-world-2015-training/tutorials") ##For RStudio
+spiral <- h2o.importFile(path = normalizePath("../data/spiral.csv"))
+grid   <- h2o.importFile(path = normalizePath("../data/grid.csv"))
 # Define helper to plot contours
 plotC <- function(name, model, data=spiral, g=grid) {
   data <- as.data.frame(data) #get data from into R
@@ -134,7 +133,7 @@ We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
 ```{r covtype_load}
-df <- h2o.importFile(paste0(ROOT_PATH, "/data/covtype.full.csv"))
+df <- h2o.importFile(path = normalizePath("../data/covtype.full.csv"))
 dim(df)
 df
 splits <- h2o.splitFrame(df, c(0.6,0.2), seed=1234)
@@ -217,7 +216,7 @@ By default, H2O Deep Learning uses an adaptive learning rate ([ADADELTA](http://
 If `adaptive_rate` is disabled, several manual learning rate parameters become important: `rate`, `rate_annealing`, `rate_decay`, `momentum_start`, `momentum_ramp`, `momentum_stable` and `nesterov_accelerated_gradient`, the discussion of which we leave to [H2O Deep Learning booklet](http://h2o.ai/resources/).
 
 ### Tuning
-With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Deep tree methods are more effective for this dataset than Deep Learning, as the space needs to be simply be partitioned into the corresponding hyper-space corners to solve this problem.
+With some tuning, it is possible to obtain less than 10% test set error rate in about one minute. Error rates of below 5% are possible with larger models. Note that deep tree methods can be more effective for this dataset than Deep Learning, as they directly partition the space into sectors, which seems to be needed here.
 
 ```{r covtype_tuned}
 m3 <- h2o.deeplearning(
@@ -226,13 +225,13 @@ m3 <- h2o.deeplearning(
   validation_frame=valid, 
   x=predictors, 
   y=response, 
-  overwrite_with_best_model=F,
+  overwrite_with_best_model=F,    ## Return the final model after 10 epochs, even if not the best
   hidden=c(128,128,128),          ## more hidden layers -> more complex interactions
   epochs=10,                      ## to keep it short enough
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
-  rate=0.02, 
+  rate=0.01, 
   rate_annealing=2e-6,            
   momentum_start=0.2,             ## manually tuned momentum
   momentum_stable=0.4, 
@@ -402,14 +401,14 @@ m_cont <- h2o.deeplearning(
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
   adaptive_rate=F,                ## manually tuned learning rate
-  rate=0.02, 
+  rate=0.01, 
   rate_annealing=2e-6,            
-  momentum_start=0.2,           ## manually tuned momentum
+  momentum_start=0.2,             ## manually tuned momentum
   momentum_stable=0.4, 
   momentum_ramp=1e7, 
   l1=1e-5,                        ## add some L1/L2 regularization
   l2=1e-5,
-  max_w2=10                     ## helps stability for Rectifier
+  max_w2=10                       ## helps stability for Rectifier
 ) 
 summary(m_cont)
 plot(m_cont)
@@ -419,7 +418,7 @@ Once we are satisfied with the results, we can save the model to disk (on the cl
 
 ```{r save_model}
 path <- h2o.saveModel(m_cont, 
-          path=paste0(ROOT_PATH,"mybest_deeplearning_covtype_model"), force=TRUE)
+          path="./mybest_deeplearning_covtype_model", force=TRUE)
 ```
 
 It can be loaded later with the following command:
@@ -547,3 +546,8 @@ Note that the default value of `score_duty_cycle=0.1` limits the amount of time 
 Stratified sampling of the validation dataset can help with scoring on datasets with class imbalance.  Note that this option also requires `balance_classes` to be enabled (used to over/under-sample the training dataset, based on the max. relative size of the resulting training dataset, `max_after_balance_size`):
     
 ### More information can be found in the [H2O Deep Learning booklet](http://h2o.ai/resources/), in our [H2O SlideShare Presentations](http://www.slideshare.net/0xdata/presentations), our [H2O YouTube channel](https://www.youtube.com/user/0xdata/), as well as on our [H2O Github Repository](https://github.com/h2oai/h2o-3/), especially in our [H2O Deep Learning R tests](https://github.com/h2oai/h2o-3/tree/master/h2o-r/tests/testdir_algos/deeplearning), and [H2O Deep Learning Python tests](https://github.com/h2oai/h2o-3/tree/master/h2o-py/tests/testdir_algos/deeplearning).
+
+### All done, shutdown H2O
+```{r Shutdown}
+h2o.shutdown(prompt=FALSE)
+```

@@ -47,7 +47,7 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 ###### Initialize the H2O server and import our walking stance data. We use all available cores on our computer and allocate a maximum of 2 GB of memory to H2O.
 	library(h2o)
 	h2o.init(nthreads = -1, max_mem_size = "2G")
-	gait.hex <- h2o.importFile(path = "../data/subject01_walk1.csv", destination_frame = "gait.hex")
+	gait.hex <- h2o.importFile(path = normalizePath("../data/subject01_walk1.csv"), destination_frame = "gait.hex")
 
 ###### Get a summary of the imported data set.
 	dim(gait.hex)
@@ -98,7 +98,7 @@ For our first example, we will use data on [Subject 01's walking stances](https:
 Suppose that due to a sensor malfunction, our walking stance data has missing values randomly interspersed. We can use GLRM to reconstruct these missing values from the existing data.
 
 ###### Import walking stance data containing 15% missing values and get a summary.
-	gait.miss <- h2o.importFile(path = "../data/subject01_walk1_miss15.csv", destination_frame = "gait.miss")
+	gait.miss <- h2o.importFile(path = normalizePath("../data/subject01_walk1_miss15.csv"), destination_frame = "gait.miss")
 	dim(gait.miss)
 	summary(gait.miss)
 
