@@ -12,3 +12,9 @@
 - Numpy 1.9.2 (pre-installed)
 - $ pip install requests
 - $ pip install tabulate
+
+
+
+## Running the notebook
+
+- Run this line in your teminal `IPYTHON_OPTS="notebook" bin/pysparkling" ` and locate the desired notebook file
