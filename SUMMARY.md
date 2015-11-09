@@ -6,6 +6,7 @@
 * [Building a Smarter Application](tutorials/building-a-smarter-application/README.md)
 * [Deep Learning](tutorials/deeplearning/README.md)
 * [GBM & Random Forest](tutorials/gbm-randomforest/README.md)
+* [GLM](tutorials/glm/glm.md)
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
 * [Hive UDF example](tutorials/hive_udf_template/README.md)
 * [Ensembles: Stacking, Super Learner](tutorials/ensembles-stacking/README.md)
