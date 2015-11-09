@@ -135,7 +135,7 @@ x = names(data_ext$Train)
 x = x[-which(x==y)]
 m2 = h2o.glm(training_frame = data_ext$Train, validation_frame = data_ext$Valid, x = x, y = y,family='multinomial',solver='L_BFGS',lambda=1e-4)
 # 21% err down from 28%
-m2
+summary(m2)
 
 ### All done, shutdown H2O    
 h2o.shutdown(prompt=FALSE)

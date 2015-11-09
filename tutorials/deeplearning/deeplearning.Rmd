@@ -2,7 +2,6 @@
 
 * Introduction
   * Installation and Startup
-  * Decision Boundaries
 * Cover Type Dataset
   * Exploratory Data Analysis
   * Deep Learning Model
