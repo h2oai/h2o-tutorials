@@ -245,7 +245,7 @@ fit <- h2o.ensemble(x = x, y = y,
                     learner = learner, 
                     metalearner = metalearner,
                     cvControl = list(V = 5))
-
+```
 Generate predictions on the test set:
 ```r
 pred <- predict(fit, test)

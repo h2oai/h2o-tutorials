@@ -12,3 +12,10 @@
 - Numpy 1.9.2 (pre-installed)
 - $ pip install requests
 - $ pip install tabulate
+
+
+
+## Running the notebook
+- Go to the Sparkling Water directory
+- Run this line - `IPYTHON_OPTS="notebook" bin/pysparkling ` and locate the desired notebook file
+

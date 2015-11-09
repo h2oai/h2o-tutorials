@@ -10,12 +10,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from h2o.estimators.glrm import H2OGeneralizedLowRankEstimator
 from h2o.estimators.deeplearning import H2ODeepLearningEstimator
+import os
 
 
 # In[ ]:
 
 h2o.init()
-h2o.removeAll() # Clean slate - just in case the cluster was already running
+h2o.remove_all() # Clean slate - just in case the cluster was already running
 
 
 # In[ ]:
