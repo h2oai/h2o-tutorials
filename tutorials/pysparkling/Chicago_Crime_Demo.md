@@ -271,7 +271,7 @@
     ON a.Community_Area = c.Community_Area_Number""")
 
 
-#19. Print the crimeWithWeather data table from Spark
+#19. Print the `crimeWithWeather` data table from Spark
     crimeWithWeather.show(2)
 
     +----+-----+---+-------+---------+-------+------+-------+----+-----------------+--------------------+--------------+--------+------+--------+----+----+--------+-------+-------+--------+--------------------------------+-----------------+--------------+--------------------------+--------------------------------+---------------------------+--------------------------------------------+
@@ -417,7 +417,7 @@
     print(model_gbm.confusion_matrix(valid = True))
 
     
-    Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.335827722991:
+**Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.335827722991:**
 
 
 
@@ -445,7 +445,7 @@
 
     
     
-    Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.432844055866:
+**Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.432844055866:**
 
 
 
@@ -743,8 +743,9 @@
 
     
     
-    ModelMetricsBinomial: deeplearning
-    ** Reported on train data. **
+**ModelMetricsBinomial: deeplearning**
+
+  Reported on train data. 
     
     MSE: 0.0737426129728
     R^2: 0.642891439669
@@ -752,7 +753,7 @@
     AUC: 0.950131166302
     Gini: 0.900262332604
     
-    Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.343997370612:
+**Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.343997370612:**
 
 
 
@@ -779,7 +780,7 @@
 
 
     
-    Maximum Metrics: Maximum metrics at their respective thresholds
+**Maximum Metrics: Maximum metrics at their respective thresholds**
     
 
 
@@ -828,7 +829,7 @@
     AUC: 0.930515181213
     Gini: 0.861030362427
     
-    Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.493462351545:
+**Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.493462351545:**
 
 
 
@@ -855,7 +856,7 @@
 
 
     
-    Maximum Metrics: Maximum metrics at their respective thresholds
+**Maximum Metrics: Maximum metrics at their respective thresholds**
     
 
 
@@ -895,7 +896,7 @@
 
 
     
-    Scoring History:
+**Scoring History**:
 
 
 
@@ -982,7 +983,7 @@
 
 
     
-    Variable Importances:
+**Variable Importances:**
 
 
 
@@ -1079,7 +1080,7 @@
     AUC: 0.922152238508
     Gini: 0.844304477016
     
-    Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.365461652105:
+**Confusion Matrix (Act/Pred) for max f1 @ threshold = 0.365461652105:**
 
 
 
@@ -1106,7 +1107,7 @@
 
 
     
-    Maximum Metrics: Maximum metrics at their respective thresholds
+**Maximum Metrics: Maximum metrics at their respective thresholds**
     
 
 
@@ -1183,11 +1184,11 @@
 
 
 
-    #Copy Crime_type table from Spark to H2O
+#34. Copy Crime_type table from Spark to H2O
     crime_typeHF = hc.as_h2o_frame(crime_type,framename="crime_type")
 
 
-    # Create Additional columns Arrest_rate and Crime_propotion 
+#35. Create Additional columns Arrest_rate and Crime_propotion 
     crime_typeHF["Arrest_rate"] = crime_typeHF["crime_count"]/crime_typeHF["all_count"]
     crime_typeHF["Crime_proportion"] = crime_typeHF["all_count"]/crime_typeHF["all_count"].sum()
     crime_typeHF["Crime_Type"] = crime_typeHF["Crime_Type"].asfactor()
@@ -1235,7 +1236,7 @@
 
 
 
-#. Plot in Flow 
+#36. Plot in Flow 
     plot (g) -> g(
       g.rect(
         g.position "Crime_Type", "Arrest_rate"
