@@ -12,6 +12,7 @@ In this tutorial, we will discuss ensemble learning with a focus on a type of en
 
 Following the introduction to ensemble learning, we will dive into a hands-on code demo of the [h2oEnsemble](https://github.com/h2oai/h2o-3/tree/master/h2o-r/ensemble) R package.
 
+H2O World slides accompanying this tutorial are [here](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/ensembles-stacking/H2O_World_2015_Ensembles.pdf).
 
 # What is Ensemble Learning?
 
