@@ -1,6 +1,7 @@
 # Summary
 
 * [Introduction](README.md)
+* [What is H2O?](WhatIsH2O.md)
 * [Intro to Data Science](tutorials/intro-to-datascience/README.md)
 * [Building a Smarter Application](tutorials/building-a-smarter-application/README.md)
 * [Deep Learning](tutorials/deeplearning/README.md)
