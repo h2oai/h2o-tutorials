@@ -18,7 +18,7 @@ More examples and explanations can be found in our [H2O GLM booklet](http://h2o.
 
 Load the H2O R package:
 
-```{r load_library}
+```{r}
 ## R installation instructions are at http://h2o.ai/download
 library(h2o)
 ```
@@ -26,7 +26,7 @@ library(h2o)
 ### Start H2O
 Start up a 1-node H2O server on your local machine, and allow it to use all CPU cores and up to 2GB of memory:
 
-```{r start_h2o}
+```{r}
 h2o.init(nthreads=-1, max_mem_size="2G")
 h2o.removeAll() ## clean slate - just in case the cluster was already running
 ```
@@ -34,14 +34,14 @@ h2o.removeAll() ## clean slate - just in case the cluster was already running
 Predicting forest cover type from cartographic variables only (no remotely sensed data).
 Let's import the dataset:
 
-```{r import_data}
+```{r}
 D = h2o.importFile(path = normalizePath("../data/covtype.full.csv"))
 h2o.summary(D)
 ```
 We have 11 numeric and two categorical features. Response is "Cover_Type" and has 7 classes.
 Let's split the data into Train/Test/Validation with train having 70% and Test and Validation 15% each:
 
-```{r split_data}
+```{r}
 data = h2o.splitFrame(D,ratios=c(.7,.15),destination_frames = c("train","test","valid"))
 names(data) <- c("Train","Test","Valid")
 y = "Cover_Type"
@@ -54,13 +54,13 @@ We imported our data, so let's run GLM. As we mentioned previously, Cover_Type i
 We have multi-class problem so we pick family=multinomial. L-BFGS solver tends to be faster on multinomial problems, so we pick L-BFGS for our first try. 
 The rest can use the default settings.
 
-```{r build_model1}
+```{r}
 m1 = h2o.glm(training_frame = data$Train, validation_frame = data$Valid, x = x, y = y,family='multinomial',solver='L_BFGS')
 h2o.confusionMatrix(m1, valid=TRUE)
 ```
 The model predicts only the majority class so it's not useful at all! Maybe we regularized it too much, let's try again without regularization: 
 
-```{r build_model2}
+```{r}
 m2 = h2o.glm(training_frame = data$Train, validation_frame = data$Valid, x = x, y = y,family='multinomial',solver='L_BFGS', lambda = 0)
 h2o.confusionMatrix(m2, valid=FALSE) # get confusion matrix in the training data
 h2o.confusionMatrix(m2, valid=TRUE)  # get confusion matrix in the validation data
@@ -73,7 +73,7 @@ This model is actually useful. It got 28% classification error, down from 51% ob
 Since multinomial models are difficult and time consuming, let's try a simpler binary classification. 
 We'll take a subset of the data with only `class_1` and `class_2` (the two majority classes) and build a binomial model deciding between them.
 
-```{r get_and_split_binomial_data}
+```{r}
 D_binomial = D[D$Cover_Type %in% c("class_1","class_2"),]
 h2o.setLevels(D_binomial$Cover_Type,c("class_1","class_2"))
 # split to train/test/validation again
@@ -82,7 +82,7 @@ names(data_binomial) <- c("Train","Test","Valid")
 ```
 We can run a binomial model now: 
 
-```{r build_binomial_model_1}
+```{r}
 m_binomial = h2o.glm(training_frame = data_binomial$Train, validation_frame = data_binomial$Valid, x = x, y = y, family='binomial',lambda=0)
 h2o.confusionMatrix(m_binomial, valid = TRUE)
 h2o.confusionMatrix(m_binomial, valid = TRUE)
@@ -95,7 +95,7 @@ The classification errors in binomial cases have a particular meaning: we call t
 
 The common way to evaluate a binary classifier performance is to look at its [ROC curve](https://en.wikipedia.org/wiki/Receiver_operating_characteristic). The ROC curve plots the true positive rate versus false positive rate. We can plot it from the H2O model output:
 
-```{r build_binomial_model_output_1}
+```{r}
 fpr = m_binomial@model$training_metrics@metrics$thresholds_and_metric_scores$fpr
 tpr = m_binomial@model$training_metrics@metrics$thresholds_and_metric_scores$tpr
 fpr_val = m_binomial@model$validation_metrics@metrics$thresholds_and_metric_scores$fpr
@@ -108,14 +108,14 @@ legend("bottomright",c("Train", "Validation"),col=c("black","red"),lty=c(1,1),lw
 
 The area under the ROC curve (AUC) is a common "good fit" metric for binary classifiers. For this example, the results were:
 
-```{r build_binomial_model_output_2}
+```{r}
 h2o.auc(m_binomial,valid=FALSE) # on train                   
 h2o.auc(m_binomial,valid=TRUE)  # on test
 ```
 
 The default confusion matrix is computed at thresholds that optimize the [F1 score](https://en.wikipedia.org/wiki/F1_score). We can choose different thresholds - the H2O output shows optimal thresholds for some common metrics.
 
-```{r build_binomial_model_output_3}
+```{r}
 m_binomial@model$training_metrics@metrics$max_criteria_and_metric_scores                  
 ```
 
@@ -129,7 +129,7 @@ Let's make a convenience function to cut the column into intervals working on al
 We'll use `h2o.hist` to determine interval boundaries (but there are many more ways to do that!) on the Train set.  
 We'll take only the bins with non-trivial support:  
 
-```{r cut_column}
+```{r}
 cut_column <- function(data, col) {
   # need lower/upper bound due to h2o.cut behavior (points < the first break or > the last break are replaced with missing value) 
   min_val = min(data$Train[,col])-1
@@ -157,7 +157,7 @@ cut_column <- function(data, col) {
 ```
 Now let's make a convenience function generating interaction terms on all three of our datasets. We'll use `h2o.interaction`:
 
-```{r generate_interactions}
+```{r}
 interactions <- function(data, cols, pairwise = TRUE) {
   iii = h2o.interaction(data = data$Train, destination_frame = "itrain",factors = cols,pairwise=pairwise,max_factors=1000,min_occurrence=100)
   data$Train <- h2o.cbind(data$Train,iii)
@@ -175,7 +175,7 @@ interactions <- function(data, cols, pairwise = TRUE) {
 Finally, let's wrap addition of the features into a separate function call, as we will use it again later.
 We'll add intervals for each numeric column and interactions between each pair of binary columns.
 
-```{r add_features}
+```{r}
 # add features to our cover type example
 # let's cut all the numerical columns into intervals and add interactions between categorical terms
 add_features <- function(data) {
@@ -199,7 +199,7 @@ add_features <- function(data) {
 ```
 Now we generate new features and add them to the dataset. We'll also need to generate column names again, as we added more columns:
 
-```{r add_features_binomial}
+```{r}
 # Add Features
 data_binomial_ext <- add_features(data_binomial)
 data_binomial_ext$Train <- h2o.assign(data_binomial_ext$Train,"train_b_ext")
