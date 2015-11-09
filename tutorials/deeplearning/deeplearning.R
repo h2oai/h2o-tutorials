@@ -48,7 +48,7 @@ example(h2o.deeplearning)
 #
 #We visualize the nature of H2O Deep Learning (DL), H2O's tree methods (GBM/DRF) and H2O's generalized linear modeling (GLM) by plotting the decision boundary between the red and black spirals:
 #
-#setwd("~/h2o-world-2015-training/tutorials") ##For RStudio
+setwd("~/h2o-world-2015-training/tutorials/deeplearning") ##For RStudio
 spiral <- h2o.importFile(path = normalizePath("../data/spiral.csv"))
 grid   <- h2o.importFile(path = normalizePath("../data/grid.csv"))
 # Define helper to plot contours
