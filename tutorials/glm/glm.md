@@ -211,19 +211,19 @@ x = x[-which(x==y)]
 ```
 Let's build the model! We should add some regularization this time because we added correlated variables, so let's try the default:
 
-```{r build_binomial_ext_1}
+```{r}
 m_binomial_1_ext = try(h2o.glm(training_frame = data_binomial_ext$Train, validation_frame = data_binomial_ext$Valid, x = x, y = y, family='binomial'))
 ```
 Oops, doesn't run - well, we know have more features than the default method can solve with 2GB of RAM. Let's try L-BFGS instead.
 
-```{r build_binomial_ext_2}
+```{r}
 m_binomial_1_ext = h2o.glm(training_frame = data_binomial_ext$Train, validation_frame = data_binomial_ext$Valid, x = x, y = y, family='binomial', solver='L_BFGS')
 h2o.confusionMatrix(m_binomial_1_ext)
 h2o.auc(m_binomial_1_ext,valid=TRUE)
 ```
 Not much better, maybe too much regularization? Let's pick a smaller lambda and try again.
 
-```{r build_binomial_ext_3}
+```{r}
 m_binomial_2_ext = h2o.glm(training_frame = data_binomial_ext$Train, validation_frame = data_binomial_ext$Valid, x = x, y = y, family='binomial', solver='L_BFGS', lambda=1e-4)
 h2o.confusionMatrix(m_binomial_2_ext, valid=TRUE)
 h2o.auc(m_binomial_2_ext,valid=TRUE)
@@ -235,7 +235,7 @@ So now we want to run a lambda search to find optimal penalty strength and we wa
 We'll use the IRLSM solver this time as it does much better with lambda search and l1 penalty. 
 Recall we were not able to use it before. We can use it now as we are running a lambda search that will filter out a large portion of the inactive (coefficient==0) predictors. 
 
-```{r build_binomial_ext_4}
+```{r}
 m_binomial_3_ext = h2o.glm(training_frame = data_binomial_ext$Train, validation_frame = data_binomial_ext$Valid, x = x, y = y, family='binomial', lambda_search=TRUE)
 h2o.confusionMatrix(m_binomial_3_ext, valid=TRUE)
 h2o.auc(m_binomial_3_ext,valid=TRUE)
@@ -243,7 +243,7 @@ h2o.auc(m_binomial_3_ext,valid=TRUE)
 Better yet, we have 17% error and we used only 3000 out of 7000 features.
 Ok, our new features improved the binomial model significantly, so let's revisit our former multinomial model and see if they make a difference there (they should!):
 
-```{r build_multinomial_ext_4}
+```{r}
 # Multinomial Model 2
 # let's revisit the multinomial case with our new features
 data_ext <- add_features(data)
