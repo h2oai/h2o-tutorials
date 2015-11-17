@@ -1,11 +1,93 @@
-// Databricks notebook source exported at Mon, 9 Nov 2015 04:31:10 UTC
-// Ensure you have included the table smsData
+// Databricks notebook source exported at Tue, 17 Nov 2015 05:42:37 UTC
+// MAGIC %md #H2O Databricks Ham vs Spam using DeepLearning
 
 // COMMAND ----------
 
-// Representation of a training message
+// MAGIC %md
+// MAGIC ### Prepare working environment
+// MAGIC * Create a new library based on Sparkling Water Maven coordinates `ai.h2o:sparkling-water-examples_2.10:1.5.6`
+// MAGIC * Create a new cluster and attach Sparkling Water library
+
+// COMMAND ----------
+
+// MAGIC %md ### Load Data
+
+// COMMAND ----------
+
+// MAGIC %md #### Download data from GitHub
+
+// COMMAND ----------
+
+import java.net.URL
+import java.io.File
+import org.apache.commons.io.FileUtils
+val SMSDATA_FILE = new File("/tmp/smsData.csv")
+FileUtils.copyURLToFile(new URL("https://raw.githubusercontent.com/h2oai/sparkling-water/master/examples/smalldata/smsData.txt"), SMSDATA_FILE)
+
+// COMMAND ----------
+
+// MAGIC %md #### Share data with Spark DBFS
+
+// COMMAND ----------
+
+// MAGIC %fs cp file:///tmp/smsData.csv /tmp
+
+// COMMAND ----------
+
+// MAGIC %fs ls /tmp
+
+// COMMAND ----------
+
+// MAGIC %md #### Create a table 'smsData' by parsing input file
+
+// COMMAND ----------
+
+// MAGIC %sql 
+// MAGIC DROP TABLE smsData;
+// MAGIC CREATE TABLE smsData
+// MAGIC USING com.databricks.spark.csv
+// MAGIC OPTIONS (path "/FileStore/smsData.csv", delimiter "\t", inferSchema "true")
+
+// COMMAND ----------
+
+// MAGIC %md ### Explore data
+
+// COMMAND ----------
+
+// MAGIC %md #### Print schema of loaded data
+
+// COMMAND ----------
+
+table("smsData").printSchema
+
+// COMMAND ----------
+
+// MAGIC %md #### Show preview of data
+
+// COMMAND ----------
+
+// MAGIC %sql select * from smsData
+
+// COMMAND ----------
+
+// MAGIC %sql select c0, count(1) from smsdata group by c0
+
+// COMMAND ----------
+
+// MAGIC %md ## Build ML workflow
+
+// COMMAND ----------
+
+// MAGIC %md ### Spark: Create representation for training data
+
+// COMMAND ----------
+
 import org.apache.spark.mllib.linalg.Vector
 case class SMS(target: String, fv: Vector)
+
+// COMMAND ----------
+
+// MAGIC %md ### Spark: Transform the data using Spark tokenizer
 
 // COMMAND ----------
 
@@ -29,7 +111,10 @@ def tokenize(data: RDD[String]): RDD[Seq[String]] = {
 
 // COMMAND ----------
 
-// Define function which builds an IDF model
+// MAGIC %md ### Spark: Define tf-idf model builder
+
+// COMMAND ----------
+
 import org.apache.spark.mllib.feature._
 
 def buildIDFModel(tokens: RDD[Seq[String]],
@@ -46,6 +131,10 @@ def buildIDFModel(tokens: RDD[Seq[String]],
 
 // COMMAND ----------
 
+// MAGIC %md ### H2O: Define DeepLearning model builder
+
+// COMMAND ----------
+
 // Define function which builds a DL model
 import org.apache.spark.h2o._
 import water.Key
@@ -57,28 +146,32 @@ def buildDLModel(train: Frame, valid: Frame,
                epochs: Int = 10, l1: Double = 0.001, l2: Double = 0.0,
                hidden: Array[Int] = Array[Int](200, 200))
               (implicit h2oContext: H2OContext): DeepLearningModel = {
-import h2oContext._
-// Build a model
+  import h2oContext._
+  // Build a model
 
-val dlParams = new DeepLearningParameters()
-dlParams._model_id = Key.make("dlModel.hex")
-dlParams._train = train
-dlParams._valid = valid
-dlParams._response_column = 'target
-dlParams._epochs = epochs
-dlParams._l1 = l1
-dlParams._hidden = hidden
+  val dlParams = new DeepLearningParameters()
+  dlParams._model_id = Key.make("dlModel.hex")
+  dlParams._train = train
+  dlParams._valid = valid
+  dlParams._response_column = 'target
+  dlParams._epochs = epochs
+  dlParams._l1 = l1
+  dlParams._hidden = hidden
 
-// Create a job
-val dl = new DeepLearning(dlParams)
-val dlModel = dl.trainModel.get
+  // Create a job
+  val dl = new DeepLearning(dlParams)
+  val dlModel = dl.trainModel.get
 
-// Compute metrics on both datasets
-dlModel.score(train).delete()
-dlModel.score(valid).delete()
+  // Compute metrics on both datasets
+  dlModel.score(train).delete()
+  dlModel.score(valid).delete()
 
-dlModel
+  dlModel
 }
+
+// COMMAND ----------
+
+// MAGIC %md ### Create and Initialize H2OContext
 
 // COMMAND ----------
 
@@ -95,12 +188,9 @@ import org.apache.spark.h2o._
 
 // COMMAND ----------
 
-// Open H2O UI
-h2oContext.openFlow
+// MAGIC %md ### H2O+Spark: build ML workflow
 
 // COMMAND ----------
-
-// Build the application
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.examples.h2o.DemoUtils._
@@ -143,23 +233,35 @@ table.delete()
 
 // COMMAND ----------
 
+// MAGIC %md ### Explore DeepLearnign model
+
+// COMMAND ----------
+
 dlModel
 
 // COMMAND ----------
 
-// Evaluate model equality
+// MAGIC %md ### Evaluate model quality on training data
 
-// Collect model metrics and evaluate model quality
+// COMMAND ----------
+
 import water.app.ModelMetricsSupport
 val trainMetrics = ModelMetricsSupport.binomialMM(dlModel, train)
 println(trainMetrics.auc._auc)
 
 // COMMAND ----------
 
-// Collect model metrics and evaluate model quality
+// MAGIC %md ### Evaluate model quality on validation data
+
+// COMMAND ----------
+
 import water.app.ModelMetricsSupport
 val validMetrics = ModelMetricsSupport.binomialMM(dlModel, valid)
 println(validMetrics.auc._auc)
+
+// COMMAND ----------
+
+// MAGIC %md ### ... and finally define spam detector
 
 // COMMAND ----------
 
@@ -186,9 +288,19 @@ if (prediction.vecs()(1).at(0) < hamThreshold) "SPAM DETECTED!" else "HAM"
 
 // COMMAND ----------
 
-// Try do detect spam
+// MAGIC %md ### Try to detect spam..
 
-isSpam("Michal, h2oworld party tonight in MV?", dlModel._key.toString, hashingTF, idfModel, h2oContext)
+// COMMAND ----------
+
+// MAGIC %md #### "Michal, h2oworld party tomorrow night in MV?"
+
+// COMMAND ----------
+
+isSpam("Michal, h2oworld party tomorrow night in MV?", dlModel._key.toString, hashingTF, idfModel, h2oContext)
+
+// COMMAND ----------
+
+// MAGIC %md #### "We tried to contact you re your reply to our offer of a Video Handset? 750 anytime any networks mins? UNLIMITED TEXT?"
 
 // COMMAND ----------
 
