@@ -140,7 +140,7 @@ The remaining columns are all input features (i.e. the "x" columns) we use to pr
 
 The `example.R` script builds the model and exports the Java POJO to the generated_model temporary directory.  Run `example.R` at the command line as follows:
 
-```{bash}
+```bash
 R -f example.R  
 ```
 You will see the following output:
