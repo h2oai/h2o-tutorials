@@ -44,8 +44,7 @@ log_wagp_gbm <- h2o.gbm(x = predset,
                         max_depth = 5,
                         ntrees = 110,
                         learn_rate = 0.25,
-                        validation_frame = adult_2013_test,
-                        importance = TRUE)
+                        validation_frame = adult_2013_test)
 log_wagp_gbm
 
 # Do in-H2O predictions for reference.  This is not using the POJO.
