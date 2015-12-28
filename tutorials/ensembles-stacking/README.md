@@ -14,6 +14,8 @@ Following the introduction to ensemble learning, we will dive into a hands-on co
 
 H2O World slides accompanying this tutorial are [here](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/ensembles-stacking/H2O_World_2015_Ensembles.pdf).
 
+The GitHub page for the ensembles is [here](https://github.com/h2oai/h2o-world-2015-training/tree/master/tutorials/ensembles-stacking). 
+
 # What is Ensemble Learning?
 
 Ensemble machine learning methods use multiple learning algorithms to obtain better predictive performance than could be obtained from any of the constituent learning algorithms.
