@@ -18,7 +18,7 @@ This tutorial shows how a H2O [Deep Learning](http://en.wikipedia.org/wiki/Deep_
 
 If run from plain R, execute R in the directory of this script. If run from RStudio, be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current working directory. h2o.importFile() looks for files from the perspective of where H2O was started.
 
-More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/). The PDF slide deck can be found [on Github](https://github.com/h2oai/h2o-world-2015-training/raw/master/tutorials/deeplearning/H2ODeepLearning.pdf).
+More examples and explanations can be found in our [H2O Deep Learning booklet](http://h2o.ai/resources/) and on our [H2O Github Repository](http://github.com/h2oai/h2o-3/). The PDF slide deck can be found [on Github](./H2ODeepLearning.pdf).
 
 ### H2O R Package
 
