@@ -1,3 +1,4 @@
+##AUTO-GENERATED - DO NOT EDIT##
 # Classification and Regression with H2O Deep Learning
 
 * Introduction
@@ -55,7 +56,7 @@ We start with a small dataset representing red and black dots on a plane, arrang
 We visualize the nature of H2O Deep Learning (DL), H2O's tree methods (GBM/DRF) and H2O's generalized linear modeling (GLM) by plotting the decision boundary between the red and black spirals:
 
 ```r
-setwd("~/h2o-world-2015-training/tutorials/deeplearning") ##For RStudio
+setwd("~/h2o-tutorials/tutorials/deeplearning") ##For RStudio
 spiral <- h2o.importFile(path = normalizePath("../data/spiral.csv"))
 grid   <- h2o.importFile(path = normalizePath("../data/grid.csv"))
 # Define helper to plot contours
@@ -246,11 +247,11 @@ summary(m3)
 Let's compare the training error with the validation and test set errors
 
 ```r
-h2o.performance(m3, train=T)       ## sampled training data (from model building)
-h2o.performance(m3, valid=T)       ## sampled validation data (from model building)
-h2o.performance(m3, data=train)    ## full training data
-h2o.performance(m3, data=valid)    ## full validation data
-h2o.performance(m3, data=test)     ## full test data
+h2o.performance(m3, train=T)          ## sampled training data (from model building)
+h2o.performance(m3, valid=T)          ## sampled validation data (from model building)
+h2o.performance(m3, newdata=train)    ## full training data
+h2o.performance(m3, newdata=valid)    ## full validation data
+h2o.performance(m3, newdata=test)     ## full test data
 ```
 
 To confirm that the reported confusion matrix on the validation set (here, the test set) was correct, we make a prediction on the test set and compare the confusion matrices explicitly:
@@ -282,15 +283,15 @@ hyper_params <- list(
 )
 hyper_params
 grid <- h2o.grid(
-  "deeplearning",
-  model_id="dl_grid", 
+  algorithm="deeplearning",
+  grid_id="dl_grid", 
   training_frame=sampled_train,
   validation_frame=valid, 
   x=predictors, 
   y=response,
   epochs=10,
   stopping_metric="misclassification",
-  stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
+  stopping_tolerance=1e-2,        ## stop when misclassification does not improve by >=1% for 2 scoring events
   stopping_rounds=2,
   score_validation_samples=10000, ## downsample validation set for faster scoring
   score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
@@ -310,75 +311,77 @@ grid
 Let's see which model had the lowest validation error:
 
 ```r
-## Find the best model and its full set of parameters (clunky for now, will be improved)
-scores <- cbind(as.data.frame(unlist((lapply(grid@model_ids, function(x) 
-  { h2o.confusionMatrix(h2o.performance(h2o.getModel(x),valid=T))$Error[8] })) )), unlist(grid@model_ids))
-names(scores) <- c("misclassification","model")
-sorted_scores <- scores[order(scores$misclassification),]
-head(sorted_scores)
-best_model <- h2o.getModel(as.character(sorted_scores$model[1]))
+grid <- h2o.getGrid("dl_grid",sort_by="err",decreasing=FALSE)
+grid
+
+## See what other "sort_by" criteria are allowed
+grid <- h2o.getGrid("dl_grid",sort_by="wrong_thing",decreasing=FALSE)
+
+## Sort by logloss
+h2o.getGrid("dl_grid",sort_by="logloss",decreasing=FALSE)
+
+## Find the best model and its full set of parameters
+grid@summary_table[1,]
+best_model <- h2o.getModel(grid@model_ids[[1]])
+best_model
+
 print(best_model@allparameters)
-best_err <- sorted_scores$misclassification[1]
-print(best_err)
+print(h2o.performance(best_model, valid=T))
+print(h2o.logloss(best_model, valid=T))
 ```
     
 ### Random Hyper-Parameter Search
-Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build `N` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters.
+Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build up to `max_models` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters. Note that we keep the `grid_id` the same, which will lead to the original grid search to be extended, such that we'll have one "leaderboard" across both grid searches. We also let the grid search stop automatically once the performance at the top of the leaderboard doesn't change much anymore, i.e., once the search has converged.
 
 ```r
-models <- c()
-for (i in 1:10) {
-  rand_activation <- c("TanhWithDropout", "RectifierWithDropout")[sample(1:2,1)]
-  rand_numlayers <- sample(2:5,1)
-  rand_hidden <- c(sample(10:50,rand_numlayers,T))
-  rand_l1 <- runif(1, 0, 1e-3)
-  rand_l2 <- runif(1, 0, 1e-3)
-  rand_dropout <- c(runif(rand_numlayers, 0, 0.6))
-  rand_input_dropout <- runif(1, 0, 0.5)
-  dlmodel <- h2o.deeplearning(
-    model_id=paste0("dl_random_model_", i),
-    training_frame=sampled_train,
-    validation_frame=valid, 
-    x=predictors, 
-    y=response,
-#    epochs=100,                    ## for real parameters: set high enough to get to convergence
-    epochs=1,
-    stopping_metric="misclassification",
-    stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
-    stopping_rounds=2,
-    score_validation_samples=10000, ## downsample validation set for faster scoring
-    score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
-    max_w2=10,                      ## can help improve stability for Rectifier
+hyper_params <- list(
+  activation=c("Rectifier","Tanh","Maxout","RectifierWithDropout","TanhWithDropout","MaxoutWithDropout"),
+  hidden=list(c(20,20),c(50,50),c(30,30,30),c(25,25,25,25)),
+  input_dropout_ratio=c(0,0.05),
+  l1=seq(0,1e-4,1e-6),
+  l2=seq(0,1e-4,1e-6)
+)
+hyper_params
 
-    ### Random parameters
-    activation=rand_activation, 
-    hidden=rand_hidden, 
-    l1=rand_l1, 
-    l2=rand_l2,
-    input_dropout_ratio=rand_input_dropout, 
-    hidden_dropout_ratios=rand_dropout
-  )                                
-  models <- c(models, dlmodel)
-}
+## Stop once the top 5 models are within 1% of each other (i.e., the windowed average varies less than 1%)
+search_criteria = list(strategy = "RandomDiscrete", max_runtime_secs = 36000, max_models = 1000, seed=1234567, stopping_rounds=5, stopping_tolerance=1e-2)
+dl_random_grid <- h2o.grid(
+  algorithm="deeplearning",
+  grid_id = "dl_grid",
+  training_frame=sampled_train,
+  validation_frame=valid, 
+  x=predictors, 
+  y=response,
+  epochs=1,
+  stopping_metric="logloss",
+  stopping_tolerance=1e-2,        ## stop when logloss does not improve by >=1% for 2 scoring events
+  stopping_rounds=2,
+  score_validation_samples=10000, ## downsample validation set for faster scoring
+  score_duty_cycle=0.025,         ## don't score more than 2.5% of the wall time
+  max_w2=10,                      ## can help improve stability for Rectifier
+  hyper_params = hyper_params,
+  search_criteria = search_criteria
+)                                
+grid <- h2o.getGrid("dl_grid",sort_by="logloss",decreasing=FALSE)
+grid
+
+grid@summary_table[1,]
+best_model <- h2o.getModel(grid@model_ids[[1]]) ## model with lowest logloss
+best_model
 ```
   
-We continue to look for the model with the lowest validation misclassification rate:
+Let's look at the model with the lowest validation misclassification rate:
 
 ```r
-best_err <- 1      ##start with the best reference model from the grid search above, if available
-for (i in 1:length(models)) {
-  err <- h2o.confusionMatrix(h2o.performance(models[[i]],valid=T))$Error[8]
-  if (err < best_err) {
-    best_err <- err
-    best_model <- models[[i]]
-  }
-}
+grid <- h2o.getGrid("dl_grid",sort_by="err",decreasing=FALSE)
+best_model <- h2o.getModel(grid@model_ids[[1]]) ## model with lowest classification error (on validation, since it was available during training)
 h2o.confusionMatrix(best_model,valid=T)
 best_params <- best_model@allparameters
+best_params$activation
 best_params$hidden
+best_params$input_dropout_ratio
 best_params$l1
 best_params$l2
-best_params$input_dropout_ratio
 ```            
     
 ###Checkpointing
