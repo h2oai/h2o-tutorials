@@ -314,8 +314,8 @@ Let's see which model had the lowest validation error:
 grid <- h2o.getGrid("dl_grid",sort_by="err",decreasing=FALSE)
 grid
 
-## See what other "sort_by" criteria are allowed
-grid <- h2o.getGrid("dl_grid",sort_by="wrong_thing",decreasing=FALSE)
+## To see what other "sort_by" criteria are allowed
+#grid <- h2o.getGrid("dl_grid",sort_by="wrong_thing",decreasing=FALSE)
 
 ## Sort by logloss
 h2o.getGrid("dl_grid",sort_by="logloss",decreasing=FALSE)
@@ -331,7 +331,7 @@ print(h2o.logloss(best_model, valid=T))
 ```
     
 ### Random Hyper-Parameter Search
-Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build up to `max_models` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters. Note that we keep the `grid_id` the same, which will lead to the original grid search to be extended, such that we'll have one "leaderboard" across both grid searches. We also let the grid search stop automatically once the performance at the top of the leaderboard doesn't change much anymore, i.e., once the search has converged.
+Often, hyper-parameter search for more than 4 parameters can be done more efficiently with random parameter search than with grid search. Basically, chances are good to find one of many good models in less time than performing an exhaustive grid search. We simply build up to `max_models` models with parameters drawn randomly from user-specified distributions (here, uniform). For this example, we use the adaptive learning rate and focus on tuning the network architecture and the regularization parameters. We also let the grid search stop automatically once the performance at the top of the leaderboard doesn't change much anymore, i.e., once the search has converged.
 
 ```r
 hyper_params <- list(
@@ -344,10 +344,10 @@ hyper_params <- list(
 hyper_params
 
 ## Stop once the top 5 models are within 1% of each other (i.e., the windowed average varies less than 1%)
-search_criteria = list(strategy = "RandomDiscrete", max_runtime_secs = 36000, max_models = 1000, seed=1234567, stopping_rounds=5, stopping_tolerance=1e-2)
+search_criteria = list(strategy = "RandomDiscrete", max_runtime_secs = 360, max_models = 100, seed=1234567, stopping_rounds=5, stopping_tolerance=1e-2)
 dl_random_grid <- h2o.grid(
   algorithm="deeplearning",
-  grid_id = "dl_grid",
+  grid_id = "dl_grid_random",
   training_frame=sampled_train,
   validation_frame=valid, 
   x=predictors, 
@@ -362,7 +362,7 @@ dl_random_grid <- h2o.grid(
   hyper_params = hyper_params,
   search_criteria = search_criteria
 )                                
-grid <- h2o.getGrid("dl_grid",sort_by="logloss",decreasing=FALSE)
+grid <- h2o.getGrid("dl_grid_random",sort_by="logloss",decreasing=FALSE)
 grid
 
 grid@summary_table[1,]
