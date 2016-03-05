@@ -14,6 +14,8 @@ H2O offers an R package that can be installed from CRAN, and a python package th
 
 H2O can also be downloaded directly from http://h2o.ai/download. 
 
+N.B. The version of H2O for this tutorial is here: http://h2o-release.s3.amazonaws.com/h2o/rel-tibshirani/3/index.html
+
 **Join the community**
 
 Visit the open source community forum at https://groups.google.com/d/forum/h2ostream. 
