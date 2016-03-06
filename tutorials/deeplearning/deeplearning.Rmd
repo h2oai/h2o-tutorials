@@ -498,6 +498,10 @@ For instructions on how to build unsupervised models with H2O Deep Learning, we 
 
 
 ##H2O Deep Learning Tips & Tricks
+
+####Performance Tuning
+The [Definitive H2O Deep Learning Performance Tuning](http://blog.h2o.ai/2015/08/deep-learning-performance-august/) blog post covers many of the following points, so it's highly recommended.
+
 ####Activation Functions
 While sigmoids have been used historically for neural networks, H2O Deep Learning implements `Tanh`, a scaled and shifted variant of the sigmoid which is symmetric around 0. Since its output values are bounded by -1..1, the stability of the neural network is rarely endangered. However, the derivative of the tanh function is always non-zero and back-propagation (training) of the weights is more computationally expensive than for rectified linear units, or `Rectifier`, which is `max(0,x)` and has vanishing gradient for `x<=0`, leading to much faster training speed for large networks and is often the fastest path to accuracy on larger problems. In case you encounter instabilities with the `Rectifier` (in which case model building is automatically aborted), try a limited value to re-scale the weights: `max_w2=10`. The `Maxout` activation function is computationally more expensive, but can lead to higher accuracy. It is a generalized version of the Rectifier with two non-zero channels. In practice, the `Rectifier` (and `RectifierWithDropout`, see below) is the most versatile and performant option for most problems.
 
