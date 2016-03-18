@@ -2,7 +2,7 @@
 
 ### Slides
 
-* [PDF](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/building-a-smarter-application/BuildingASmarterApplication.pdf)
+* [PDF](https://github.com/h2oai/h2o-tutorials/blob/master/tutorials/building-a-smarter-application/BuildingASmarterApplication.pdf)
 * [Powerpoint](https://github.com/h2oai/h2o-tutorials/blob/master/tutorials/aws-lambda-app/BuildingAnAppWithAWSLambda.pptx)
 
 ### Code
