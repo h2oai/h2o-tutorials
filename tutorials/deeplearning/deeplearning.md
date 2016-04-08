@@ -130,7 +130,7 @@ Clearly, the dropout rate was too high or the number of epochs was too low for t
 More information about the parameters can be found in the [H2O Deep Learning booklet](http://h2o.ai/resources/).
 
 ## Cover Type Dataset
-We important the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
+We import the full cover type dataset (581k rows, 13 columns, 10 numerical, 3 categorical).
 We also split the data 3 ways: 60% for training, 20% for validation (hyper parameter tuning) and 20% for final testing.
 
 ```r
