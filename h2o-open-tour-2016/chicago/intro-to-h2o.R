@@ -258,7 +258,6 @@ nb_perf1 <- h2o.performance(model = nb_fit1,
 nb_perf2 <- h2o.performance(model = nb_fit2,
                             newdata = test)
 
-
 # Print model performance
 nb_perf1
 nb_perf2
