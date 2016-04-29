@@ -1,5 +1,5 @@
 # Introductory H2O Machine Learning Tutorial
-# Prepared by for H2O Open Chicago 2016: http://open.h2o.ai/chicago.html
+# Prepared for H2O Open Chicago 2016: http://open.h2o.ai/chicago.html
 
 
 # First step is to download & install the h2o R library
@@ -28,7 +28,7 @@ data$bad_loan <- as.factor(data$bad_loan)  #encode the binary repsonse as a fact
 
 
 # Partition the data into training, validation and test sets
-splits <- h2o.splitFrame(data, 
+splits <- h2o.splitFrame(data = data, 
                          ratios = c(0.7, 0.15),  #partition data into 70%, 15%, 15% chunks
                          seed = 1)  #setting a seed will guarantee reproducibility
 train <- splits[[1]]
@@ -241,18 +241,18 @@ plot(dl_fit3,
 
 # 5. Lastly, let's take a look at a Naive Bayes model
 nb_fit1 <- h2o.naiveBayes(x = x,
-                            y = y,
-                            training_frame = train,
-                            model_id = "nb_fit1")
+                          y = y,
+                          training_frame = train,
+                          model_id = "nb_fit1")
 
 # Next we add Laplace smoothing
 nb_fit2 <- h2o.naiveBayes(x = x,
-                            y = y,
-                            training_frame = train,
-                            model_id = "nb_fit2",
-                            laplace = 6)
+                          y = y,
+                          training_frame = train,
+                          model_id = "nb_fit2",
+                          laplace = 6)
 
-# Let's compare the performance of the two GBMs
+# Let's compare the performance of the two NB models
 nb_perf1 <- h2o.performance(model = nb_fit1,
                             newdata = test)
 nb_perf2 <- h2o.performance(model = nb_fit2,
