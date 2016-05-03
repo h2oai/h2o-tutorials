@@ -17,27 +17,47 @@ h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machin
 # The response column, bad_loan, is 1 if the loan was bad, and 0 otherwise
 
 # Import the data
-loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+loan_csv <- "/Users/me/h2oai/code/demos/lending_club/loan.csv"  # modify this for your machine
+# Alternatively, you can import the data directly from a URL
+#loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
 data <- h2o.importFile(loan_csv)  # 163,994 rows x 15 columns
+dim(data)
+# [1] 163994     15
 
 # Since we want to train a binary classification model, 
 # we must ensure that the response is coded as a factor
-# If the repsonse is 0/1, H2O will assume it's numeric,
+# If the response is 0/1, H2O will assume it's numeric,
 # which means that H2O will train a regression model instead
 data$bad_loan <- as.factor(data$bad_loan)  #encode the binary repsonse as a factor
-
+h2o.levels(data$bad_loan)  #optoional: after encoding, this shows the two factor levels, '0' and '1'
+# [1] "0" "1"
 
 # Partition the data into training, validation and test sets
 splits <- h2o.splitFrame(data = data, 
                          ratios = c(0.7, 0.15),  #partition data into 70%, 15%, 15% chunks
                          seed = 1)  #setting a seed will guarantee reproducibility
 train <- splits[[1]]
-valid <- splits[[3]]
-test <- splits[[2]]
+valid <- splits[[2]]
+test <- splits[[3]]
+
+# Take a look at the size of each partition
+# Notice that h2o.splitFrame uses approximate splitting not exact splitting (for efficiency)
+# so these are not exactly 70%, 15% and 15% of the total rows
+nrow(train)  # 114914
+nrow(valid) # 24499
+nrow(test)  # 24581
 
 # Identify response and predictor variables
 y <- "bad_loan"
 x <- setdiff(names(data), c(y, "int_rate"))  #remove the interest rate column because it's correlated with the outcome
+print(x)
+# [1] "loan_amnt"             "term"                 
+# [3] "emp_length"            "home_ownership"       
+# [5] "annual_inc"            "verification_status"  
+# [7] "purpose"               "addr_state"           
+# [9] "dti"                   "delinq_2yrs"          
+# [11] "revol_util"            "total_acc"            
+# [13] "longest_credit_length"
 
 
 
@@ -58,8 +78,13 @@ glm_fit1 <- h2o.glm(x = x,
                     model_id = "glm_fit1",
                     family = "binomial")  #similar to R's glm, h2o.glm has the family argument
 
-# Next we will do some automatic tuning by passing in 
-# a validation frame and set lambda_search = TRUE
+# Next we will do some automatic tuning by passing in a validation frame and setting 
+# `lambda_search = True`.  Since we are training a GLM with regularization, we should 
+# try to find the right amount of regularization (to avoid overfitting).  The model 
+# parameter, `lambda`, controls the amount of regularization in a GLM model and we can 
+# find the optimal value for `lambda` automatically by setting `lambda_search = TRUE` 
+# and passing in a validation frame (which is used to evaluate model performance using a 
+# particular value of lambda).
 glm_fit2 <- h2o.glm(x = x, 
                     y = y, 
                     training_frame = train,
@@ -78,25 +103,41 @@ glm_perf2 <- h2o.performance(model = glm_fit2,
 glm_perf1
 glm_perf2
 
+# Instead of printing the entire model performance metrics object, 
+# it is probably easier to print just the metric that you are interested in comparing.
 # Retreive test set AUC
-h2o.auc(glm_perf1)
-h2o.auc(glm_perf2)
+h2o.auc(glm_perf1)  #0.673463297871
+h2o.auc(glm_perf2)  #0.673426207356
+
+
 
 # Compare test set AUC to validation set AUC
-glm_fit2@model$validation_metrics
+glm_fit2@model$validation_metrics  #0.6734262073556496
+h2o.auc(glm_fit2, valid = TRUE)  #you can also use h2o.auc directly on a model to retreive AUC
+
+# This shows that the AUC evaluated on the validation set (0.673) is slightly higher 
+# than the AUC evaluated on the held-out test set (0.671).
 
 
 
 
 
 # 2. Now we will train a basic Random Forest model
+# Random Forest will infer the response distribution from the response encoding.
+# A seed is required for reproducibility.
 rf_fit1 <- h2o.randomForest(x = x,
                             y = y,
                             training_frame = train,
                             model_id = "rf_fit1",
                             seed = 1)
 
-# Next we will increase the number of trees
+# Next we will increase the number of trees used in the forest by setting `ntrees = 100`.  
+# The default number of trees in an H2O Random Forest is 50, so this RF will be twice as 
+# big as the default.  Usually increasing the number of trees in an RF will increase 
+# performance as well.  Unlike Gradient Boosting Machines (GBMs), Random Forests are fairly 
+# resistant (although not free from) overfitting by increasing the number of trees.  
+# See the GBM example below for additional guidance on preventing overfitting using H2O's 
+# early stopping functionality.
 rf_fit2 <- h2o.randomForest(x = x,
                             y = y,
                             training_frame = train,
@@ -180,6 +221,8 @@ plot(gbm_fit3,
      metric = "logloss")
 
 
+# Retreive the scoring history for a particular model
+h2o.scoreHistory(gbm_fit3)
 
 
 
@@ -190,21 +233,24 @@ dl_fit1 <- h2o.deeplearning(x = x,
                             model_id = "dl_fit1",
                             seed = 1)
 
-# Next we will increase the number of trees
+# Next we will increase the number of epochs and change the hidden layer architecture
 dl_fit2 <- h2o.deeplearning(x = x,
                             y = y,
                             training_frame = train,
                             model_id = "dl_fit2",
                             #validation_frame = valid,  #only used if stopping_rounds > 0
+                            stopping_rounds = 0,  # disable early stopping
+                            hidden= c(10,10),
                             epochs = 20,
                             seed = 1)
 
-# Now let's use early stopping to find optimal ntrees
+# Now let's use early stopping to find optimal number of epochs
 dl_fit3 <- h2o.deeplearning(x = x,
                             y = y,
                             training_frame = train,
                             model_id = "dl_fit3",
                             validation_frame = valid,  #in DL, early stopping is on by default
+                            hidden = c(10,10),
                             epochs = 20,
                             stopping_rounds = 3,          #used for early stopping
                             stopping_metric = "AUC",      #used for early stopping
