@@ -19,7 +19,7 @@ h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machin
 # Import the data
 loan_csv <- "/Users/me/h2oai/code/demos/lending_club/loan.csv"  # modify this for your machine
 # Alternatively, you can import the data directly from a URL
-#loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+#loan_csv <- "https://s3.amazonaws.com/h2o-datasets/loan.csv"
 data <- h2o.importFile(loan_csv)  # 163,994 rows x 15 columns
 dim(data)
 # [1] 163994     15
@@ -122,8 +122,11 @@ h2o.auc(glm_fit2, valid = TRUE)  #you can also use h2o.auc directly on a model t
 
 
 
-# 2. Now we will train a basic Random Forest model
-# Random Forest will infer the response distribution from the response encoding.
+# 2. Random Forest
+# H2O's Random Forest (RF) is implements a distributed version of the standard 
+# Random Forest algorithm and variable importance measures.
+# First we will train a basic Random Forest model with default parameters. 
+# Random Forest will infer the response distribution from the response encoding. 
 # A seed is required for reproducibility.
 rf_fit1 <- h2o.randomForest(x = x,
                             y = y,
@@ -157,11 +160,29 @@ rf_perf1
 rf_perf2
 
 # Retreive test set AUC
-h2o.auc(rf_perf1)  # 0.6569221
-h2o.auc(rf_perf2)  # 0.6630125
+h2o.auc(rf_perf1)  # 0.6650349613
+h2o.auc(rf_perf2)  # 0.671842491069
 
 
+# Cross-validate performance
+# Rather than using held-out test set to evaluate model performance, a user may wish 
+# to estimate model performance using cross-validation. Using the RF algorithm 
+# (with default model parameters) as an example, we demonstrate how to perform k-fold 
+# cross-validation using H2O. No custom code or loops are required, you simply specify 
+# the number of desired folds in the nfolds argument.
+# Since we are not going to use a test set here, we can use the original (full) dataset, 
+# which we called data rather than the subsampled train dataset. Note that this will 
+# take approximately k (nfolds) times longer than training a single RF model, since it 
+# will train k models in the cross-validation process (trained on n(k-1)/k rows), in 
+# addition to the final model trained on the full training_frame dataset with n rows.
 
+rf_fit3 <- h2o.randomForest(x = x,
+                            y = y,
+                            training_frame = train,
+                            model_id = "rf_fit3",
+                            ntrees = 100,
+                            seed = 1,
+                            nfolds = 5)
 
 
 # 3. Now we will train a basic GBM model

@@ -19,7 +19,7 @@ h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machin
 # Import the data
 loan_csv <- "/Users/me/h2oai/code/demos/lending_club/loan.csv"  # modify this for your machine
 # Alternatively, you can import the data directly from a URL
-#loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+#loan_csv <- "https://s3.amazonaws.com/h2o-datasets/loan.csv"
 data <- h2o.importFile(loan_csv)  # 163,994 rows x 15 columns
 dim(data)
 # [1] 163994     15
