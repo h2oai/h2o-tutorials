@@ -379,9 +379,11 @@ plot(gbm_fit3,
 # It can also be used to train an autoencoder, however, in the example below we will train 
 # a standard supervised prediction model.
 
+# Train a default DL
 # First we will train a basic DL model with default parameters. DL will infer the response 
 # distribution from the response encoding if not specified explicitly through the `distribution` 
-# argument. A seed is required for reproducibility.
+# argument.  H2O's DL will not be reproducbible if run on more than a single core, so in this example, 
+# the performance metrics below may vary slightly from what you see on your machine.
 # In H2O's DL, early stopping is enabled by default, so below, it will use the training set and 
 # default stopping parameters to perform early stopping.
 dl_fit1 <- h2o.deeplearning(x = x,
