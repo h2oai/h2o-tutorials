@@ -2,6 +2,7 @@
 # See gitbook command-line docs at:
 #
 #     https://github.com/GitbookIO/gitbook
+#     http://toolchain.gitbook.com/ebook.html
 #
 
 build:
