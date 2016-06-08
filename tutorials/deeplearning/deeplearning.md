@@ -1,4 +1,3 @@
-##AUTO-GENERATED - DO NOT EDIT##
 # Classification and Regression with H2O Deep Learning
 
 * Introduction
