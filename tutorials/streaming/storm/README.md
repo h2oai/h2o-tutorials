@@ -104,7 +104,7 @@ Let's take a look at a small piece of the training_data.csv file for a moment.  
 head -n 20 training_data.csv
 ```  
 
-| Label | Has4Legs | CoatColor | HairLength | TailLength | EnjoysPlay | StairsOutWindow | HoursSpentNapping | RespondsToCommands | EasilyFrightened | Age | Noise1             | Noise2             | Noise3              | Noise4             | Noise5             |
+| Label | Has4Legs | CoatColor | HairLength | TailLength | EnjoysPlay | StaresOutWindow | HoursSpentNapping | RespondsToCommands | EasilyFrightened | Age | Noise1             | Noise2             | Noise3              | Noise4             | Noise5             |
 |-------|----------|-----------|------------|------------|------------|-----------------|-------------------|--------------------|------------------|-----|--------------------|--------------------|---------------------|--------------------|--------------------|
 | dog   | 1        | Brown     | 0          | 2          | 1          | 1               | 2                 | 1                  | 0                | 4   | 0.852352328598499  | 0.229839221341535  | 0.576096264412627   | 0.0105558061040938 | 0.470826978096738  |
 | dog   | 1        | Brown     | 1          | 1          | 1          | 1               | 5                 | 0                  | 0                | 16  | 0.928460991941392  | 0.98618565662764   | 0.553872474469244   | 0.932764369761571  | 0.435074317501858  |
@@ -247,7 +247,7 @@ Building GBM model
 > df <- h2o.importFile(path = normalizePath("./training_data.csv"));
   |======================================================================| 100%
 > y <- "Label"
-> x <- c("Has4Legs","CoatColor","HairLength","TailLength","EnjoysPlay","StairsOutWindow","HoursSpentNapping","RespondsToCommands","EasilyFrightened","Age", "Noise1", "Noise2", "Noise3", "Noise4", "Noise5")
+> x <- c("Has4Legs","CoatColor","HairLength","TailLength","EnjoysPlay","StaresOutWindow","HoursSpentNapping","RespondsToCommands","EasilyFrightened","Age", "Noise1", "Noise2", "Noise3", "Noise4", "Noise5")
 > gbm.h2o.fit <- h2o.gbm(training_frame = df, y = y, x = x, model_id = "GBMPojo", ntrees = 10)
   |======================================================================| 100%
 > 
@@ -339,7 +339,7 @@ preds[2] contains the probability that the observation is ColInfo_15.VALUES[1]
     /* HairLength */ null,
     /* TailLength */ null,
     /* EnjoysPlay */ null,
-    /* StairsOutWindow */ null,
+    /* StaresOutWindow */ null,
     /* HoursSpentNapping */ null,
     /* RespondsToCommands */ null,
     /* EasilyFrightened */ null,
