@@ -5,7 +5,7 @@
 # First step is to download & install the h2o R library
 # The latest version is always here: http://www.h2o.ai/download/h2o/r
 
-# Load the H2O library and start up the H2O cluter locally on your machine
+# Load the H2O library and start up the H2O cluster locally on your machine
 library(h2o)
 h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machine
          max_mem_size = "8G")  #max mem size is the maximum memory to allocate to H2O
