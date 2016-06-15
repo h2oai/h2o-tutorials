@@ -291,7 +291,7 @@ plot(gbm_fit3,
 
 # 4. Deep Learning
 # H2O's Deep Learning algorithm is a multilayer feed-forward artificial neural network.  
-# It can also be used to train an autoencoder, however, in the example below we will train 
+# It can also be used to train an autoencoder. In this example we will train 
 # a standard supervised prediction model.
 
 # Train a default DL
