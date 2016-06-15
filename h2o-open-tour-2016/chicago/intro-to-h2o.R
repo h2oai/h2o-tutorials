@@ -29,7 +29,7 @@ dim(data)
 # If the response is 0/1, H2O will assume it's numeric,
 # which means that H2O will train a regression model instead
 data$bad_loan <- as.factor(data$bad_loan)  #encode the binary repsonse as a factor
-h2o.levels(data$bad_loan)  #optoional: after encoding, this shows the two factor levels, '0' and '1'
+h2o.levels(data$bad_loan)  #optional: after encoding, this shows the two factor levels, '0' and '1'
 # [1] "0" "1"
 
 # Partition the data into training, validation and test sets
