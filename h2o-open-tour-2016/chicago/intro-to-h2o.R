@@ -169,7 +169,7 @@ h2o.auc(rf_perf2)  # 0.66525468051
 # cross-validation using H2O. No custom code or loops are required, you simply specify 
 # the number of desired folds in the nfolds argument.
 # Since we are not going to use a test set here, we can use the original (full) dataset, 
-# which we called data rather than the subsampled train dataset. Note that this will 
+# which we called data rather than the subsampled `train` dataset. Note that this will 
 # take approximately k (nfolds) times longer than training a single RF model, since it 
 # will train k models in the cross-validation process (trained on n(k-1)/k rows), in 
 # addition to the final model trained on the full training_frame dataset with n rows.
