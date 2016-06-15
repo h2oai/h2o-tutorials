@@ -192,7 +192,7 @@ h2o.auc(rf_fit3, xval = TRUE)  # 0.661201482614
 # increase performance quite a bit compared to the original GBM implementation.
 
 # Now we will train a basic GBM model
-# GBM will infer the response distribution from the response encoding if not specified 
+# The GBM model will infer the response distribution from the response encoding if not specified 
 # explicitly through the `distribution` argument. A seed is required for reproducibility.
 gbm_fit1 <- h2o.gbm(x = x,
                     y = y,
