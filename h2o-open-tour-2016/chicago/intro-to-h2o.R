@@ -295,9 +295,9 @@ plot(gbm_fit3,
 # a standard supervised prediction model.
 
 # Train a default DL
-# First we will train a basic DL model with default parameters. DL will infer the response 
-# distribution from the response encoding if not specified explicitly through the `distribution` 
-# argument.  H2O's DL will not be reproducbible if run on more than a single core, so in this example, 
+# First we will train a basic DL model with default parameters. The DL will infer the response 
+# distribution from the response encoding if it is not specified explicitly through the `distribution` 
+# argument.  H2O's DL will not be reproducible if it is run on more than a single core, so in this example, 
 # the performance metrics below may vary slightly from what you see on your machine.
 # In H2O's DL, early stopping is enabled by default, so below, it will use the training set and 
 # default stopping parameters to perform early stopping.
@@ -310,7 +310,7 @@ dl_fit1 <- h2o.deeplearning(x = x,
 # Train a DL with new architecture and more epochs.
 # Next we will increase the number of epochs used in the GBM by setting `epochs=20` (the default is 10).  
 # Increasing the number of epochs in a deep neural net may increase performance of the model, however, 
-# you have to be careful not to overfit your model.  To automatically find the optimal number of epochs, 
+# you have to be careful not to overfit your model to your training data.  To automatically find the optimal number of epochs, 
 # you must use H2O's early stopping functionality.  Unlike the rest of the H2O algorithms, H2O's DL will 
 # use early by default, so we will first turn it off in the next example by setting `stopping_rounds=0`, 
 #for comparison.
