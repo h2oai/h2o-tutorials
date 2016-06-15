@@ -65,7 +65,7 @@ print(x)
 # We will start by training a single model from each of the H2O supervised algos:
 # 1. Generalized Linear Model (GLM)
 # 2. Random Forest (RF)
-# 3. Gradient Boosting Machine (RF)
+# 3. Gradient Boosting Machine (GBM)
 # 4. Deep Learning (DL)
 # 5. Naive Bayes (NB)
 
