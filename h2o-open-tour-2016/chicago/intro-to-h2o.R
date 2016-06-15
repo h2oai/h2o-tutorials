@@ -134,9 +134,9 @@ rf_fit1 <- h2o.randomForest(x = x,
 
 # Next we will increase the number of trees used in the forest by setting `ntrees = 100`.  
 # The default number of trees in an H2O Random Forest is 50, so this RF will be twice as 
-# big as the default.  Usually increasing the number of trees in an RF will increase 
+# big as the default.  Usually increasing the number of trees in a RF will increase 
 # performance as well.  Unlike Gradient Boosting Machines (GBMs), Random Forests are fairly 
-# resistant (although not free from) overfitting by increasing the number of trees.  
+# resistant (although not free from) overfitting.
 # See the GBM example below for additional guidance on preventing overfitting using H2O's 
 # early stopping functionality.
 rf_fit2 <- h2o.randomForest(x = x,
