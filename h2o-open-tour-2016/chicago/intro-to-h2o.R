@@ -124,7 +124,7 @@ glm_fit2@model$validation_metrics  #0.675512216705
 # H2O's Random Forest (RF) implements a distributed version of the standard 
 # Random Forest algorithm and variable importance measures.
 # First we will train a basic Random Forest model with default parameters. 
-# Random Forest will infer the response distribution from the response encoding. 
+# The Random Forest model will infer the response distribution from the response encoding. 
 # A seed is required for reproducibility.
 rf_fit1 <- h2o.randomForest(x = x,
                             y = y,
