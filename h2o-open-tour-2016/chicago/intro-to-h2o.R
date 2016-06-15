@@ -217,11 +217,11 @@ gbm_fit2 <- h2o.gbm(x = x,
 
 # We will again set `ntrees = 500`, however, this time we will use early stopping in order to 
 # prevent overfitting (from too many trees).  All of H2O's algorithms have early stopping available, 
-# however, with the exception of Deep Learning, it is not enabled by default.  
+# however early stopping is not enabled by default (with the exception of Deep Learning).  
 # There are several parameters that should be used to control early stopping.  The three that are 
-# generic to all the algorithms are: `stopping_rounds`, `stopping_metric` and `stopping_tolerance`.  
+# common to all the algorithms are: `stopping_rounds`, `stopping_metric` and `stopping_tolerance`.  
 # The stopping metric is the metric by which you'd like to measure performance, and so we will choose 
-# AUC here.  The `score_tree_interval` is a parameter specific to Random Forest and GBM.  
+# AUC here.  The `score_tree_interval` is a parameter specific to the Random Forest model and the GBM.  
 # Setting `score_tree_interval = 5` will score the model after every five trees.  The parameters we 
 # have set below specify that the model will stop training after there have been three scoring intervals 
 # where the AUC has not increased more than 0.0005.  Since we have specified a validation frame, 
