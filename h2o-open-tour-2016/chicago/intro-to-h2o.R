@@ -312,8 +312,8 @@ dl_fit1 <- h2o.deeplearning(x = x,
 # Increasing the number of epochs in a deep neural net may increase performance of the model, however, 
 # you have to be careful not to overfit your model to your training data.  To automatically find the optimal number of epochs, 
 # you must use H2O's early stopping functionality.  Unlike the rest of the H2O algorithms, H2O's DL will 
-# use early by default, so we will first turn it off in the next example by setting `stopping_rounds=0`, 
-#for comparison.
+# use early stopping by default, so for comparison we will first turn off early stopping.  We do this in the next example 
+# by setting `stopping_rounds=0`.
 dl_fit2 <- h2o.deeplearning(x = x,
                             y = y,
                             training_frame = train,
@@ -325,9 +325,9 @@ dl_fit2 <- h2o.deeplearning(x = x,
                             seed = 1)
 
 # Train a DL with early stopping
-# This example will use the same model parameters as `dl_fit2`, however, we will turn on early 
-# stopping and specify the stopping criterion.  We will also pass a validation set, as is recommended 
-# for early stopping.
+# This example will use the same model parameters as `dl_fit2`. This time, we will turn on 
+# early stopping and specify the stopping criterion.  We will also pass a validation set, as is
+# recommended for early stopping.
 dl_fit3 <- h2o.deeplearning(x = x,
                             y = y,
                             training_frame = train,
