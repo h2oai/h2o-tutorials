@@ -295,7 +295,7 @@ plot(gbm_fit3,
 # a standard supervised prediction model.
 
 # Train a default DL
-# First we will train a basic DL model with default parameters. The DL will infer the response 
+# First we will train a basic DL model with default parameters. The DL model will infer the response 
 # distribution from the response encoding if it is not specified explicitly through the `distribution` 
 # argument.  H2O's DL will not be reproducible if it is run on more than a single core, so in this example, 
 # the performance metrics below may vary slightly from what you see on your machine.
