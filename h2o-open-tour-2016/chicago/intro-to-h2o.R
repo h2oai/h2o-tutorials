@@ -421,7 +421,7 @@ plot(dl_fit3,
 # or GBM, however it is still a popular algorithm, especially in the text domain (when your 
 # input is text encoded as "Bag of Words", for example).  The Naive Bayes algorithm is for 
 # binary or multiclass classification problems only, not regression.  Therefore, your response 
-# must be a factor instead of numeric.
+# must be a factor instead of a numeric.
 
 # First we will train a basic NB model with default parameters. 
 nb_fit1 <- h2o.naiveBayes(x = x,
