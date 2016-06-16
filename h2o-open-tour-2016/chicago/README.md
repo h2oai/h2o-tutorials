@@ -1,6 +1,6 @@
 # H2O Open Chicago Training 
 
-The training is broken up into two modules, an introductory machine learning module and a grid search / model selection module.  The slides that accompany this tutorial are available [here](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-chicago-2016-training.pdf).
+The training is broken up into two modules, an introductory machine learning module and a grid search / model selection module.  The slides that accompany this tutorial are available [here](https://github.com/h2oai/h2o-tutorials/raw/master/h2o-open-tour-2016/chicago/h2o-open-chicago-2016-training.pdf).
 
 ### R Users
 
