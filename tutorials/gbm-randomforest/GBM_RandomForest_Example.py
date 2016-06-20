@@ -24,7 +24,7 @@ import os
 
 # In[ ]:
 
-h2o.init(max_mem_size_GB = 2)            #uses all cores by default
+h2o.init(max_mem_size = "2G")             #specify max number of bytes. uses all cores by default.
 h2o.remove_all()                          #clean slate, in case cluster was already running
 
 
