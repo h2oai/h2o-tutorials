@@ -39,7 +39,7 @@ public class GBMPojo extends GenModel {
     /* HairLength */ null,
     /* TailLength */ null,
     /* EnjoysPlay */ null,
-    /* StairsOutWindow */ null,
+    /* StaresOutWindow */ null,
     /* HoursSpentNapping */ null,
     /* RespondsToCommands */ null,
     /* EasilyFrightened */ null,
@@ -96,7 +96,7 @@ class NamesHolder_GBMPojo implements java.io.Serializable {
       sa[2] = "HairLength";
       sa[3] = "TailLength";
       sa[4] = "EnjoysPlay";
-      sa[5] = "StairsOutWindow";
+      sa[5] = "StaresOutWindow";
       sa[6] = "HoursSpentNapping";
       sa[7] = "RespondsToCommands";
       sa[8] = "EasilyFrightened";
@@ -186,7 +186,7 @@ class GBMPojo_Tree_1_class_0 {
           ? 0.08193019f
           : (data[3 /* TailLength */] <6.0f
             ? (data[13 /* Noise4 */] <0.018522264f ? 0.1432611f : 0.14191039f)
-            : (data[5 /* StairsOutWindow */] <0.5f ? 0.062075198f : 0.14195327f)))
+            : (data[5 /* StareOutWindow */] <0.5f ? 0.062075198f : 0.14195327f)))
         : 0.011091855f)
       : (data[3 /* TailLength */] <2.5f
         ? (data[12 /* Noise3 */] <0.48935533f ? 0.14267492f : 0.14855684f)
@@ -244,7 +244,7 @@ class GBMPojo_Tree_3_class_0 {
           ? 0.07114688f
           : (data[3 /* TailLength */] <6.0f
             ? (data[13 /* Noise4 */] <0.018522264f ? 0.13385855f : 0.13175501f)
-            : (data[5 /* StairsOutWindow */] <0.5f ? 0.0474084f : 0.13182291f)))
+            : (data[5 /* StaresOutWindow */] <0.5f ? 0.0474084f : 0.13182291f)))
         : 0.009055963f)
       : (data[3 /* TailLength */] <3.5f
         ? (data[7 /* RespondsToCommands */] <0.5f
@@ -256,7 +256,7 @@ class GBMPojo_Tree_3_class_0 {
           ? (data[7 /* RespondsToCommands */] <0.5f
             ? (data[10 /* Noise1 */] <0.3829831f ? -0.2004312f : -0.19511971f)
             : -0.038507923f)
-          : (data[5 /* StairsOutWindow */] <0.5f
+          : (data[5 /* StaresOutWindow */] <0.5f
             ? -0.14426081f
             : (data[9 /* Age */] != 2.0f ? -0.19771059f : -0.16344947f)))));
     return pred;
@@ -358,7 +358,7 @@ class GBMPojo_Tree_6_class_0 {
           ? (data[7 /* RespondsToCommands */] <0.5f
             ? (data[6 /* HoursSpentNapping */] != 5.0f ? -0.16521677f : -0.15657602f)
             : -0.017920874f)
-          : (data[5 /* StairsOutWindow */] <0.5f
+          : (data[5 /* StaresOutWindow */] <0.5f
             ? -0.109569974f
             : (data[2 /* HairLength */] <0.5f ? -0.18520229f : -0.15443023f)))));
     return pred;
@@ -384,7 +384,7 @@ class GBMPojo_Tree_7_class_0 {
           ? 0.04761952f
           : (data[3 /* TailLength */] <6.0f
             ? (data[13 /* Noise4 */] <0.018522264f ? 0.122064196f : 0.11927856f)
-            : (data[5 /* StairsOutWindow */] <0.5f ? 0.0151380105f : 0.11992228f)))
+            : (data[5 /* StaresOutWindow */] <0.5f ? 0.0151380105f : 0.11992228f)))
         : -6.6823204E-4f)
       : (data[3 /* TailLength */] <2.5f
         ? (!GenModel.bitSetContains(GRPSPLIT1, 0, (int) data[1 /* CoatColor */]) ? 0.121530764f : 0.12643112f)
@@ -424,7 +424,7 @@ class GBMPojo_Tree_8_class_0 {
           ? (data[7 /* RespondsToCommands */] <0.5f ? -0.12763098f : 0.033691287f)
           : (data[3 /* TailLength */] <5.5f
             ? (data[7 /* RespondsToCommands */] <0.5f ? -0.13796118f : -0.013975056f)
-            : (data[5 /* StairsOutWindow */] <0.5f ? -0.14589271f : -0.14130971f)))));
+            : (data[5 /* StaresOutWindow */] <0.5f ? -0.14589271f : -0.14130971f)))));
     return pred;
   }
   // {01111000 00000000 00000000 00000000}
@@ -450,13 +450,13 @@ class GBMPojo_Tree_9_class_0 {
         : (!GenModel.bitSetContains(GRPSPLIT1, 0, (int) data[1 /* CoatColor */])
           ? (data[3 /* TailLength */] <6.5f
             ? (data[3 /* TailLength */] <4.5f ? 0.11524487f : 0.11898457f)
-            : (data[5 /* StairsOutWindow */] <0.5f ? 0.0033368843f : 0.11584385f))
+            : (data[5 /* StaresOutWindow */] <0.5f ? 0.0033368843f : 0.11584385f))
           : 0.12325309f))
       : (data[3 /* TailLength */] <3.5f
         ? (!GenModel.bitSetContains(GRPSPLIT2, 0, (int) data[1 /* CoatColor */])
           ? (data[7 /* RespondsToCommands */] <0.5f ? -0.14521906f : 0.0061618523f)
           : (data[10 /* Noise1 */] <0.5228332f ? 0.12177707f : 0.13905832f))
-        : (data[5 /* StairsOutWindow */] <0.5f
+        : (data[5 /* StaresOutWindow */] <0.5f
           ? -0.053777825f
           : (data[8 /* EasilyFrightened */] <0.5f
             ? (data[7 /* RespondsToCommands */] <0.5f ? -0.14158723f : -0.020394998f)
