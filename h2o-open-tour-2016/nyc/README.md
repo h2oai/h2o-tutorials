@@ -2,6 +2,8 @@
 
 The training is available in R, Python, and Flow. At the same time you can look over the presentation slides [here](Intro_To_R_Python_Flow.pdf).
 
+## Please change the data path in all the scripts to where you land the data!
+
 ### R Users
 
 R users can use RStudio or the R console to execute the [R script](R/Chicago_Airlines_Demo.r).
