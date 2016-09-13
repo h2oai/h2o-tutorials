@@ -1,0 +1,7 @@
+"loan_amnt" "term" "home_ownership" "annual_inc" "verification_status" "purpose" "addr_state" "dti" "delinq_2yrs" "open_acc" "pub_rec" "revol_bal" "total_acc" "emp_length" "credit_length_in_years" "inq_last_6mths" "revol_util"
+5000 " 36 months" "RENT" 24000 "verified" "credit_card" "AZ" 27.65 0 3 0 13648 9 10 26 1 83.7
+2500 " 60 months" "RENT" 30000 "verified" "car" "GA" 1 0 3 0 1687 4 0 12 5 9.4
+10000 " 36 months" "RENT" 49200 "verified" "other" "CA" 20 0 10 0 5598 37 10 15 1 21
+5000 " 36 months" "RENT" 36000 "verified" "wedding" "AZ" 11.2 0 9 0 7963 12 3 7 3 28.3
+3000 " 36 months" "RENT" 48000 "verified" "car" "CA" 5.35 0 4 0 8221 4 9 4 2 87.5
+5600 " 60 months" "OWN" 40000 "verified" "small_business" "CA" 5.55 0 11 0 5210 13 4 7 2 32.6
