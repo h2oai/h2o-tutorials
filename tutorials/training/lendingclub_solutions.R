@@ -6,12 +6,14 @@ small_test <- "http://h2o-public-test-data.s3.amazonaws.com/bigdata/laptop/lendi
 
 ## Task 1: Import Data
 loanStats <- h2o.importFile(path = small_test, parse = F)
-col_types <- c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'enum', 'string', 'numeric',
-               'enum', 'enum', 'enum', 'string', 'enum', 'numeric', 'enum', 'enum', 'enum', 'enum',
-               'string', 'enum', 'enum', 'enum', 'enum', 'enum', 'numeric', 'numeric', 'enum',
-               'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'string', 'numeric',
-               'enum', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric',
-               'numeric', 'numeric', 'enum', 'numeric', 'enum', 'enum', 'numeric', 'enum', 'numeric')
+## Parse with user imposed schema which changes the column types of column:
+## 'int_rate', 'revol_util', 'emp_length', 'verification_status' to String instead of Enum
+col_types <- c('Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Enum', 'String', 'Numeric', 
+               'Enum', 'Enum', 'Enum', 'String', 'Enum', 'Numeric', 'String', 'Time', 'Enum', 'Enum', 
+               'String', 'Enum', 'Enum', 'Enum', 'Enum', 'Enum', 'Numeric', 'Numeric', 'Time', 'Numeric', 
+               'Enum', 'Enum', 'Numeric', 'Numeric', 'Numeric', 'String', 'Numeric', 'Enum', 'Numeric', 
+               'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 
+               'Enum', 'Numeric', 'Enum', 'Time', 'Numeric', 'Enum', 'Numeric')
 loanStats <- h2o.parseRaw(data = loanStats, destination_frame = "loanStats", col.types = col_types)
 
 ## Task 2: Look at the levels in the response column loan_status
@@ -52,18 +54,16 @@ loanStats$emp_length <- h2o.sub(x = loanStats$emp_length, pattern = "< 1", repla
 loanStats$emp_length <- h2o.sub(x = loanStats$emp_length, pattern = "10\\+", replacement = "10")
 loanStats$emp_length <- as.numeric(loanStats$emp_length)
 
-## Task 6: Convert string columns to dates
-## Also create new feature called "credit_length_in_years"
+## Task 6: Create new feature called "credit_length_in_years"
 ## Hint: Use the columns "earliest_cr_line" and "issue_d"
-time1 <- as.Date(h2o.strsplit(x = loanStats$earliest_cr_line, split = "-")[,2], format = "%Y")
-time2 <- as.Date(h2o.strsplit(x = loanStats$issue_d, split = "-")[,2], format = "%Y")
-loanStats$credit_length_in_years <- year(time2) - year(time1)
+loanStats$credit_length_in_years <- h2o.year(loanStats$issue_d) - h2o.year(loanStats$earliest_cr_line)
 
 ## Task 7: Use h2o.sub to create two levels for column "verification_status" ie "verified" and "not verified"
-## Hint: Use h2o.table to examine levels within "verification_status", warning messages can be ignored
+## Hint: Use h2o.table to examine levels within "verification_status"
 loanStats$verification_status <- h2o.sub(x = loanStats$verification_status, pattern = "VERIFIED - income source", replacement = "verified")
 loanStats$verification_status <- h2o.sub(x = loanStats$verification_status, pattern = "VERIFIED - income", replacement = "verified")
-loanStats$verification_status <- as.h2o(as.matrix(loanStats$verification_status))
+loanStats$verification_status <- as.factor(loanStats$verification_status)
+h2o.table(loanStats$verification_status)
 
 ## Task 8: Define your response and predictor variables
 myY <- "bad_loan"
@@ -76,11 +76,17 @@ myX <-  c("loan_amnt", "term", "home_ownership", "annual_inc", "verification_sta
 split <- h2o.splitFrame(loanStats, ratios = 0.8)
 train <- split[[1]]
 valid <- split[[2]]
+## Hint: Use h2o.table to see if the ratio of the response class is maintained
+h2o.table(loanStats[,myY])
+h2o.table(train[,myY])
+h2o.table(valid[,myY])
 
 ## Task 10: Build model predicting good/bad loan 
 ## Note: Use any of the classification methods available including GLM, GBM, Random Forest, and Deep Learning
+glm_model <- h2o.glm(x = myX, y = myY, training_frame = train, validation_frame = valid,
+                     family = "binomial", model_id = "GLM_BadLoan")
 gbm_model <- h2o.gbm(x = myX, y = myY, training_frame = train, validation_frame = valid,
-                     learn_rate = 0.05, score_each_iteration = T, ntrees = 100)
+                     learn_rate = 0.05, score_each_iteration = T, ntrees = 100, model_id = "GBM_BadLoan")
 
 ## Task 11: Plot the scoring history to make sure you're not overfitting
 ## Hint: Use plot function on the model object

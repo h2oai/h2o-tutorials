@@ -6,12 +6,14 @@ small_test <- "http://h2o-public-test-data.s3.amazonaws.com/bigdata/laptop/lendi
 
 ## Task 1: Import Data
 loanStats <- h2o.importFile(path = small_test, parse = F)
-col_types <- c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'enum', 'string', 'numeric',
-               'enum', 'enum', 'enum', 'string', 'enum', 'numeric', 'enum', 'enum', 'enum', 'enum',
-               'string', 'enum', 'enum', 'enum', 'enum', 'enum', 'numeric', 'numeric', 'enum',
-               'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'string', 'numeric',
-               'enum', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric',
-               'numeric', 'numeric', 'enum', 'numeric', 'enum', 'enum', 'numeric', 'enum', 'numeric')
+## Parse with user imposed schema which changes the column types of column:
+## 'int_rate', 'revol_util', 'emp_length', 'verification_status' to String instead of Enum
+col_types <- c('Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Enum', 'String', 'Numeric', 
+               'Enum', 'Enum', 'Enum', 'String', 'Enum', 'Numeric', 'String', 'Time', 'Enum', 'Enum', 
+               'String', 'Enum', 'Enum', 'Enum', 'Enum', 'Enum', 'Numeric', 'Numeric', 'Time', 'Numeric', 
+               'Enum', 'Enum', 'Numeric', 'Numeric', 'Numeric', 'String', 'Numeric', 'Enum', 'Numeric', 
+               'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 
+               'Enum', 'Numeric', 'Enum', 'Time', 'Numeric', 'Enum', 'Numeric')
 loanStats <- h2o.parseRaw(data = loanStats, destination_frame = "loanStats", col.types = col_types)
 
 ## Task 2: Look at the levels in the response column loan_status
@@ -53,15 +55,13 @@ loanStats$emp_length <- h2o.trim(loanStats$emp_length)
 
 
 
-## Task 6: Convert string columns to dates
-## Also create new feature called "credit_length_in_years"
+## Task 6: Create new feature called "credit_length_in_years"
 ## Hint: Use the columns "earliest_cr_line" and "issue_d"
 
 
-
-
 ## Task 7: Use h2o.sub to create two levels for column "verification_status" ie "verified" and "not verified"
-## Hint: Use h2o.table to examine levels within "verification_status", warning messages can be ignored
+## Hint: Use h2o.table to examine levels within "verification_status"
+
 
 
 
@@ -72,6 +72,7 @@ myX <-  c()
 
 ## Task 9: Do a test-train split (80-20)
 ## Hint: Use h2o.splitFrame ONLY once
+## Hint: Use h2o.table to see if the ratio of the response class is maintained
 
 
 
