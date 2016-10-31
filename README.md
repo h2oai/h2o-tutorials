@@ -26,3 +26,11 @@ Tutorial versions in named branches are snapshotted for specific events.  Script
 | --- | --- |
 | Training material | <https://github.com/h2oai/h2o-tutorials/blob/h2o-world-2015-training/SUMMARY.md> |
 | Tibshirani-3 H2O release | <http://h2o-release.s3.amazonaws.com/h2o/rel-tibshirani/3/index.html> |
+
+
+### R Tutorials
+
+- [Intro to H2O in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.R)
+- [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.R)
+- [H2O Deep Learning in R](http://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html)
+- [H2O Ensemble (Stacking)](http://learn.h2o.ai/content/tutorials/ensembles-stacking/index.html)
