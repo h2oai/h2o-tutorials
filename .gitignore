@@ -1,1 +1,8 @@
-“/_book/”
+_book
+
+node_modules
+tutorials/deeplearning/.Rapp.history
+
+tutorials/deeplearning/.Rhistory
+
+H2OTutorialsBook.pdf
