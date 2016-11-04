@@ -1,6 +1,6 @@
 # H2O Tutorials 
 
-This document contains tutorials and training materials for H2O-3.  For questions, visit the H2O community forum at:
+This document contains tutorials and training materials for H2O-3.  For questions or feature requests, visit the H2O community forum at [https://community.h2o.ai](https://community.h2o.ai/index.html), or join the "H2O Stream" Google Group:
 
 * Web: <https://groups.google.com/forum/#!forum/h2ostream>
 * E-mail: <mailto:h2ostream@googlegroups.com>
@@ -34,3 +34,9 @@ Tutorial versions in named branches are snapshotted for specific events.  Script
 - [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.R)
 - [H2O Deep Learning in R](http://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html)
 - [H2O Ensemble (Stacking)](http://learn.h2o.ai/content/tutorials/ensembles-stacking/index.html)
+
+
+### Python Tutorials
+
+- [Intro to H2O in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.ipynb)
+- [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.ipynb)
