@@ -344,10 +344,30 @@ fit <- h2o.ensemble(x = x, y = y,
                      cvControl = list(V = 5))
 
 perf <- h2o.ensemble_performance(fit, newdata = test)
-perf
 ```
 
-We actually lose performance by removing the weak learners!  This demonstrates the power of stacking.
+We actually lose ensemble performance by removing the weak learners!  This demonstrates the power of stacking with a large and diverse set of base learners.
+
+
+```r
+> perf
+
+Base learner performance, sorted by specified metric:
+             learner       AUC
+1 h2o.randomForest.1 0.7668024
+2 h2o.randomForest.2 0.7697849
+3          h2o.gbm.1 0.7751240
+5          h2o.gbm.8 0.7752852
+4          h2o.gbm.6 0.7771115
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (AUC): 0.778853964308554
+
+```
 
 At first thought, you may assume that removing less performant models would increase the perforamnce of the ensemble.  However, each learner has it's own unique contribution to the ensemble and the added diversity among learners usually improves performance.  The Super Learner algorithm learns the optimal way of combining all these learners together in a way that is superior to other combination/blending methods.
 
@@ -372,8 +392,12 @@ family <- "binomial"
 #For binary classification, response should be a factor
 train[,y] <- as.factor(train[,y])
 test[,y] <- as.factor(test[,y])
+```
 
 
+Cross-validate and train a handful of base learners and then use the `h2o.stack()` function to create the ensemble:
+
+```r
 # The h2o.stack function is an alternative to the h2o.ensemble function, which
 # allows the user to specify H2O models individually and then stack them together
 # at a later time.  Saved models, re-loaded from disk, can also be stacked.
