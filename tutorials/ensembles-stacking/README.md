@@ -62,7 +62,7 @@ Here is an outline of the tasks involved in training and testing a Super Learner
 #### Train the ensemble
 - Train each of the L base algorithms on the training set.
 - Perform k-fold cross-validation on each of these learners and collect the cross-validated predicted values from each of the L algorithms.
-- The N cross-validated predicted values from each of the L algorithms can be combined to form a new N x L matrix.  This matrix, along wtih the original response vector, is called the "level-one" data.
+- The N cross-validated predicted values from each of the L algorithms can be combined to form a new N x L matrix.  This matrix, along wtih the original response vector, is called the "level-one" data.  (N = number of rows in the training set)
 - Train the metalearning algorithm on the level-one data.
 - The "ensemble model" consists of the L base learning models and the metalearning model, which can then be used to generate predictions on a test set.
 
@@ -110,21 +110,23 @@ If run from plain R, execute R in the directory of this script. If run from RStu
 ```r
 library(h2oEnsemble)  # This will load the `h2o` R package as well
 h2o.init(nthreads = -1)  # Start an H2O cluster with nthreads = num cores on your machine
-h2o.removeAll() # Clean slate - just in case the cluster was already running
+h2o.removeAll() # (Optional) Remove all objects in H2O cluster
 ```
 
 
 ### Load Data into H2O Cluster
 
 First, import a sample binary outcome train and test set into the H2O cluster.
+
 ```r
-train <- h2o.importFile(path = normalizePath("../data/higgs_10k.csv"))
-test <- h2o.importFile(path = normalizePath("../data/higgs_test_5k.csv"))
-y <- "C1"
+train <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_train_5k.csv")
+test <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv")
+y <- "response"
 x <- setdiff(names(train), y)
+family <- "binomial"
 ```
 
-For binary classification, the response should be encoded as factor (also known as the [enum](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html) type in Java).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
+For binary classification, the response should be encoded as a [factor](http://stat.ethz.ch/R-manual/R-patched/library/base/html/factor.html) type (also known as the [enum](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html) type in Java or [categorial](http://pandas.pydata.org/pandas-docs/stable/categorical.html) in Python Pandas).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
 
 ```r
 train[,y] <- as.factor(train[,y])  
@@ -144,59 +146,94 @@ metalearner <- "h2o.glm.wrapper"
 
 ### Train an Ensemble
 Train the ensemble (using 5-fold internal CV) to generate the level-one data.  Note that more CV folds will take longer to train, but should increase performance.
+
 ```r
 fit <- h2o.ensemble(x = x, y = y, 
                     training_frame = train, 
-                    family = "binomial", 
+                    family = family, 
                     learner = learner, 
                     metalearner = metalearner,
                     cvControl = list(V = 5))
 ```
 
 
-### Predict 
-Generate predictions on the test set.
+### Evaluate Model Performance
+
+Since the response is binomial, we can use Area Under the ROC Curve ([AUC](https://www.kaggle.com/wiki/AUC)) to evaluate the model performance.  Compute test set performance, and sort by AUC (the default metric that is printed for a binomial classification):
+
 ```r
-pred <- predict(fit, test)
+perf <- h2o.ensemble_performance(fit, newdata = test)
+```
+
+Print the base learner and ensemble performance:
+
+```r
+> perf
+
+Base learner performance, sorted by specified metric:
+                   learner       AUC
+1          h2o.glm.wrapper 0.6824304
+4 h2o.deeplearning.wrapper 0.7006335
+2 h2o.randomForest.wrapper 0.7570211
+3          h2o.gbm.wrapper 0.7780807
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (AUC): 0.781580655670451
+```
+
+
+We can compare the performance of the ensemble to the performance of the individual learners in the ensemble.
+
+So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.778, as compared to 0.782 for the ensemble.  At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable. 
+
+To increase the performance of the ensemble, we have several options.  One of them is to increase the number of internal cross-validation folds using the `cvControl` argument.  The other options are to change the base learner library or the metalearning algorithm.
+
+Note that the ensemble results above are not reproducible since `h2o.deeplearning` is not reproducible when using multiple cores, and we did not set a seed for `h2o.randomForest.wrapper`.
+
+                    
+If we want to evaluate the model by a different metric, say "MSE", then we can pass that metric to the `print` method for and ensemble performance object as follows:
+
+```r
+> print(perf, metric = "MSE")
+
+Base learner performance, sorted by specified metric:
+                   learner       MSE
+4 h2o.deeplearning.wrapper 0.2305775
+1          h2o.glm.wrapper 0.2225176
+2 h2o.randomForest.wrapper 0.2014339
+3          h2o.gbm.wrapper 0.1916273
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (MSE): 0.1898735479034431
+```
+
+                    
+
+### Predict 
+
+If you actually need to generate the predictions (instead of looking only at model performance), you can use the `predict()` function with a test set.  Generate predictions on the test set and store as an H2O Frame:
+
+```r
+pred <- predict(fit, newdata = test)
+```
+
+If you need to bring the predictions back into R memory for futher processing, you can convert `pred` to a local R data.frame as follows:
+
+```r
 predictions <- as.data.frame(pred$pred)[,3]  #third column is P(Y==1)
 labels <- as.data.frame(test[,y])[,1]
 ```
 
 The `predict` method for an `h2o.ensemble` fit will return a list of two objects.  The `pred$pred` object contains the ensemble predictions, and `pred$basepred` is a matrix of predictions from each of the base learners.  In this particular example where we used four base learners, the `pred$basepred` matrix has four columns.  Keeping the base learner predictions around is useful for model inspection and will allow us to calculate performance of each of the base learners on the test set (for comparison to the ensemble).
 
-
-### Model Evaluation
-
-Since the response is binomial, we can use Area Under the ROC Curve ([AUC](https://www.kaggle.com/wiki/AUC)) to evaluate the model performance.  We first generate predictions on the test set and then calculate test set AUC using the [cvAUC](https://cran.r-project.org/web/packages/cvAUC/) R package.
-
-#### Ensemble test set AUC
-```r
-library(cvAUC)
-cvAUC::AUC(predictions = predictions, labels = labels)
-# 0.7888723
-```
-
-#### Base learner test set AUC
-We can compare the performance of the ensemble to the performance of the individual learners in the ensemble.  Again, we use the `AUC` utility function to calculate performance.
-
-```r
-L <- length(learner)
-auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
-data.frame(learner, auc)
-#                    learner       auc
-# 1          h2o.glm.wrapper 0.6871288
-# 2 h2o.randomForest.wrapper 0.7711654
-# 3          h2o.gbm.wrapper 0.7817075
-# 4 h2o.deeplearning.wrapper 0.7425813
-```
-
-So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.782, as compared to 0.789 for the ensemble.  At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable. 
-
-To increase the performance of the ensemble, we have several options.  One of them is to increase the number of internal cross-validation folds using the `cvControl` argument.  The other options are to change the base learner library or the metalearning algorithm.
-
-Note that the ensemble results above are not reproducible since `h2o.deeplearning` is not reproducible when using multiple cores, and we did not set a seed for `h2o.randomForest.wrapper`.
-
-Additional note: In a future version, performance metrics such as AUC will be computed automatically, as in the other H2O algos.
 
 
 ### Specifying new learners
@@ -234,6 +271,7 @@ h2o.deeplearning.7 <- function(..., hidden = c(100,100), activation = "Rectifier
 Let's grab a subset of these learners for our base learner library and re-train the ensemble.
 
 ### Customized base learner library
+
 ```r
 learner <- c("h2o.glm.wrapper",
              "h2o.randomForest.1", "h2o.randomForest.2",
@@ -242,82 +280,204 @@ learner <- c("h2o.glm.wrapper",
 ```
 
 Train with new library:
+
 ```r
 fit <- h2o.ensemble(x = x, y = y, 
                     training_frame = train,
-                    family = "binomial", 
+                    family = family, 
                     learner = learner, 
                     metalearner = metalearner,
                     cvControl = list(V = 5))
 ```
-Generate predictions on the test set:
-```r
-pred <- predict(fit, test)
-predictions <- as.data.frame(pred$pred)[,3]
-labels <- as.data.frame(test[,y])[,1]
-```
 
 Evaluate the test set performance: 
+
 ```r
-cvAUC::AUC(predictions = predictions , labels = labels)
-# 0.7904223
+perf <- h2o.ensemble_performance(fit, newdata = test)
 ```
+
 We see an increase in performance by including a more diverse library.
 
 Base learner test AUC (for comparison)
-```r
-L <- length(learner)
-auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
-data.frame(learner, auc)
 
-# learner       auc
-# 1    h2o.glm.wrapper 0.6871288
-# 2 h2o.randomForest.1 0.7809140
-# 3 h2o.randomForest.2 0.7835352
-# 4          h2o.gbm.1 0.7816863
-# 5          h2o.gbm.6 0.7821683
-# 6          h2o.gbm.8 0.7804483
-# 7 h2o.deeplearning.1 0.7160903
-# 8 h2o.deeplearning.6 0.7272538
-# 9 h2o.deeplearning.7 0.7379495
+```r
+> perf
+
+Base learner performance, sorted by specified metric:
+             learner       AUC
+1    h2o.glm.wrapper 0.6824304
+7 h2o.deeplearning.1 0.6897187
+8 h2o.deeplearning.6 0.6998472
+9 h2o.deeplearning.7 0.7048874
+2 h2o.randomForest.1 0.7668024
+3 h2o.randomForest.2 0.7697849
+4          h2o.gbm.1 0.7751240
+6          h2o.gbm.8 0.7752852
+5          h2o.gbm.6 0.7771115
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (AUC): 0.780924502576107
+
 ```
 
 So what happens to the ensemble if we remove some of the weaker learners?  Let's remove the GLM and DL from the learner library and see what happens...
 
 Here is a more stripped down version of the base learner library used above:
+
 ```r
 learner <- c("h2o.randomForest.1", "h2o.randomForest.2",
              "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8")
 ```
 
-Again re-train the ensemble:
+Again re-train the ensemble and evaluate the performance:
+
 ```r
 fit <- h2o.ensemble(x = x, y = y, 
                      training_frame = train,
-                     family = "binomial", 
+                     family = family, 
                      learner = learner, 
                      metalearner = metalearner,
                      cvControl = list(V = 5))
 
-# Generate predictions on the test set
-pred <- predict(fit, test)
-predictions <- as.data.frame(pred$pred)[,3]  #third column, p1 is P(Y==1)
-labels <- as.data.frame(test[,y])[,1]
-
-# Ensemble test AUC 
-cvAUC::AUC(predictions = predictions , labels = labels)
-# 0.7887694
+perf <- h2o.ensemble_performance(fit, newdata = test)
 ```
 
-We actually lose performance by removing the weak learners!  This demonstrates the power of stacking.
+We actually lose ensemble performance by removing the weak learners!  This demonstrates the power of stacking with a large and diverse set of base learners.
+
+
+```r
+> perf
+
+Base learner performance, sorted by specified metric:
+             learner       AUC
+1 h2o.randomForest.1 0.7668024
+2 h2o.randomForest.2 0.7697849
+3          h2o.gbm.1 0.7751240
+5          h2o.gbm.8 0.7752852
+4          h2o.gbm.6 0.7771115
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (AUC): 0.778853964308554
+
+```
 
 At first thought, you may assume that removing less performant models would increase the perforamnce of the ensemble.  However, each learner has it's own unique contribution to the ensemble and the added diversity among learners usually improves performance.  The Super Learner algorithm learns the optimal way of combining all these learners together in a way that is superior to other combination/blending methods.
 
+### Stacking Existing Model Sets
+
+You can also use an existing (cross-validated) list of H2O models as the starting point and use the `h2o.stack()` function to ensemble them together via a specified metalearner.  The base models must have been trained on the same dataset with same response and for cross-validation, must have all used the same folds.
+
+An example follows.  As above, start up the H2O cluster and load the training and test data.
+
+```r
+library(h2oEnsemble)
+h2o.init(nthreads = -1) # Start H2O cluster using all available CPU threads
+
+
+# Import a sample binary outcome train/test set into R
+train <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_train_5k.csv")
+test <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv")
+y <- "response"
+x <- setdiff(names(train), y)
+family <- "binomial"
+
+#For binary classification, response should be a factor
+train[,y] <- as.factor(train[,y])
+test[,y] <- as.factor(test[,y])
+```
+
+
+Cross-validate and train a handful of base learners and then use the `h2o.stack()` function to create the ensemble:
+
+```r
+# The h2o.stack function is an alternative to the h2o.ensemble function, which
+# allows the user to specify H2O models individually and then stack them together
+# at a later time.  Saved models, re-loaded from disk, can also be stacked.
+
+# The base models must use identical cv folds; this can be achieved in two ways:
+# 1. they be specified explicitly by using the fold_column argument, or
+# 2. use same value for `nfolds` and set `fold_assignment = "Modulo"`
+
+nfolds <- 5  
+
+glm1 <- h2o.glm(x = x, y = y, family = family, 
+                training_frame = train,
+                nfolds = nfolds,
+                fold_assignment = "Modulo",
+                keep_cross_validation_predictions = TRUE)
+
+gbm1 <- h2o.gbm(x = x, y = y, distribution = "bernoulli",
+                training_frame = train,
+                seed = 1,
+                nfolds = nfolds,
+                fold_assignment = "Modulo",
+                keep_cross_validation_predictions = TRUE)
+
+rf1 <- h2o.randomForest(x = x, y = y, # distribution not used for RF
+                        training_frame = train,
+                        seed = 1,
+                        nfolds = nfolds,
+                        fold_assignment = "Modulo",
+                        keep_cross_validation_predictions = TRUE)
+
+dl1 <- h2o.deeplearning(x = x, y = y, distribution = "bernoulli",
+                        training_frame = train,
+                        nfolds = nfolds,
+                        fold_assignment = "Modulo",
+                        keep_cross_validation_predictions = TRUE)
+
+models <- list(glm1, gbm1, rf1, dl1)
+metalearner <- "h2o.glm.wrapper"
+
+stack <- h2o.stack(models = models,
+                   response_frame = train[,y],
+                   metalearner = metalearner, 
+                   seed = 1,
+                   keep_levelone_data = TRUE)
+
+
+# Compute test set performance:
+perf <- h2o.ensemble_performance(stack, newdata = test)
+```
+
+Print base learner and ensemble test set performance:
+
+```r
+> print(perf)
+
+Base learner performance, sorted by specified metric:
+                                   learner       AUC
+1          GLM_model_R_1480128759162_16643 0.6822933
+4 DeepLearning_model_R_1480128759162_18909 0.7016809
+3          DRF_model_R_1480128759162_17790 0.7546005
+2          GBM_model_R_1480128759162_16661 0.7780807
+
+
+H2O Ensemble Performance on <newdata>:
+----------------
+Family: binomial
+
+Ensemble performance (AUC): 0.781241759877087
+```
+
+
 
 ## Roadmap for H2O Ensemble
+
 H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble) (tickets with the "Ensemble" tag). 
 
+**Update:** Ensembles have been implemented in the H2O Java core as model class, "H2OStackedEnsembleEstimator".  The code can be found on the [ensembles branch](https://github.com/h2oai/h2o-3/tree/ensembles) of h2o-3.  APIs in R and Python will be available soon.
+
 ### All done, shutdown H2O
+
 ```r
 h2o.shutdown()
 ```
