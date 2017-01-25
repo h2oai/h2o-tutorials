@@ -5,7 +5,6 @@ h2o.init(nthreads = -1)
 small_test <- "http://h2o-public-test-data.s3.amazonaws.com/bigdata/laptop/lending-club/LoanStats3a.csv"
 
 ## Task 1: Import Data
-loanStats <- h2o.importFile(path = small_test, parse = F)
 ## Parse with user imposed schema which changes the column types of column:
 ## 'int_rate', 'revol_util', 'emp_length', 'verification_status' to String instead of Enum
 col_types <- c('Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Enum', 'String', 'Numeric', 
@@ -14,7 +13,7 @@ col_types <- c('Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Enum', 'S
                'Enum', 'Enum', 'Numeric', 'Numeric', 'Numeric', 'String', 'Numeric', 'Enum', 'Numeric', 
                'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 'Numeric', 
                'Enum', 'Numeric', 'Enum', 'Time', 'Numeric', 'Enum', 'Numeric')
-loanStats <- h2o.parseRaw(data = loanStats, destination_frame = "loanStats", col.types = col_types)
+loanStats <- h2o.importFile(path = small_test, col.types = col_types)
 
 ## Task 2: Look at the levels in the response column loan_status
 ## Hint: Use h2o.table function on the response column, use as.data.frame to return the table to R
