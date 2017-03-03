@@ -543,7 +543,7 @@ Once these are installed, you may navigate to the *web* directory and start the 
 
 Now open up your browser and navigate to [http://localhost:4040](http://localhost:4040). Requires a modern browser (depends on [D3](http://d3js.org/) for animation).  
 
-Here's a [short video](https://www.youtube.com/watch?v=-DEbBlwBsdI) showing what it looks like all together.
+Here's a [short video](https://www.youtube.com/watch?v=NTUo5MyS6qE) showing what it looks like all together.
 
 Enjoy!
 
