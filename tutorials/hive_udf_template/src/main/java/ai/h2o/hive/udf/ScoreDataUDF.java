@@ -94,7 +94,7 @@ class ScoreDataUDF extends GenericUDF {
             } else if (o instanceof Short) {
               data[i] = ((Short) o).doubleValue();
             } else if (o == null) {
-              return null;
+              data[i] = Double.NaN;
             } else {
               throw new UDFArgumentException("scoredata(...): Cannot accept type: "
                   + o.getClass().toString() + " for argument # " + i + ".");
