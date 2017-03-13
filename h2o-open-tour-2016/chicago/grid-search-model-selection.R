@@ -17,9 +17,9 @@ h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machin
 # The response column, bad_loan, is 1 if the loan was bad, and 0 otherwise
 
 # Import the data
-loan_csv <- "/Volumes/H2OTOUR/loan.csv"  # modify this for your machine
+# loan_csv <- "/Volumes/H2OTOUR/loan.csv"  # modify this for your machine
 # Alternatively, you can import the data directly from a URL
-#loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+loan_csv <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
 data <- h2o.importFile(loan_csv)  # 163,987 rows x 15 columns
 dim(data)
 # [1] 163987     15
