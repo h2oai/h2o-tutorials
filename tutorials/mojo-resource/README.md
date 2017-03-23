@@ -9,7 +9,9 @@ This tutorial describes how to package an H2O MOJO model as a JAR resource.
 3. Setup main class & MOJO resource
 4. Compile and package as a JAR
 
-**H2O 3.10.4.2 or newer required!**
+**Requirements**
+1. H2O 3.10.4.2 or newer
+2. Maven (https://maven.apache.org/install.html) required to run tutorial but in general any other build tool (gradle etc.) can be used
 
 This repo represents the end state of the tutorial, and can be cloned, compiled, and run as follows:
 
