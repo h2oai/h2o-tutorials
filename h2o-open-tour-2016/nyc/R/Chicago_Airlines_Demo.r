@@ -90,7 +90,7 @@ auc_table1
 
 
 ## Join with weather data by Year, Month, and DayofMonth
-merged_data = h2o.merge(x = flights_hex, y = weather_hex, by.x = 1:3)
+merged_data = h2o.merge(x = flights_hex, y = weather_hex, by = colnames(flights_hex)[1:3])
 
 ## Split frame into test/train split
 split_weather = h2o.splitFrame(data = merged_data,
