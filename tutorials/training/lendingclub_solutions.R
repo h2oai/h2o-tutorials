@@ -50,7 +50,7 @@ loanStats$emp_length <- h2o.trim(loanStats$emp_length)
 ## Use h2o.sub to convert < 1 to 0 years and do the same for 10 + to 10 
 ## Hint: Be mindful of spaces between characters
 loanStats$emp_length <- h2o.sub(x = loanStats$emp_length, pattern = "< 1", replacement = "0")
-loanStats$emp_length <- h2o.sub(x = loanStats$emp_length, pattern = "10+", replacement = "10")
+loanStats$emp_length <- h2o.sub(x = loanStats$emp_length, pattern = "10\\\\+", replacement = "10")
 loanStats$emp_length <- as.numeric(loanStats$emp_length)
 
 ## Task 6: Create new feature called "credit_length_in_years"
