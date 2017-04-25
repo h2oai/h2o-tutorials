@@ -9,32 +9,24 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-![](https://media.giphy.com/media/Qh7QVjnRgP040/giphy.gif)
-
-<p><a href="http://giphy.com/gifs/Qh7QVjnRgP040">via GIPHY</a></p>
-
-
 This tutorial will demonstrate how to use the **h2o** R package to combine H2O models with XGBoost models into a Stacked Ensemble.
-
-
 
 ## Install XGBoost-enabled H2O
 
-Currently, XGBoost is available in a special development edition of H2O.  The Mac OS X version (with XGBoost compiled for Mac) is available (temporarily) [here](http://www.stat.berkeley.edu/~ledell/files/h2o-3.11.0.99999.zip).  Download the file, unzip it, and `cd` to the `./R/` directory.  Install the R package: `R CMD install ./R/h2o_3.11.0.99999.tar.gz`
+Currently, XGBoost is available in a special development edition of H2O.  The Mac OS X version (with XGBoost compiled for Mac) is available (temporarily) [here](https://slack-files.com/T0329MHH6-F53HJUP5E-11e85e527b).  Download the file, unzip it, and install the R package: `R CMD install ./R/h2o_3.11.0.99999.tar.gz`
 
-H2O ships with everything -- except the system library for multithreading (openMP).  On a Mac, you will need to install OpenMP.
+H2O ships with everything except the system library for multithreading (openMP).  On a Mac, you will need to install OpenMP, which you get easily via Homebrew.
 
 ```bash
 # Install OpenMP (required of xgboost-enabled h2o)
 brew install gcc --without-multilib
 ```
-Once the special edition **h2o** R package is installed, you are all set to start training H2O and XGBoost models from H2O.
+Once the special edition **h2o** R package is installed, you are all set to start training H2O and XGBoost models from H2O.  This distribution process will be modified when it's officially released (and these instructions will be updated accordingly).
 
 
 ## Train Base Learners
 
-Let's train and cross-validate a set of H2O and XGBoost models and then create a [Stacked Ensemble](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html) using the h2o R package.
+Let's train and cross-validate a set of H2O and XGBoost models and then create a [Stacked Ensemble](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html) using the **h2o** R package.
 
 ### Start H2O Cluster & Load Data
 
@@ -67,7 +59,6 @@ my_gbm <- h2o.gbm(x = x,
                   y = y,
                   training_frame = train,
                   distribution = "bernoulli",
-                  ntrees = 10,
                   max_depth = 3,
                   min_rows = 2,
                   learn_rate = 0.2,
@@ -80,7 +71,6 @@ my_gbm <- h2o.gbm(x = x,
 my_rf <- h2o.randomForest(x = x,
                           y = y,
                           training_frame = train,
-                          ntrees = 50,
                           nfolds = nfolds,
                           fold_assignment = "Modulo",
                           keep_cross_validation_predictions = TRUE,
@@ -95,7 +85,6 @@ my_dl <- h2o.deeplearning(x = x,
                           fold_assignment = "Modulo",
                           keep_cross_validation_predictions = TRUE,
                           seed = 1)
-
 ```
 
 
@@ -108,7 +97,7 @@ my_xgb1 <- h2o.xgboost(x = x,
                        y = y,
                        training_frame = train,
                        distribution = "bernoulli",
-                       ntrees = 100,
+                       ntrees = 50,
                        max_depth = 3,
                        min_rows = 2,
                        learn_rate = 0.2,
@@ -141,14 +130,17 @@ perf <- h2o.performance(ensemble, newdata = test)
 perf_gbm_test <- h2o.performance(my_gbm, newdata = test)
 perf_rf_test <- h2o.performance(my_rf, newdata = test)
 perf_dl_test <- h2o.performance(my_dl, newdata = test)
-# TO DO: Fix this bug, right now h2o.performance does not work on xgb models
-#perf_xgb1_test <- h2o.performance(my_xgb1, newdata = test) 
-#Error in Filter(function(mm) { : subscript out of bounds  
+perf_xgb1_test <- h2o.performance(my_xgb1, newdata = test)
 baselearner_best_auc_test <- max(h2o.auc(perf_gbm_test), 
                                  h2o.auc(perf_rf_test),
-                                 h2o.auc(perf_dl_test))#,
-#                                 h2o.auc(perf_xgb1_test))
+                                 h2o.auc(perf_dl_test),
+                                 h2o.auc(perf_xgb1_test))
 ensemble_auc_test <- h2o.auc(perf)
+```
+
+Compare the test set performance of the best base model to the ensemble.
+
+```{r print_perf}
 print(sprintf("Best Base-learner Test AUC:  %s", baselearner_best_auc_test))
 print(sprintf("Ensemble Test AUC:  %s", ensemble_auc_test))
 ```
