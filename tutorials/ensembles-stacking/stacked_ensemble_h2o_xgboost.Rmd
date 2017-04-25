@@ -21,20 +21,15 @@ This tutorial will demonstrate how to use the **h2o** R package to combine H2O m
 
 ## Install XGBoost-enabled H2O
 
-Currently, XGBoost is available in a special development edition of H2O, available (temporarily) [here](http://www.stat.berkeley.edu/~ledell/files/h2o-3.11.0.99999.zip).  Download the file, unzip it, and `cd` to the `./R/` directory.  Install the R package: `R CMD install ./R/h2o_3.11.0.99999.tar.gz`
+Currently, XGBoost is available in a special development edition of H2O.  The Mac OS X version (with XGBoost compiled for Mac) is available (temporarily) [here](http://www.stat.berkeley.edu/~ledell/files/h2o-3.11.0.99999.zip).  Download the file, unzip it, and `cd` to the `./R/` directory.  Install the R package: `R CMD install ./R/h2o_3.11.0.99999.tar.gz`
 
-H2O ships with everything -- except the system library for multithreading (openMP).  If you are on a Mac, you will need to install OpenMP.
-
-### Mac
+H2O ships with everything -- except the system library for multithreading (openMP).  On a Mac, you will need to install OpenMP.
 
 ```bash
 # Install OpenMP (required of xgboost-enabled h2o)
 brew install gcc --without-multilib
 ```
-
-For now, let's assume the h2o (+xgb) R package one is installed currently.
-
-
+Once the special edition **h2o** R package is installed, you are all set to start training H2O and XGBoost models from H2O.
 
 
 ## Train Base Learners
