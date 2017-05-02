@@ -123,14 +123,14 @@ $(document).ready(function () {
 </div>
 
 
-<p>This tutorial will demonstrate how to use the <strong>h2o</strong> R package to combine H2O models with XGBoost models into a Stacked Ensemble.</p>
+<p>This tutorial will demonstrate how to use the <strong>h2o</strong> R package to combine H2O models with XGBoost models into a Stacked Ensemble. This is a preview of upcoming H2O functionality. Please provide any feedback to erin_at_ h2o.ai.</p>
 <div id="install-xgboost-enabled-h2o" class="section level2">
 <h2>Install XGBoost-enabled H2O</h2>
-<p>Currently, XGBoost is available in a special development edition of H2O. The Mac OS X version (with XGBoost compiled for Mac) is available (temporarily) <a href="https://slack-files.com/T0329MHH6-F53HJUP5E-11e85e527b">here</a>. Download the file, unzip it, and install the R package: <code>R CMD install ./R/h2o_3.11.0.99999.tar.gz</code></p>
+<p>Currently, XGBoost is available in a special development edition of H2O. The Mac OS X version (with XGBoost compiled for Mac) is available (temporarily) <a href="https://slack-files.com/T0329MHH6-F53HJUP5E-11e85e527b">here</a>. Download the file, unzip it, and install the R package: <code>R CMD install ./R/h2o_3.11.0.99999.tar.gz</code> Linux binary available upon request.</p>
 <p>H2O ships with everything except the system library for multithreading (openMP). On a Mac, you will need to install OpenMP, which you get easily via Homebrew.</p>
 <pre class="bash"><code># Install OpenMP (required of xgboost-enabled h2o)
 brew install gcc --without-multilib</code></pre>
-<p>Once the special edition <strong>h2o</strong> R package is installed, you are all set to start training H2O and XGBoost models from H2O.</p>
+<p>Once the special edition <strong>h2o</strong> R package is installed, you are all set to start training H2O and XGBoost models from H2O. This distribution process will be modified when it’s officially released (and these instructions will be updated accordingly).</p>
 </div>
 <div id="train-base-learners" class="section level2">
 <h2>Train Base Learners</h2>
@@ -165,12 +165,12 @@ brew install gcc --without-multilib</code></pre>
 <pre><code>##  Connection successful!
 ## 
 ## R is connected to the H2O cluster: 
-##     H2O cluster uptime:         14 minutes 19 seconds 
+##     H2O cluster uptime:         12 minutes 5 seconds 
 ##     H2O cluster version:        3.11.0.99999 
-##     H2O cluster version age:    2 months and 26 days  
-##     H2O cluster name:           H2O_started_from_R_me_yst589 
+##     H2O cluster version age:    3 months and 1 day  
+##     H2O cluster name:           H2O_started_from_R_me_qvv541 
 ##     H2O cluster total nodes:    1 
-##     H2O cluster total memory:   3.15 GB 
+##     H2O cluster total memory:   3.12 GB 
 ##     H2O cluster total cores:    8 
 ##     H2O cluster allowed cores:  8 
 ##     H2O cluster healthy:        TRUE 
@@ -219,11 +219,13 @@ my_rf &lt;- h2o.randomForest(x = x,
                           keep_cross_validation_predictions = TRUE,
                           seed = 1)
 
-
 # Train &amp; Cross-validate a DNN
 my_dl &lt;- h2o.deeplearning(x = x,
                           y = y,
                           training_frame = train,
+                          l1 = 0.001,
+                          l2 = 0.001,
+                          hidden = c(200, 200, 200),
                           nfolds = nfolds,
                           fold_assignment = &quot;Modulo&quot;,
                           keep_cross_validation_predictions = TRUE,
@@ -231,7 +233,7 @@ my_dl &lt;- h2o.deeplearning(x = x,
 </div>
 <div id="xgboost-base-models" class="section level3">
 <h3>XGBoost base models</h3>
-<pre class="r"><code># Train &amp; Cross-validate a XGB-GBM
+<pre class="r"><code># Train &amp; Cross-validate a (shallow) XGB-GBM
 my_xgb1 &lt;- h2o.xgboost(x = x,
                        y = y,
                        training_frame = train,
@@ -243,6 +245,23 @@ my_xgb1 &lt;- h2o.xgboost(x = x,
                        nfolds = nfolds,
                        fold_assignment = &quot;Modulo&quot;,
                        keep_cross_validation_predictions = TRUE,
+                       seed = 1)
+
+
+# Train &amp; Cross-validate another (deeper) XGB-GBM
+my_xgb2 &lt;- h2o.xgboost(x = x,
+                       y = y,
+                       training_frame = train,
+                       distribution = &quot;bernoulli&quot;,
+                       ntrees = 50,
+                       max_depth = 8,
+                       min_rows = 1,
+                       learn_rate = 0.1,
+                       sample_rate = 0.7,
+                       col_sample_rate = 0.9,
+                       nfolds = nfolds,
+                       fold_assignment = &quot;Modulo&quot;,
+                       keep_cross_validation_predictions = TRUE,
                        seed = 1)</code></pre>
 </div>
 </div>
@@ -250,12 +269,12 @@ my_xgb1 &lt;- h2o.xgboost(x = x,
 <h2>Create a Stacked Ensemble</h2>
 <p>To maximize predictive power, will create an <a href="http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html">H2O Stacked Ensemble</a> from the models we created above and print the performance gain the ensemble has over the best base model.</p>
 <pre class="r"><code># Train a stacked ensemble using the H2O and XGBoost models from above
-base_models &lt;- list(my_gbm@model_id, my_rf@model_id, my_dl@model_id, my_xgb1@model_id)
+base_models &lt;- list(my_gbm@model_id, my_rf@model_id, my_dl@model_id,  
+                    my_xgb1@model_id, my_xgb2@model_id)
 
 ensemble &lt;- h2o.stackedEnsemble(x = x,
                                 y = y,
                                 training_frame = train,
-                                model_id = &quot;h2o_xgb_ensemble&quot;,
                                 base_models = base_models)
 
 # Eval ensemble performance on a test set
@@ -263,20 +282,15 @@ perf &lt;- h2o.performance(ensemble, newdata = test)
 
 
 # Compare to base learner performance on the test set
-perf_gbm_test &lt;- h2o.performance(my_gbm, newdata = test)
-perf_rf_test &lt;- h2o.performance(my_rf, newdata = test)
-perf_dl_test &lt;- h2o.performance(my_dl, newdata = test)
-perf_xgb1_test &lt;- h2o.performance(my_xgb1, newdata = test)
-baselearner_best_auc_test &lt;- max(h2o.auc(perf_gbm_test), 
-                                 h2o.auc(perf_rf_test),
-                                 h2o.auc(perf_dl_test),
-                                 h2o.auc(perf_xgb1_test))
+get_auc &lt;- function(mm) h2o.auc(h2o.performance(h2o.getModel(mm), newdata = test))
+baselearner_aucs &lt;- sapply(base_models, get_auc)
+baselearner_best_auc_test &lt;- max(baselearner_aucs)
 ensemble_auc_test &lt;- h2o.auc(perf)</code></pre>
 <p>Compare the test set performance of the best base model to the ensemble.</p>
 <pre class="r"><code>print(sprintf(&quot;Best Base-learner Test AUC:  %s&quot;, baselearner_best_auc_test))</code></pre>
 <pre><code>## [1] &quot;Best Base-learner Test AUC:  0.782882102392703&quot;</code></pre>
 <pre class="r"><code>print(sprintf(&quot;Ensemble Test AUC:  %s&quot;, ensemble_auc_test))</code></pre>
-<pre><code>## [1] &quot;Ensemble Test AUC:  0.788103977380134&quot;</code></pre>
+<pre><code>## [1] &quot;Ensemble Test AUC:  0.789511283790034&quot;</code></pre>
 </div>
 
 
