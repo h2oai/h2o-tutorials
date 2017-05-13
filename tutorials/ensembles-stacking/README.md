@@ -8,9 +8,9 @@
 
 # Overview
 
-In this tutorial, we will discuss ensemble learning with a focus on a type of ensemble learning called stacking or Super Learning.  We present the H2O implementation of the Super Learner algorithm, called "H2O Ensemble."  
+In this tutorial, we will discuss ensemble learning with a focus on a type of ensemble learning called stacking or Super Learning.  In this tutorial, we present an H2O implementation of the Super Learner algorithm (aka. Stacking, Stacked Ensembles).  
 
-Following the introduction to ensemble learning, we will dive into a hands-on code demo of the [h2oEnsemble](https://github.com/h2oai/h2o-3/tree/master/h2o-r/ensemble) R package.
+Following the introduction to ensemble learning, we will dive into a hands-on code demo of the [h2oEnsemble](https://github.com/h2oai/h2o-3/tree/master/h2o-r/ensemble) R package.  Note that as of H2O [3.10.3.1](https://github.com/h2oai/h2o-3/blob/master/Changes.md#tverberg-31031---1302017), Stacked Ensembles are now available as part of base H2O.  The documentation for H2O Stacked Ensembles, including R and Python code examples, can be found [here](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html).  The **h2oEnsemble** R package is the predecessor to the base H2O implementation and although this package will contibue to be supported, new development efforts will be focused on the native H2O version of stacked ensembles, and for new projects we'd recommend using native H2O.
 
 H2O World slides accompanying this tutorial are [here](https://github.com/h2oai/h2o-world-2015-training/blob/master/tutorials/ensembles-stacking/H2O_World_2015_Ensembles.pdf).
 
@@ -468,16 +468,15 @@ Family: binomial
 Ensemble performance (AUC): 0.781241759877087
 ```
 
-
-
-## Roadmap for H2O Ensemble
-
-H2O Ensemble is currently only available using the R API, however, it will be accessible via all our APIs in a future release.  You can follow the progress of H2O Ensemble development on the [H2O JIRA](https://0xdata.atlassian.net/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+PUBDEV+AND+component+%3D+Ensemble) (tickets with the "Ensemble" tag). 
-
-**Update:** Ensembles have been implemented in the H2O Java core as model class, "H2OStackedEnsembleEstimator".  The code can be found on the [ensembles branch](https://github.com/h2oai/h2o-3/tree/ensembles) of h2o-3.  APIs in R and Python will be available soon.
-
 ### All done, shutdown H2O
 
 ```r
 h2o.shutdown()
 ```
+
+
+## Roadmap for h2oEnsemble
+
+**h2oEnsemble** is only available as an R package.  A list of open tickets (bugs, feature requests) for the package can be found [here](https://0xdata.atlassian.net/issues/?filter=14900) (JIRA tickets with the "h2oEnsemble" tag). 
+
+Open tickets for the native H2O version of Stacked Ensembles can be found [here](https://0xdata.atlassian.net/issues/?filter=19301) (JIRA tickets with the "StackedEnsemble" tag).
