@@ -19,7 +19,7 @@ You should have already successfully [installed Sparkling Water](../README.md) b
 3. Go to your sparkling-water-2.1.2 folder and from your terminal, run:
 
   ```bash
-  PYSPARK_DRIVER_PYTHON="ipython" PYSPARK_DRIVER_PYTHON_OPTS="notebook" bin/pysparkling
+  PYSPARK_DRIVER_PYTHON="jupyter" PYSPARK_DRIVER_PYTHON_OPTS="notebook" bin/pysparkling
   ```
   A notebook should open on your browser.
 
