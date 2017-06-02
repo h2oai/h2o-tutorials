@@ -3,7 +3,7 @@
 
 
 # First step is to download & install the h2o R library
-# The latest version is always here: http://www.h2o.ai/download/h2o/r
+# The latest version is available by clicking on the R tab here: http://h2o-release.s3.amazonaws.com/h2o/latest_stable.html
 
 # Load the H2O library and start up the H2O cluster locally on your machine
 library(h2o)
