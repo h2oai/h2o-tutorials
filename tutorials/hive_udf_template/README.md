@@ -1,13 +1,13 @@
 ## Introduction
 
-This tutorial describes how to use a model created in H2O to create a Hive UDF (user-defined function) for scoring data.   While the fastest scoring typically results from ingesting data files in HDFS directly into H2O for scoring, there may be several motivations not to do so.  For example, the clusters used for model building may be research clusters, and the data to be scored may be on "production" clusters.  In other cases, the final data set to be scored may be too large to reasonably score in-memory.  To help with these kinds of cases, this document walks through how to take a scoring model from H2O, plug it into a template UDF project, and use it to score in Hive.  All the code needed for this walkthrough can be found in this repository branch.
+This tutorial describes how to use a [MOJO](https://maven.apache.org/developers/mojo-api-specification.html) model created in H2O to create a Hive UDF (user-defined function) for scoring data.   While the fastest scoring typically results from ingesting data files in HDFS directly into H2O for scoring, there may be several motivations not to do so.  For example, the clusters used for model building may be research clusters, and the data to be scored may be on "production" clusters.  In other cases, the final data set to be scored may be too large to reasonably score in-memory.  To help with these kinds of cases, this document walks through how to take a scoring model from H2O, plug it into a template UDF project, and use it to score in Hive.  All the code needed for this walkthrough can be found in this repository branch.
 
 ##The Goal
 The desired work flow for this task is:
 
 1. Load training and test data into H2O
 2. Create several models in H2O
-3. Export the best model as a [POJO](https://en.wikipedia.org/wiki/Plain_Old_Java_Object)
+3. Export the best model as a [MOJO](https://maven.apache.org/developers/mojo-api-specification.html)
 4. Compile the H2O model as a part of the UDF project
 5. Copy the UDF to the cluster and load into Hive
 6. Score with your UDF
@@ -49,51 +49,58 @@ No need to cut and paste code: the complete R script described below is part of 
 Since we are playing with a small data set for this example, we will start H2O locally and load the datasets:
 
 ```r
-> myIP <- "localhost"
-> myPort <- 54321
-
 > library(h2o)
-> h2oServer <- h2o.init(ip = myIP, port = myPort, startH2O = TRUE)
+> h2o.init(nthreads = -1)
+
+> # Download the data into the pums2013 directory if necessary.
+> pumsdir <- "pums2013"
+> if (! file.exists(pumsdir)) {
+>   dir.create(pumsdir)
+> }
+
+> trainfile <- file.path(pumsdir, "adult_2013_train.csv.gz")
+> if (! file.exists(trainfile)) {
+>   download.file("http://h2o-training.s3.amazonaws.com/pums2013/adult_2013_train.csv.gz", trainfile)
+> }
+
+> testfile  <- file.path(pumsdir, "adult_2013_test.csv.gz")
+> if (! file.exists(testfile)) {
+>   download.file("http://h2o-training.s3.amazonaws.com/pums2013/adult_2013_test.csv.gz", testfile)
+> }
 ```
 
 Load the datasets (change the directory to reflect where you stored these files):
 
 ```r
-> pumsdir <- file.path("/Users/myhomedir/data/pums2013")
-> trainfile <- "adult_2013_train.csv.gz"
-> testfile  <- "adult_2013_test.csv.gz"
+> adult_2013_train <- h2o.importFile(trainfile, destination_frame = "adult_2013_train")
 
-> adult_2013_train <- h2o.importFile(h2oServer,
-                                   path = file.path(pumsdir, trainfile),
-                                   key = "adult_2013_train", sep = ",")
-
-> adult_2013_test <- h2o.importFile(h2oServer,
-                                  path = file.path(pumsdir, testfile),
-                                  key = "adult_2013_test", sep = ",")
+> adult_2013_test <- h2o.importFile(testfile, destination_frame = "adult_2013_test")
 ```
 Looking at the data, we can see that 8 columns are using integer codes to represent different categorical levels.  Let's tell H2O to treat those columns as factors.
 
 ```r
+> actual_log_wagp <- h2o.assign(adult_2013_test[, "LOG_WAGP"], key = "actual_log_wagp")
+
 > for (j in c("COW", "SCHL", "MAR", "INDP", "RELP", "RAC1P", "SEX", "POBP")) {
-  adult_2013_train[[j]] <- as.factor(adult_2013_train[[j]])
-  adult_2013_test[[j]]  <- as.factor(adult_2013_test[[j]])
-}
+>   adult_2013_train[[j]] <- as.factor(adult_2013_train[[j]])
+>   adult_2013_test[[j]]  <- as.factor(adult_2013_test[[j]])
+> }
+
 ```
 
 ### Creating several models in H2O
 Now that the data has been prepared, let's build a set of models using [GBM](http://h2o-release.s3.amazonaws.com/h2o/rel-simons/7/docs-website/h2o-docs/index.html#Data%20Science%20Algorithms-GBM).  Here we will select the columns used as predictors and results, specify the validation data set, and then build a model.
 
 ```r
-> predset <- c(("RELP", "SCHL", "COW", "MAR", "INDP", "RAC1P", "SEX", "POBP", "AGEP", "WKHP", "LOG_CAPGAIN", "LOG_CAPLOSS")
+> predset <- c("RELP", "SCHL", "COW", "MAR", "INDP", "RAC1P", "SEX", "POBP", "AGEP", "WKHP", "LOG_CAPGAIN", "LOG_CAPLOSS")
 
-> log_wagp_gbm_grid <- h2o.gbm(x = predset),
+> log_wagp_gbm_grid <- h2o.gbm(x = predset,
                              y = "LOG_WAGP",
                              training_frame = adult_2013_train,
                              model_id  = "GBMModel",
                              distribution = "gaussian",
                              max_depth = 5,
                              ntrees = 110,
-                             learning_rate = 0.25,
                              validation_frame = adult_2013_test)
 > log_wagp_gbm
 
@@ -101,7 +108,7 @@ Model Details:
 ==============
 
 H2ORegressionModel: gbm
-Model ID:  GBMModel 
+Model ID:  GBMModel
 Model Summary:
   number_of_trees model_size_in_bytes min_depth max_depth mean_depth min_leaves max_leaves mean_leaves
 1      110.000000       111698.000000  5.000000  5.000000    5.00000  14.000000  32.000000    27.93636
@@ -124,16 +131,16 @@ Mean Residual Deviance :  0.6605266
 ```
 
 
-###Export the best model as a POJO
-From here, we can download this model as a Java [POJO](https://en.wikipedia.org/wiki/Plain_Old_Java_Object) to a local directory called `generated_model`.
+###Export the best model as a MOJO
+From here, we can download this model as a Java [MOJO](https://maven.apache.org/developers/mojo-api-specification.html) to a local directory called `generated_model`.
 
 ```r
 > tmpdir_name <- "generated_model"
 > dir.create(tmpdir_name)
-> h2o.download_pojo(log_wagp_gbm, tmpdir_name)
-[1] "POJO written to: generated_model/GBMModel.java"
+> h2o.download_mojo(log_wagp_gbm, tmpdir_name)
+[1] "MOJO written to: generated_model/GBMModel.zip"
 ```
-At this point, the Java POJO is available for scoring data outside of H2O.  As the last step in R, let's take a look at the scores this model gives on the test data set. We will use these to confirm the results in Hive.
+At this point, the Java MOJO is available for scoring data outside of H2O.  As the last step in R, let's take a look at the scores this model gives on the test data set. We will use these to confirm the results in Hive.
 
 ```r
 > h2o.predict(log_wagp_gbm, adult_2013_test)
@@ -160,7 +167,7 @@ All code for this section can be found in this git repository.  To simplify the 
 To use the template:
 
 1. Copy the Java from H2O into the project
-2. Update the POJO to be part of the UDF package
+2. Update the MOJO to be part of the UDF package
 3. Update the pom.xml to reflect your version of Hadoop and Hive
 4. Compile
 
@@ -168,16 +175,15 @@ To use the template:
 
 ```bash
 $ cp generated_model/h2o-genmodel.jar localjars
-$ cp generated_model/GBMModel.java src/main/java/ai/h2o/hive/udf/GBMModel.java
+$ cd src/main/
+$ mkdir resources
+$ cp generated_model/GBMModel.zip src/main/java/resources/ai/h2o/hive/udf/GBMModel.zip
 ```
 
-### Update the POJO to Be a Part of the Same Package as the UDF ###
+### Verify File Structure ###
 
-To the top of `GBMModel.java`, add:
-
-```Java
-package ai.h2o.hive.udf;
-```
+Ensure that your file structure looks exactly like this repository. Your MOJO model needs to be in
+a new resources folder with the file path as shown above or else the project will not compile.
 
 ### Update the pom.xml to Reflect Hadoop and Hive Versions ###
 
@@ -192,11 +198,11 @@ And plug these into the `<properties>`  section of the `pom.xml` file.  Currentl
 
 ###Compile
 
-> Caution:  This tutorial was written using Maven 3.0.4.  Older 2.x versions of Maven may not work.
+> Caution:  This tutorial was written using Maven 3.5.0.  Older 2.x versions of Maven may not work.
 
 ```bash
 $ mvn compile
-$ mvn package
+$ mvn package -Dmaven.test.skip=true
 ```
 
 As with most Maven builds, the first run will probably seem like it is downloading the entire Internet.  It is just grabbing the needed compile dependencies.  In the end, this process should create the file `target/ScoreData-1.0-SNAPSHOT.jar`.
@@ -261,11 +267,11 @@ Time taken: 0.063 seconds, Fetched: 10 row(s)
 
 This solution is fairly quick and easy to implement.  Once you've run through things once, going through steps 1-5 should be pretty painless.  There are, however, a few things to be desired here.
 
-The major trade-off made in this template has been a more generic design over strong input checking.   To be applicable for any POJO, the code only checks that the user-supplied arguments have the correct count and they are all at least primitive types.  Stronger type checking could be done by generating Hive UDF code on a per-model basis.
+The major trade-off made in this template has been a more generic design over strong input checking.   To be applicable for any MOJO, the code only checks that the user-supplied arguments have the correct count and they are all at least primitive types.  Stronger type checking could be done by generating Hive UDF code on a per-model basis.
 
-Also, while the template isn't specific to any given model, it isn't completely flexible to the incoming data either.  If you used 12 of 19 fields as predictors (as in this example), then you must feed the scoredata() UDF only those 12 fields, and in the order that the POJO expects. This is fine for a small number of predictors, but can be messy for larger numbers of predictors.  Ideally, it would be nicer to say `SELECT scoredata(*) FROM adult_data_set;` and let the UDF pick out the relevant fields by name.  While the H2O POJO does have utility functions for this, Hive, on the other hand, doesn't provide UDF writers the names of the fields (as mentioned in [this](https://issues.apache.org/jira/browse/HIVE-3491) Hive feature request) from which the arguments originate.
+Also, while the template isn't specific to any given model, it isn't completely flexible to the incoming data either.  If you used 12 of 19 fields as predictors (as in this example), then you must feed the scoredata() UDF only those 12 fields, and in the order that the MOJO expects. This is fine for a small number of predictors, but can be messy for larger numbers of predictors.  Ideally, it would be nicer to say `SELECT scoredata(*) FROM adult_data_set;` and let the UDF pick out the relevant fields by name.  While the H2O MOJO does have utility functions for this, Hive, on the other hand, doesn't provide UDF writers the names of the fields (as mentioned in [this](https://issues.apache.org/jira/browse/HIVE-3491) Hive feature request) from which the arguments originate.
 
-Finally, as written, the UDF only returns a single prediction value.  The H2O POJO actually returns an array of float values.  The first value is the main prediction and the remaining values hold probability distributions for classifiers.  This code can easily be expanded to return all values if desired.
+Finally, as written, the UDF only returns a single prediction value.  The H2O MOJO actually returns an array of float values.  The first value is the main prediction and the remaining values hold probability distributions for classifiers.  This code can easily be expanded to return all values if desired.
 
 ## A Look at the UDF Template
 
@@ -277,12 +283,13 @@ The template code starts with some basic annotations that define the nature of t
         extended="Example:\n"+"> SELECT scoredata(*) FROM target_data;")
 ```
 
-Rather than extend the plain UDF class, this template extends GenericUDF.  The plain UDF requires that you hard code each of your input variables.  This is fine for most UDFs, but for a function like scoring the number of columns used in scoring may be large enough to make this cumbersome.   Note the declaration of an array to hold ObjectInspectors for each argument, as well as the instantiation of the model POJO.
+Rather than extend the plain UDF class, this template extends GenericUDF.  The plain UDF requires that you hard code each of your input variables.  This is fine for most UDFs, but for a function like scoring the number of columns used in scoring may be large enough to make this cumbersome.   Note the declaration of an array to hold ObjectInspectors for each argument, as well as the instantiation of the model MOJO.
 
 ```Java
 class ScoreDataUDF extends GenericUDF {
   private PrimitiveObjectInspector[] inFieldOI;
-  GBMModel p = new GBMModel();
+
+  MojoModel p;
 
   @Override
   public String getDisplayString(String[] args) {
@@ -294,7 +301,18 @@ All GenericUDF children must implement initialize() and evaluate().  In initiali
 
 ```Java
   @Override
-    public ObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
+  public ObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
+    // Get the MOJO as a resource
+    URL mojoURL = ScoreDataUDF.class.getResource("GBMModel.zip");
+    // Declare r as a MojoReaderBackend
+    MojoReaderBackend r;
+    // Read the MOJO and assign it to p
+    try {
+      r = MojoReaderBackendFactory.createReaderBackend(mojoURL, CachingStrategy.MEMORY);
+      p = ModelMojoReader.readFrom(r);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     // Basic argument count check
     // Expects one less argument than model used; results column is dropped
     if (args.length != p.getNumCols()) {
@@ -302,6 +320,7 @@ All GenericUDF children must implement initialize() and evaluate().  In initiali
               "  scoredata() requires: "+ Arrays.asList(p.getNames())
               +", in the listed order. Received "+args.length+" arguments.");
     }
+
 
     //Check input types
     inFieldOI = new PrimitiveObjectInspector[args.length];
