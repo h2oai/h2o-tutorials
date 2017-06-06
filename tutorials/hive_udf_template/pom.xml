@@ -8,8 +8,8 @@
 	<name>ScoreData</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<hive.version>0.14.0.2.2.0.0-2041</hive.version>
-		<hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+		<hive.version>0.13.0</hive.version>
+		<hadoop.version>2.8.0</hadoop.version>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
                 <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>

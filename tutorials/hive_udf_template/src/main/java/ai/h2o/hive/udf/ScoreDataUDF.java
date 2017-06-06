@@ -1,7 +1,16 @@
 package ai.h2o.hive.udf;
 
 import java.util.Arrays;
-
+import java.net.*;
+import java.lang.*;
+import java.io.IOException;
+import hex.genmodel.MojoReaderBackendFactory;
+import static hex.genmodel.MojoReaderBackendFactory.CachingStrategy;
+import hex.genmodel.MojoReaderBackend;
+import hex.genmodel.ModelMojoReader;
+import java.io.InputStream;
+import hex.genmodel.easy.EasyPredictModelWrapper;
+import hex.genmodel.MojoModel;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.hive.ql.exec.MapredContext;
 import org.apache.hadoop.hive.ql.udf.UDFType;
@@ -22,7 +31,9 @@ import org.apache.log4j.Logger;
 
 class ScoreDataUDF extends GenericUDF {
   private PrimitiveObjectInspector[] inFieldOI;
-  GBMModel p = new GBMModel();
+
+  MojoModel p;
+
 
   @Override
   public String getDisplayString(String[] args) {
@@ -36,6 +47,17 @@ class ScoreDataUDF extends GenericUDF {
   }
   @Override
   public ObjectInspector initialize(ObjectInspector[] args) throws UDFArgumentException {
+    // Get the MOJO as a resource
+    URL mojoURL = ScoreDataUDF.class.getResource("GBMModel.zip");
+    // Declare r as a MojoReaderBackend
+    MojoReaderBackend r;
+    // Read the MOJO and assign it to p
+    try {
+      r = MojoReaderBackendFactory.createReaderBackend(mojoURL, CachingStrategy.MEMORY);
+      p = ModelMojoReader.readFrom(r);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     // Basic argument count check
     // Expects one less argument than model used; results column is dropped
     if (args.length != p.getNumCols()) {
