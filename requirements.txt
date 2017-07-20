@@ -1,0 +1,6 @@
+h2o
+requests
+pandas
+numpy
+matplotlib
+jupyter
