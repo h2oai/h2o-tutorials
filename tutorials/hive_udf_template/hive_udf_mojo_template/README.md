@@ -1,8 +1,8 @@
-## Introduction
+## Hive UDF MOJO Example
 
 This tutorial describes how to use a [MOJO](https://maven.apache.org/developers/mojo-api-specification.html) model created in H2O to create a Hive UDF (user-defined function) for scoring data.   While the fastest scoring typically results from ingesting data files in HDFS directly into H2O for scoring, there may be several motivations not to do so.  For example, the clusters used for model building may be research clusters, and the data to be scored may be on "production" clusters.  In other cases, the final data set to be scored may be too large to reasonably score in-memory.  To help with these kinds of cases, this document walks through how to take a scoring model from H2O, plug it into a template UDF project, and use it to score in Hive.  All the code needed for this walkthrough can be found in this repository branch.
 
-##The Goal
+## The Goal
 The desired work flow for this task is:
 
 1. Load training and test data into H2O
@@ -131,7 +131,7 @@ Mean Residual Deviance :  0.6605266
 ```
 
 
-###Export the best model as a MOJO
+### Export the best model as a MOJO
 From here, we can download this model as a Java [MOJO](https://maven.apache.org/developers/mojo-api-specification.html) to a local directory called `generated_model`.
 
 ```r
@@ -160,7 +160,7 @@ First 10 rows:
 10  9.502004
 ```
 
-##Compile the H2O model as a part of UDF project
+## Compile the H2O model as a part of UDF project
 
 All code for this section can be found in this git repository.  To simplify the build process, I have included a pom.xml file.  For Maven users, this will automatically grab the dependencies you need to compile.
 
@@ -196,7 +196,7 @@ $ hive --version
 
 And plug these into the `<properties>`  section of the `pom.xml` file.  Currently, the configuration is set for pulling the necessary dependencies for Hortonworks.  For other Hadoop distributions, you will also need to update the `<repositories>` section to reflect the respective repositories (a commented-out link to a Cloudera repository is included).
 
-###Compile
+### Compile
 
 > Caution:  This tutorial was written using Maven 3.5.0.  Older 2.x versions of Maven may not work.
 
@@ -226,7 +226,7 @@ Here we mark the table as `EXTERNAL` so that Hive doesn't make a copy of the fil
 ```
 
 
-##Copy the UDF to the cluster and load into Hive
+## Copy the UDF to the cluster and load into Hive
 ```bash
 $ hadoop fs -put localjars/h2o-genmodel.jar  hdfs://my-name-node:/user/myhomedir/
 $ hadoop fs -put target/ScoreData-1.0-SNAPSHOT.jar  hdfs://my-name-node:/user/myhomedir/
@@ -242,7 +242,7 @@ Note that for correct class loading, you will need to load the h2o-model.jar bef
 
 Keep in mind that your UDF is only loaded in Hive for as long as you are using it.  If you `quit;` and then join Hive again, you will have to re-enter the last three lines.
 
-##Score with your UDF
+## Score with your UDF
 Now the moment we've been working towards:
 
 ```r
@@ -263,7 +263,7 @@ Time taken: 0.063 seconds, Fetched: 10 row(s)
 
 
 <a name="Limitations"></a>
-##Limitations
+## Limitations
 
 This solution is fairly quick and easy to implement.  Once you've run through things once, going through steps 1-5 should be pretty painless.  There are, however, a few things to be desired here.
 
