@@ -120,3 +120,5 @@ summary(best_model)
 
 # use partial dependence plots to get insight into important relationships
 h2o.partialPlot(best_model, valid, "int_rate")
+
+h2o.shutdown(prompt = FALSE)

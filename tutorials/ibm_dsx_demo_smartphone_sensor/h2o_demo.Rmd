@@ -1,0 +1,329 @@
+---
+title: 'H2O Demo: Human Activity Recognition with Smartphones'
+output:
+  html_notebook:
+    fig_height: 6
+    fig_width: 9
+    highlight: haddock
+    theme: spacelab
+  html_document: default
+---
+
+## About the dataset
+
+- Recordings of 30 study participants performing activities of daily living
+- by UCI Machine Learning
+- Reference (Original): https://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+- Reference (Kaggle): https://www.kaggle.com/uciml/human-activity-recognition-with-smartphones
+
+
+### Description
+
+The Human Activity Recognition database was built from the recordings of 30 study participants performing activities of daily living (ADL) while carrying a waist-mounted smartphone with embedded inertial sensors. The objective is to classify activities into one of the six activities performed.
+
+### Description of experiment
+
+The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data.
+
+The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain.
+
+### Attribute information
+
+For each record in the dataset the following is provided:
+
+- Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration.
+- Triaxial Angular velocity from the gyroscope.
+- A 561-feature vector with time and frequency domain variables.
+- Its activity label.
+- An identifier of the subject who carried out the experiment.
+
+### Relevant papers
+
+- Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. International Workshop of Ambient Assisted Living (IWAAL 2012). Vitoria-Gasteiz, Spain. Dec 2012
+
+- Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra, Jorge L. Reyes-Ortiz. Energy Efficient Smartphone-Based Activity Recognition using Fixed-Point Arithmetic. Journal of Universal Computer Science. Special Issue in Ambient Assisted Living: Home Care. Volume 19, Issue 9. May 2013
+
+- Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. 4th International Workshop of Ambient Assited Living, IWAAL 2012, Vitoria-Gasteiz, Spain, December 3-5, 2012. Proceedings. Lecture Notes in Computer Science 2012, pp 216-223.
+
+- Jorge Luis Reyes-Ortiz, Alessandro Ghio, Xavier Parra-Llanas, Davide Anguita, Joan Cabestany, Andreu Català. Human Activity and Motion Disorder Recognition: Towards Smarter Interactive Cognitive Environments. 21st European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+
+### Citation
+
+Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21st European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
+
+<hr>
+
+<br>
+
+```{r, echo = FALSE}
+# Hidden Step 0
+# Check and make sure H2O version 3.10.5.1 is installed
+pkg_installed <- as.data.frame(installed.packages(), stringsAsFactors = FALSE)
+row_h2o <- which(pkg_installed$Package == "h2o")
+if (row_h2o != 0) ver_h2o <- pkg_installed[row_h2o,]$Version
+
+if ((row_h2o == 0) | (ver_h2o != "3.10.5.1")) {
+  
+  # Install H2O version 3.10.5.1
+
+  # The following two commands remove any previously installed H2O packages for R.
+  if ("package:h2o" %in% search()) { detach("package:h2o", unload=TRUE) }
+  if ("h2o" %in% rownames(installed.packages())) { remove.packages("h2o") }
+  
+  # Next, we download packages that H2O depends on.
+  pkgs <- c("statmod","RCurl","jsonlite")
+  for (pkg in pkgs) {
+    if (! (pkg %in% rownames(installed.packages()))) { install.packages(pkg) }
+  }
+  
+  # Now we download, install and initialize the H2O package for R.
+  install.packages("h2o", type="source", repos="http://h2o-release.s3.amazonaws.com/h2o/rel-vajda/1/R")
+  
+}
+
+```
+
+## Step 1 - Start and connect to a H2O cluster (JVM)
+
+```{r}
+# Pre-load all R packages
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(h2o))
+suppressPackageStartupMessages(library(plotly))
+```
+
+```{r}
+# Start and connect to a H2O cluster (JVM)
+h2o.init(nthreads = -1)
+h2o.no_progress() # disable progress bar in notebbok
+```
+
+<br>
+
+## Step 2 - Importing datasets into H2O
+
+```{r, message=FALSE, warning=FALSE}
+# Check if the datasets exist (locally)
+chk_train <- suppressMessages(file.exists("./data/train.csv.gz"))
+chk_test <- suppressMessages(file.exists("./data/test.csv.gz"))
+
+# Import datasets (locally)
+if (chk_train) hex_train <- h2o.importFile("./data/train.csv.gz")
+if (chk_test) hex_test <- h2o.importFile("./data/test.csv.gz")
+
+# Import datasets (from GitHub if they are not available locally)
+if (!chk_train) hex_train <- h2o.importFile("https://github.com/woobe/h2o_demo_for_ibm_dsx/blob/master/data/train.csv.gz?raw=true")
+if (!chk_test) hex_test <- h2o.importFile("https://github.com/woobe/h2o_demo_for_ibm_dsx/blob/master/data/test.csv.gz?raw=true")
+```
+
+<br>
+
+## Step 3 - Exploratory Analysis
+
+```{r}
+# Dimensions
+# 'Train' dataset has 7352 rows and 562 columns
+# 'Test' dataset has 2947 rows and 562 columns
+dim(hex_train)
+dim(hex_test)
+```
+
+```{r}
+# First few records
+# First column is the label 'activity'
+# Rest of the columns (V1 to V561) are sensors data
+head(hex_train)
+head(hex_test)
+```
+
+
+```{r}
+# Look at 'activity' column
+# Six classes (Carinality = 6)
+# No missing value
+h2o.describe(hex_train$activity)
+h2o.describe(hex_test$activity)
+```
+
+
+```{r}
+# Extract 'activity' columns for other graphics packages in R
+d_activity_train <- as.data.frame(hex_train$activity)
+d_activity_test <- as.data.frame(hex_test$activity)
+
+# Count acitivity 
+d_freq_train <- as.data.frame(table(d_activity_train))
+d_freq_test <- as.data.frame(table(d_activity_test))
+d_freq <- merge(d_freq_train, d_freq_test, by.x = "d_activity_train", by.y = "d_activity_test", sort = FALSE)
+colnames(d_freq) <- c("activity", "freq_train", "freq_test")
+d_freq
+```
+
+```{r, fig.width = 9, fig.height = 6}
+# Visualize 'activity' in both 'train' and 'test'
+p <- plot_ly(d_freq, x = ~activity, y = ~freq_train, type = 'bar', name = 'Frequency (Train)') %>%
+  add_trace(y = ~freq_test, name = 'Frequency (Test)') %>%
+  layout(title = "Activities in 'Train' and 'Test' Dataset") %>%
+  layout(yaxis = list(title = 'Count'), xaxis = list(title = "")) %>%
+  layout(margin = list(b = 90)) %>%
+  layout(barmode = "group")
+p
+```
+
+```{r}
+# Look at relationship between sensor data `f1_tBodyAccmeanX` and activity
+d_f1 <- data.frame(V1_train = as.data.frame(hex_train$f1_tBodyAccmeanX), activity = as.data.frame(hex_train$activity))
+head(d_f1)
+```
+
+```{r, fig.width = 9, fig.height = 6}
+p <- plot_ly(d_f1, y = ~f1_tBodyAccmeanX, color = ~activity, type = "box") %>%
+     layout(title = "Relationship between Sensor Data `f1_tBodyAccmeanX` and Activities") %>%
+     layout(yaxis = list(title = 'f1_tBodyAccmeanX'), xaxis = list(title = "")) %>%
+     layout(margin = list(b = 90))
+p
+```
+
+```{r, warning=FALSE, message=FALSE}
+# Principal Component Analysis
+# 95% of variance in original data captured by first five principal components
+model_pca <- h2o.prcomp(training_frame = hex_train, 
+                    x = 2:562, 
+                    model_id = "h2o_pca",
+                    k = 5)
+model_pca    
+```
+
+```{r}
+# Visualize principle components with activity labels
+d_pca <- as.data.frame(h2o.predict(model_pca, hex_train))
+d_pca <- data.frame(d_pca, as.data.frame(hex_train$activity))
+head(d_pca)
+```
+
+```{r, fig.width = 9, fig.height = 6}
+p <- plot_ly(data = d_pca, x = ~PC2, y = ~PC3, color = ~activity, 
+             type = "scatter", mode = "markers", marker = list(size = 3)) %>%
+     layout(title = "Visualizing Principle Components")
+p
+```
+
+From the graph above, we can see that:
+
+- it could be difficult to distinguish between **Standing** and **Sitting** as there are large overlaps in their sensor data.
+- **Laying** has its own cluster so it should be easy to classify.
+- **Walking**, **Walking Upstairs** and **Walking Downstairs** are understandably closer to each other yet they are quite different to **Sitting**, **Standing** and **Laying**.
+
+
+<br>
+
+## Step 4 - Build and evalutate a predictive model using H2O's Gradient Boosting Machine (GBM) algorithm
+
+```{r}
+# Define target and features for model training
+target <- "activity"
+features <- setdiff(colnames(hex_train), target) # i.e. using the records of all 561 sensors
+```
+
+```{r, eval=FALSE}
+# Build a GBM model with cross-validation and early stopping
+model <- h2o.gbm(x = features,
+                 y = target,
+                 training_frame = hex_train,                 
+                 model_id = "h2o_gbm",
+                 ntrees = 500,
+                 learn_rate = 0.05,
+                 learn_rate_annealing = 0.999,
+                 max_depth = 7,
+                 sample_rate = 0.9,
+                 col_sample_rate = 0.9,
+                 nfolds = 3,
+                 fold_assignment = "Stratified",
+                 stopping_metric = "logloss",
+                 stopping_rounds = 5,
+                 score_tree_interval = 10,
+                 seed = 1234)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Hidden step
+# Use pre-trained model if it exists
+chk_model <- suppressMessages(file.exists("./models/h2o_gbm"))
+
+if (chk_model) {
+  model <- h2o.loadModel("./models/h2o_gbm")
+} else {
+  model <- h2o.gbm(x = features,
+                 y = target,
+                 training_frame = hex_train,                 
+                 model_id = "h2o_gbm",
+                 ntrees = 500,
+                 learn_rate = 0.05,
+                 learn_rate_annealing = 0.999,
+                 max_depth = 7,
+                 sample_rate = 0.9,
+                 col_sample_rate = 0.9,
+                 nfolds = 3,
+                 fold_assignment = "Stratified",
+                 stopping_metric = "logloss",
+                 stopping_rounds = 5,
+                 score_tree_interval = 10,
+                 seed = 1234)
+}
+```
+
+
+```{r}
+# Print out model summary
+model
+```
+
+
+```{r}
+# Look at variable importance in this GBM model
+h2o.varimp(model)
+```
+
+```{r}
+# Visualize variable importance
+h2o.varimp_plot(model, num_of_features = 15)
+```
+
+<br>
+
+## Step 5 - Make and evalutate predictions
+
+```{r}
+# Make predictions
+yhat_test <- h2o.predict(model, hex_test)
+head(yhat_test)
+```
+
+```{r}
+# Evaluate predictions
+h2o.performance(model, newdata = hex_test)
+```
+
+As expected:
+- It is easy to classify **Laying**
+- It is difficult to distinguish between **Sitting** and **Standing**
+
+
+<br>
+
+## Step 6 - Export the PCA and GBM models for Shiny applications
+
+```{r, eval=FALSE}
+h2o.saveModel(model_pca, path = "./models")
+h2o.saveModel(model, path = "./models")
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+chk_gbm <- suppressMessages(file.exists("./models/h2o_gbm"))
+chk_pca <- suppressMessages(file.exists("./models/h2o_pca"))
+if (!chk_gbm) h2o.saveModel(model, path = "./models")
+if (!chk_pca) h2o.saveModel(model_pca, path = "./models")
+```
+
+<br>
+

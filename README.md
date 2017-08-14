@@ -1,4 +1,4 @@
-# H2O Tutorials 
+# H2O Tutorials
 
 This document contains tutorials and training materials for H2O-3.  For questions or feature requests, visit the H2O community forum at [https://community.h2o.ai](https://community.h2o.ai/index.html), or join the "H2O Stream" Google Group:
 
@@ -42,3 +42,33 @@ Tutorial versions in named branches are snapshotted for specific events.  Script
 - [Intro to H2O in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.ipynb)
 - [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.ipynb)
 - [H2O Stacked Ensembles](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
+
+For most tutorials using python you can install dependent modules to your environment by running the following commands.
+
+```
+# As current user
+pip install -r requirements.txt
+```
+
+```
+# As root user
+sudo -E pip install -r requirements.txt
+```
+
+**Note:** If you are behind a corporate proxy you may need to set environment variables for `https_proxy` accordingly.
+
+```
+# If you are behind a corporate proxy
+export https_proxy=https://<user>:<password>@<proxy_server>:<proxy_port>
+
+# As current user
+pip install -r requirements.txt
+```
+
+```
+# If you are behind a corporate proxy
+export https_proxy=https://<user>:<password>@<proxy_server>:<proxy_port>
+
+# As root user
+sudo -E pip install -r requirements.txt
+```

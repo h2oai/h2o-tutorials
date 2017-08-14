@@ -4,7 +4,7 @@ library(h2o)
 h2o.init(nthreads = -1)
 
 # location of clean data file
-path <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+path <- "/Users/phall/Documents/aetna/share/data/loan.csv"
 
 # import file
 frame <- h2o.importFile(path)
@@ -64,3 +64,5 @@ names(coef) <- "coef"
 coef <- coef[order(-coef$coef), , drop = FALSE]
 coef <- coef[coef$coef != 0, , drop = FALSE] 
 coef
+
+h2o.shutdown(prompt = FALSE)

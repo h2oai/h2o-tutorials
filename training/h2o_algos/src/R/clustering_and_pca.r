@@ -64,3 +64,5 @@ features[1:10,]
 # plot clusters with labels in 2-D space
 features$predict <- as.factor(features$predict)
 ggplot(features, aes(x=PC1, y=PC2, color=predict)) + geom_point()
+
+h2o.shutdown(prompt = FALSE)

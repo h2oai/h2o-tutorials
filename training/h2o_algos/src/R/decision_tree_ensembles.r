@@ -4,7 +4,7 @@ library(h2o)
 h2o.init(nthreads = -1)
 
 # location of clean data file
-path <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
+path <- "/Users/phall/Documents/aetna/share/data/loan.csv"
 
 # import file
 frame <- h2o.importFile(path)
@@ -40,7 +40,7 @@ loan_rf <- h2o.randomForest(
     validation_frame = valid,
     ntrees = 500,                      # Up to 500 decision trees in the forest 
     max_depth = 30,                    # trees can grow to depth of 30
-    stopping_rounds = 5,               # stop after validation error does not decrease for 5 iterations/new trees
+    stopping_rounds = 2,               # stop after validation error does not decrease for 5 iterations/new trees
     score_each_iteration = TRUE,       # score validation error on every iteration/new tree
     model_id = "loan_rf")              # for easy lookup in flow
 
@@ -92,7 +92,6 @@ loan_gbm <- h2o.grid("gbm",
                      
                      # seed to control sampling 
                      seed = 12345,
-                     
                      # grid serach options
                      hyper_params = hyper_params,
                      search_criteria = search_criteria)
@@ -112,3 +111,5 @@ h2o.varimp(best_model)
 
 # use partial dependence plots to get insight into important relationships
 h2o.partialPlot(best_model, valid, "int_rate")
+
+h2o.shutdown(prompt = FALSE)
