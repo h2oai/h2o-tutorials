@@ -10,7 +10,7 @@ Supports:
 
 - The code in this repository:
 ```
-git clone
+git clone https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/hive_udf_template/hive_multimojo_udf_template
 ```
 - Hadoop/Hive
 - Java & Maven (to compile & package UDF jar)
