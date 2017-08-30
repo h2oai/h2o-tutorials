@@ -24,7 +24,6 @@ Train your H2O models as you would normally using the WebUI (Flow), or Python/R 
 - Download the MOJOs and the h2o-genmodel.jar dependency
 - Place h2o-genmode.jar into localjars/
 - Place the H2O POJOs into src/main/resources/models
-Note: The h2o-genmodel.jar must be from the save version that was used to build the models!
 
 ### 3. Modify pom.xml as Needed
 Change artifactId = [argument] to the name of your function, in this case it is called ScoreData
