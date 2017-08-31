@@ -8,9 +8,13 @@ Supports:
 
 ## Requirements
 
-- The code in this repository:
+- Clone the h2o-tutorials repository and navigate to this folder:
 ```
-git clone https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/hive_udf_template/hive_multimojo_udf_template
+git clone https://github.com/h2oai/h2o-tutorials/tree/master/tutorials
+cd h2o-tutorials
+cd tutorials
+cd hive_udf_template
+cd hive_multimojo_udf_template
 ```
 - Hadoop/Hive
 - Java & Maven (to compile & package UDF jar)
