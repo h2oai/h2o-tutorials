@@ -26,6 +26,8 @@ Train your H2O models as you would normally using the WebUI (Flow), or Python/R 
 
 ### 2. Download H2O MOJOs & Dependency JAR
 - Download the MOJOs and the h2o-genmodel.jar dependency
+- Create a folder named localjars/ in your root folder
+  - ```mkdir localjars```
 - Place h2o-genmodel.jar into localjars/
 - Place the H2O MOJOs into src/main/resources/models
 
