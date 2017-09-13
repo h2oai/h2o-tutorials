@@ -10,14 +10,6 @@ public class ScoreDataHQLGenerator {
         ModelGroup _models = new ModelGroup();
         _models.addMOJOsFromJARResource();
 
-        System.out.println("-- model order (alphabetical)");
-        for(int i = 0; i < _models.size(); i++) {
-            GenModel m = _models.get(i);
-            System.out.println("-- Name: " + m.getUUID() + "\n"
-                    + "--   Category: " + m.getModelCategory() + "\n"
-                    + "--   Hive Select: scores["+i+"][0 - "+(m.getPredsSize()-1)+"]");
-        }
-
         System.out.println();
         System.out.println("-- add jars");
         System.out.println("ADD JAR localjars/h2o-genmodel.jar;");
@@ -27,10 +19,10 @@ public class ScoreDataHQLGenerator {
         System.out.println("CREATE TEMPORARY FUNCTION fn AS \"ai.h2o.hive.udf.MojoUDF\";");
         System.out.println();
         System.out.println("-- column names reference");
-        System.out.println("set hivevar:colnames=" + _models.getColNamesString());
+        System.out.println("set hivevar:colnames=" + _models.getColNamesString() + ";");
         System.out.println();
         System.out.println("-- sample query, returns nested array");
-        System.out.println("-- select fn(${scoredatacolnames}) from TABLEWITHAPPROPRIATEDATA");
+        System.out.println("-- select fn(${colnames}) from adult_data_set");
 
         // Also write to file
         PrintWriter writer;

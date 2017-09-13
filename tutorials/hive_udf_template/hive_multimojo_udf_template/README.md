@@ -32,22 +32,23 @@ This runs the R script which will build five GBM models and five Random Forest m
 
 Note: The MOJOs are included in the repo if you wish to skip running the R script section (but then you won't be able to see predictions)
 
-### 2. Cleanup Unnecessary Folders
+Cleanup unnecessary folders
+
 ```
 rm -rf generated_models/
 rm -rf pums2013/
 ```
 
-### 3. Download H2O MOJOs & Dependency JAR
+### 2. Download H2O MOJOs & Dependency JAR
 - Download h2o-genmodel.jar
 - Create a folder named localjars/ in your root folder
   - ```mkdir localjars```
 - Place h2o-genmodel.jar into localjars/
 
-### 4. Modify pom.xml as Needed
+### 3. Modify pom.xml as Needed
 Change artifactId = [argument] to the name of your function, in this case it is called ScoreData
 
-### 5. Compile & Package UDF JAR
+### 4. Compile & Package UDF JAR
 From the root directory of this project, run the following build commands:
 ```
 mvn clean

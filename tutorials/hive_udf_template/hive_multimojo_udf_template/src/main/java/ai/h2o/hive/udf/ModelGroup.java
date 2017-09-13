@@ -20,8 +20,28 @@ public class ModelGroup extends ArrayList<GenModel> {
 
     LinkedHashSet<String> _predixors;
 
+    class Predictor {
+        public int index;
+        public String[] domains;
+        public Predictor(int index, String[] domains) {
+            this.index = index;
+            this.domains = domains;
+        }
+        public String toString() {
+            if (this.domains != null)
+                return Integer.toString(this.index) + " " + Arrays.asList(this.domains);
+            else
+                return Integer.toString(this.index) + "numerical";
+        }
+    }
+
+    public LinkedHashMap<String, Predictor> _groupPredictors;
+    public ArrayList<String> _groupIdxToColNames;
+
     public ModelGroup() {
         this._predixors = new LinkedHashSet<String>();
+        this._groupPredictors = new LinkedHashMap<String, Predictor>();
+        this._groupIdxToColNames = new ArrayList<String>();
     }
 
     public String[] getMOJONames() throws Exception {
@@ -56,39 +76,55 @@ public class ModelGroup extends ArrayList<GenModel> {
     }
 
     public void addModel(GenModel m) {
-        this._predixors.addAll(Arrays.asList(m.getNames()));
+        String[] predictors = m.getNames();
+        for (int i = 0; i < predictors.length; i++) {
+            this._groupPredictors.put(predictors[i], new Predictor(this._groupPredictors.size(), m.getDomainValues(i)));
+            this._groupIdxToColNames.add(predictors[i]);
+        }
+        this._predixors.addAll(Arrays.asList(Arrays.copyOfRange(m.getNames(), 0, m.getNames().length -1)));
         this.add(m);
     }
 
-    public ArrayList<ArrayList<Double>> scoreAll(RowData data) {
-        ArrayList<ArrayList<Double>> result_set = new ArrayList<ArrayList<Double>>();
+    public int mapEnum(int colIdx, String enumValue) {
+        String[] domain = this._groupPredictors.get(this._groupIdxToColNames.get(colIdx)).domains;
+        if (domain==null || domain.length==0) return -1;
+        for (int i=0; i<domain.length;i++) if (enumValue.equals(domain[i])) return i;
+        return -1;
+    }
 
-        for (int i = 0; i < this.size(); i++) {
-            ArrayList<Double> p = new ArrayList<Double>();
-            try {
-                EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(this.get(i));
-                //RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predict(data);
-                BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predict(data);
-                //p.add(ArrayListprediction.classProbabilities);
-                //p.addAll(new ArrayList<Double>(Arrays.asList(prediction.classProbabilities)));
-                for (int j = 0; j < prediction.classProbabilities.length; j++)
-                    p.add(prediction.classProbabilities[j]);
-            } catch (PredictException pe) {
-                pe.printStackTrace();
-                throw new RuntimeException();
+    public Object[] scoreAll(RowData data) {
+        Object[] result_set = new Object[this.size()];
+
+        try {
+            for (int i = 0; i < this.size(); i++) {
+                EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
+                config.setConvertUnknownCategoricalLevelsToNa(true);
+                config.setModel(this.get(i));
+                EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
+                result_set[i] = prediction.value;
             }
-
-            result_set.add(p);
+        } catch (PredictException pe) {
+            pe.printStackTrace();
+            throw new RuntimeException();
         }
-
         return result_set;
     }
 
     public String getColNamesString () {
         StringBuffer sb = new StringBuffer();
-        for(String p: this._predixors) sb.append(p+",");
+        int i = 1;
+        for(String p: this._predixors) {
+            if (this._predixors.size() != i) {
+                i++;
+                sb.append(p + ",");
+            }
+            else {
+                sb.append(p);
+            }
+        }
         String result = sb.toString();
-        return result.substring(0, result.length() - 1);
+        return result;
     }
 
     /**
