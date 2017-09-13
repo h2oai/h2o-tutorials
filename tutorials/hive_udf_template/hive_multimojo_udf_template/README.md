@@ -18,6 +18,7 @@ cd hive_multimojo_udf_template
 ```
 - Hadoop/Hive
 - Java & Maven (to compile & package UDF jar)
+- R with h2o (if using the R script)
 
 ## Workflow
 
@@ -27,7 +28,9 @@ R < multimojo.R --no-save
 cp -r generated_models/. src/main/resources/models/
 ```
 
-This runs the R script which will build five GBM models and five Random Forest models on our adult data set. This is then copied into the resources directory (required).
+This runs the R script which will build five GBM models and five Random Forest models on our adult data set. This is then copied into the resources directory (required). This will also show predictions using h2o which we can compare later to validate results.
+
+Note: The MOJOs are included in the repo if you wish to skip running the R script section (but then you won't be able to see predictions)
 
 ### 2. Cleanup Unnecessary Folders
 ```
