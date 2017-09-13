@@ -10,7 +10,7 @@ Supports:
 
 - Clone the h2o-tutorials repository and navigate to this folder:
 ```
-git clone https://github.com/h2oai/h2o-tutorials/tree/master/tutorials
+git clone https://github.com/h2oai/h2o-tutorials.git
 cd h2o-tutorials
 cd tutorials
 cd hive_udf_template
@@ -21,20 +21,30 @@ cd hive_multimojo_udf_template
 
 ## Workflow
 
-### 1. Train H2O Models
-Train your H2O models as you would normally using the WebUI (Flow), or Python/R client APIs
+### 1. Run R Script
+```
+R < multimojo.R --no-save
+cp -r generated_models/. src/main/resources/models/
+```
 
-### 2. Download H2O MOJOs & Dependency JAR
-- Download the MOJOs and the h2o-genmodel.jar dependency
+This runs the R script which will build five GBM models and five Random Forest models on our adult data set. This is then copied into the resources directory (required).
+
+### 2. Cleanup Unnecessary Folders
+```
+rm -rf generated_models/
+rm -rf pums2013/
+```
+
+### 3. Download H2O MOJOs & Dependency JAR
+- Download h2o-genmodel.jar
 - Create a folder named localjars/ in your root folder
   - ```mkdir localjars```
 - Place h2o-genmodel.jar into localjars/
-- Place the H2O MOJOs into src/main/resources/models
 
-### 3. Modify pom.xml as Needed
+### 4. Modify pom.xml as Needed
 Change artifactId = [argument] to the name of your function, in this case it is called ScoreData
 
-### 4. Compile & Package UDF JAR
+### 5. Compile & Package UDF JAR
 From the root directory of this project, run the following build commands:
 ```
 mvn clean
@@ -46,36 +56,45 @@ This cleans any current builds, compiles & packages (skipping tests), & runs Sco
 
 Upload the localjars/h2o-genmodel.jar & target/MyModels-1.0-SNAPSHOT.jar somewhere you can access from Hive. You can keep it on the local filesystem or put it on the Hadoop FS - either way will work as long as you keep in mind the paths when running "ADD JAR ..."
 
-### 5. Scoring in Hive
+### 5. HQL Overview
 The above command will generate HQL similar to below.
 
 ```
--- model order (alphabetical)
--- Name: ai.h2o.hive.udf.models.deeplearning_741ae095_5cc4_415c_a726_f4e26762f3fa
---   Category: Regression
---   Hive Select: scores[0][0 - 1]
--- Name: ai.h2o.hive.udf.models.drf_99268734_ddf8_43b3_87e4_84f092df5292
---   Category: Regression
---   Hive Select: scores[1][0 - 1]
--- Name: ai.h2o.hive.udf.models.gbm_094fceb2_48a2_4447_931b_2aeed114c08a
---   Category: Regression
---   Hive Select: scores[2][0 - 1]
--- Name: ai.h2o.hive.udf.models.glm_a00273fc_04a0_4c0c_b5a6_22fba753ca1b
---   Category: Regression
---   Hive Select: scores[3][0 - 1]
-
 -- add jars
 ADD JAR localjars/h2o-genmodel.jar;
 ADD JAR target/ScoreData-1.0-SNAPSHOT.jar;
 
 -- create fn definition
-CREATE TEMPORARY FUNCTION fn AS "ai.h2o.hive.udf.ScoreDataUDF";
+CREATE TEMPORARY FUNCTION fn AS "ai.h2o.hive.udf.MojoUDF";
 
 -- column names reference
-set hivevar:scoredatacolnames=C1,C2,C3,C4,C5,C6,C7,C8
+set hivevar:colnames=AGEP,COW,SCHL,MAR,INDP,RELP,RAC1P,SEX,WKHP,POBP,LOG_CAPGAIN,LOG_CAPLOSS;
 
 -- sample query, returns nested array
--- select fn(${scoredatacolnames}) from TABLEWITHAPPROPRIATEDATA
+-- select fn(${colnames}) from adult_data_set
+
 ```
 
 TABLEWITHAPPROPRIATEDATA MUST have **ALL** columns required by the models. If they are not -- the UDF will fail to score!!
+
+### 6. Lets Try This in Hive!
+
+Get the data into hive first.
+
+```
+$ hadoop fs -mkdir hdfs://my-name-node:/user/myhomedir/UDFtest
+$ hadoop fs -put adult_2013_test.csv.gz  hdfs://my-name-node:/user/myhomedir/UDFtest/.
+$ hive
+```
+
+Now that we are in hive, lets source our hql file.
+
+```
+source ScoreData.hql;
+```
+
+Now, lets run a query on this data using the following command:
+
+```
+SELECT fn(${colnames}) FROM adult_data_set limit 5;
+```
