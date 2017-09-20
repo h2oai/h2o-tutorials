@@ -2,6 +2,7 @@ package ai.h2o.hive.udf;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MulticastSocket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -13,6 +14,7 @@ import hex.genmodel.*;
 import hex.genmodel.easy.EasyPredictModelWrapper;
 import hex.genmodel.easy.RowData;
 import hex.genmodel.easy.exception.PredictException;
+import hex.genmodel.easy.prediction.MultinomialModelPrediction;
 import hex.genmodel.easy.prediction.RegressionModelPrediction;
 import hex.genmodel.easy.prediction.BinomialModelPrediction;
 
@@ -94,15 +96,29 @@ public class ModelGroup extends ArrayList<GenModel> {
 
     public Object[] scoreAll(RowData data) {
         Object[] result_set = new Object[this.size()];
-
         try {
             for (int i = 0; i < this.size(); i++) {
                 EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
                 config.setConvertUnknownCategoricalLevelsToNa(true);
                 config.setModel(this.get(i));
-                EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
-                result_set[i] = prediction.value;
+                switch (config.getModel().getModelCategory()) {
+                    case Regression: {
+                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                        RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
+                        result_set[i] = prediction.value;
+                    }
+                    case Binomial: {
+                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                        BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
+                        result_set[i] = prediction.label;
+                    }
+                    case Multinomial: {
+                        ArrayList<Double> p = new ArrayList<Double>();
+                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                        MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
+                        result_set[i] = prediction.label;
+                    }
+                }
             }
         } catch (PredictException pe) {
             pe.printStackTrace();
