@@ -120,7 +120,7 @@ The columns: `Num Beds`, `Num Baths`, `Square Footage` have been segmented into 
 
 ### Cluster Distance Transformer
 
-* selected columns in the data clustered
+* selected columns in the data are clustered
 * the distance to a chosen cluster center is calculated
 
 | Date Built | Square Footage | Num Beds | Num Baths | State | Price | ClusterDist\_4\_NumBeds\_NumBaths\_SquareFootage_1|
