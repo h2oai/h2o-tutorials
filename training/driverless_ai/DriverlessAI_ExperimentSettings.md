@@ -1,6 +1,6 @@
 # Driverless AI
 
-### Version 1.0
+### Version 1.0.1
 
 ## Experiment Settings
 
@@ -25,16 +25,17 @@
 | 6 | 10M  | 2 | True  | True  | Default | 3 | True  | FS   |
 | 7 | 20M  | 2 | True  | True  | 4       | 4 | False | FS   |
 | 8 | 20M  | 2 | True  | True  | 4       | 4 | False | FS   |
-| 9 | 20M  | 2 | True  | True  | 4       | 4 | False | FS   |
-| 10| None | 2 | True  | True  | 8       | 4 | False | FS   |
+| 9 | 20M  | 3 | True  | True  | 4       | 4 | False | FS   |
+| 10| None | 3 | True  | True  | 8       | 4 | False | FS   |
 
 * **Max Rows:** the maximum number of rows to use in model training.
 	*  For classification, stratified random sampling done
 	*  For regression, random sampling done
 *  **Ensemble Level:** the level of ensembling done
 	* 0: single final model
-	* 1: 3 3-fold final models ensembled together
-	* 2: 5 5-fold final models ensembled togethers
+	* 1: 2 4-fold final models ensembled together
+	* 2: 5 4-fold final models ensembled together
+	* 3: 8 5-fold final models ensembled together
 * **Target Transformation:** try target transformations and choose the transformation that has the best score 
 	* Possible transformations: identity, log, square, square root, inverse, Anscombe, logit, sigmoid 
 * **Tune Parameters:** tune the parameters of the xgboost model
