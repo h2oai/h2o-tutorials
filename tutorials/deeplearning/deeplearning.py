@@ -179,7 +179,7 @@ dl_750.train(X, y, spiral)
 # In[12]:
 
 models_dl = [dl_1, dl_250, dl_500, dl_750]
-m_names_dl = ["DL " + str(int(model.get_params()['epochs']['actual_value'])) +                                      " Epochs" for model in models_dl]
+m_names_dl = ["DL " + str(int(model.get_params()['epochs']['actual_value'])) + " Epochs" for model in models_dl]
 
 plot_spirals(models_dl, m_names_dl)
 
