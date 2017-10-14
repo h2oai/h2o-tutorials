@@ -67,15 +67,15 @@ hyper_params = list(ntrees = ntrees_opts,
 # max runtime and max models are enforced
 # and the search will stop after not improving much over the best 5 random models
 search_criteria = list(strategy = "RandomDiscrete", 
-                       max_runtime_secs = 600, 
-                       max_models = 20, 
+                       max_runtime_secs = 300, 
+                       max_models = 10, 
                        stopping_metric = "AUC", 
                        stopping_tolerance = 0.0001, 
                        stopping_rounds = 5, 
                        seed = 12345)
 
 # execute training w/ grid search
-loan_gbm <- h2o.grid("gbm", 
+loan_gbm <- h2o.grid("xgboost", 
                      grid_id = "gbm_grid",
                      x = X, 
                      y = y, 
