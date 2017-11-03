@@ -20,9 +20,6 @@ h2o.init(nthreads = -1)
 
 train_main = h2o.importFile("https://raw.githubusercontent.com/h2oai/h2o-tutorials/master/training/ceder-rapids/prostate.csv")
 
-train_main$CAPSULE = h2o.asfactor(train_main$CAPSULE)
-
-
 data_split = h2o.splitFrame(train_main, ratios = 0.75, seed = 1234)
 train = data_split[[1]]
 test = data_split[[2]]
@@ -56,6 +53,16 @@ model_glm = h2o.glm(x = features,
                     seed = 1234)
 summary(model_glm)
 h2o.varimp(model_glm)
+
+
+#
+# Changing response variable to categorical for classification
+#
+train_main$CAPSULE = h2o.asfactor(train_main$CAPSULE)
+
+data_split = h2o.splitFrame(train_main, ratios = 0.75, seed = 1234)
+train = data_split[[1]]
+test = data_split[[2]]
 
 
 # ------------------------------------------------------------------------------
