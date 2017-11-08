@@ -38,12 +38,9 @@ public class ModelGroup extends ArrayList<GenModel> {
     }
 
     public LinkedHashMap<String, Predictor> _groupPredictors;
-    public ArrayList<String> _groupIdxToColNames;
 
     public ModelGroup() {
         this._predixors = new LinkedHashSet<String>();
-        this._groupPredictors = new LinkedHashMap<String, Predictor>();
-        this._groupIdxToColNames = new ArrayList<String>();
     }
 
     public String[] getMOJONames() throws Exception {
@@ -78,20 +75,8 @@ public class ModelGroup extends ArrayList<GenModel> {
     }
 
     public void addModel(GenModel m) {
-        String[] predictors = m.getNames();
-        for (int i = 0; i < predictors.length; i++) {
-            this._groupPredictors.put(predictors[i], new Predictor(this._groupPredictors.size(), m.getDomainValues(i)));
-            this._groupIdxToColNames.add(predictors[i]);
-        }
-        this._predixors.addAll(Arrays.asList(Arrays.copyOfRange(m.getNames(), 0, m.getNames().length -1)));
+        this._predixors.addAll(Arrays.asList(Arrays.copyOfRange(m.getNames(), 0, m.getNames().length - 1)));
         this.add(m);
-    }
-
-    public int mapEnum(int colIdx, String enumValue) {
-        String[] domain = this._groupPredictors.get(this._groupIdxToColNames.get(colIdx)).domains;
-        if (domain==null || domain.length==0) return -1;
-        for (int i=0; i<domain.length;i++) if (enumValue.equals(domain[i])) return i;
-        return -1;
     }
 
     public Object[] scoreAll(RowData data) {
@@ -101,27 +86,33 @@ public class ModelGroup extends ArrayList<GenModel> {
                 EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
                 config.setConvertUnknownCategoricalLevelsToNa(true);
                 config.setModel(this.get(i));
-		EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-		RegressionModelPrediction prediction = modelWrapper.predictRegression(data);
-		result_set[i] = prediction.value;
-               // switch (config.getModel().getModelCategory()) {
-               //     case Regression: {
-               //         EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-               //         RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
-               //         result_set[i] = prediction.value;
-               //     }
-               //     case Binomial: {
-               //         EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-               //         BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
-               //         result_set[i] = prediction.label;
-                //    }
-                //    case Multinomial: {
-                //        ArrayList<Double> p = new ArrayList<Double>();
-                //        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                //        MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
-                //        result_set[i] = prediction.label;
-                 //   }
-                //}
+                EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                RegressionModelPrediction prediction = modelWrapper.predictRegression(data);
+ 		result_set[i] = prediction.value;
+           //    switch (modelWrapper.getModelCategory()) {
+            //        case Regression: {
+            //            RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
+            //            result_set[i] = prediction.value;
+            //        }
+            //        case Unknown:
+            //            break;
+             //       case Binomial: {
+              //          BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
+              //          result_set[i] = prediction.label;
+              //      }
+              //      case Multinomial: {
+              //          MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
+              //          result_set[i] = prediction.label;
+              //      }
+              //      case Clustering:
+               //         break;
+                //    case AutoEncoder:
+                //        break;
+               //     case DimReduction:
+                //        break;
+               //     case WordEmbedding:
+               //         break;
+             //   }
             }
         } catch (PredictException pe) {
             pe.printStackTrace();
