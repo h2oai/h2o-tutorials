@@ -101,24 +101,27 @@ public class ModelGroup extends ArrayList<GenModel> {
                 EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
                 config.setConvertUnknownCategoricalLevelsToNa(true);
                 config.setModel(this.get(i));
-                switch (config.getModel().getModelCategory()) {
-                    case Regression: {
-                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                        RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
-                        result_set[i] = prediction.value;
-                    }
-                    case Binomial: {
-                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                        BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
-                        result_set[i] = prediction.label;
-                    }
-                    case Multinomial: {
-                        ArrayList<Double> p = new ArrayList<Double>();
-                        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                        MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
-                        result_set[i] = prediction.label;
-                    }
-                }
+		EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+		RegressionModelPrediction prediction = modelWrapper.predictRegression(data);
+		result_set[i] = prediction.value;
+               // switch (config.getModel().getModelCategory()) {
+               //     case Regression: {
+               //         EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+               //         RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
+               //         result_set[i] = prediction.value;
+               //     }
+               //     case Binomial: {
+               //         EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+               //         BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
+               //         result_set[i] = prediction.label;
+                //    }
+                //    case Multinomial: {
+                //        ArrayList<Double> p = new ArrayList<Double>();
+                //        EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
+                //        MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
+                //        result_set[i] = prediction.label;
+                 //   }
+                //}
             }
         } catch (PredictException pe) {
             pe.printStackTrace();
