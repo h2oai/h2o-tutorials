@@ -45,8 +45,8 @@ public class ScoreDataHQLGenerator {
                 }
                 writer.close();
             } catch (Exception e) {}
-            } catch (Exception e) {
-                e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

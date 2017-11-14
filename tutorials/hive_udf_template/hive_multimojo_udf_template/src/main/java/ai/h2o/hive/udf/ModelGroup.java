@@ -2,7 +2,6 @@ package ai.h2o.hive.udf;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MulticastSocket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -11,16 +10,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import hex.genmodel.*;
-import hex.genmodel.easy.EasyPredictModelWrapper;
-import hex.genmodel.easy.RowData;
-import hex.genmodel.easy.exception.PredictException;
-import hex.genmodel.easy.prediction.MultinomialModelPrediction;
-import hex.genmodel.easy.prediction.RegressionModelPrediction;
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
 
 public class ModelGroup extends ArrayList<GenModel> {
-
-    LinkedHashSet<String> _predixors;
 
     class Predictor {
         public int index;
@@ -38,9 +29,11 @@ public class ModelGroup extends ArrayList<GenModel> {
     }
 
     public LinkedHashMap<String, Predictor> _groupPredictors;
+    public ArrayList<String> _groupIdxToColNames;
 
     public ModelGroup() {
-        this._predixors = new LinkedHashSet<String>();
+        this._groupPredictors = new LinkedHashMap<String, Predictor>();
+        this._groupIdxToColNames = new ArrayList<String>();
     }
 
     public String[] getMOJONames() throws Exception {
@@ -75,66 +68,52 @@ public class ModelGroup extends ArrayList<GenModel> {
     }
 
     public void addModel(GenModel m) {
-        this._predixors.addAll(Arrays.asList(Arrays.copyOfRange(m.getNames(), 0, m.getNames().length - 1)));
+        String[] predictors = m.getNames();
+        for(int i = 0; i < predictors.length; i++) {
+            if(this._groupPredictors.get(predictors[i]) == null) {
+                this._groupPredictors.put(predictors[i], new Predictor(this._groupPredictors.size(), m.getDomainValues(i)));
+                this._groupIdxToColNames.add(predictors[i]);
+            }
+        }
         this.add(m);
     }
 
-    public Object[] scoreAll(RowData data) {
-        Object[] result_set = new Object[this.size()];
-        try {
-            for (int i = 0; i < this.size(); i++) {
-                EasyPredictModelWrapper.Config config = new EasyPredictModelWrapper.Config();
-                config.setConvertUnknownCategoricalLevelsToNa(true);
-                config.setModel(this.get(i));
-                EasyPredictModelWrapper modelWrapper = new EasyPredictModelWrapper(config);
-                RegressionModelPrediction prediction = modelWrapper.predictRegression(data);
- 		result_set[i] = prediction.value;
-           //    switch (modelWrapper.getModelCategory()) {
-            //        case Regression: {
-            //            RegressionModelPrediction prediction = (RegressionModelPrediction) modelWrapper.predictRegression(data);
-            //            result_set[i] = prediction.value;
-            //        }
-            //        case Unknown:
-            //            break;
-             //       case Binomial: {
-              //          BinomialModelPrediction prediction = (BinomialModelPrediction) modelWrapper.predictBinomial(data);
-              //          result_set[i] = prediction.label;
-              //      }
-              //      case Multinomial: {
-              //          MultinomialModelPrediction prediction = (MultinomialModelPrediction) modelWrapper.predictMultinomial(data);
-              //          result_set[i] = prediction.label;
-              //      }
-              //      case Clustering:
-               //         break;
-                //    case AutoEncoder:
-                //        break;
-               //     case DimReduction:
-                //        break;
-               //     case WordEmbedding:
-               //         break;
-             //   }
+    public int mapEnum(int colIdx, String enumValue) {
+        String[] domain = this._groupPredictors.get(this._groupIdxToColNames.get(colIdx)).domains;
+        if (domain == null || domain.length == 0) return -1;
+        for (int i = 0; i < domain.length; i++) if (enumValue.equals(domain[i])) return i;
+        return -1;
+    }
+
+    public ArrayList<ArrayList<Double>> scoreAll(double[] data) {
+        ArrayList<ArrayList<Double>> result_set = new ArrayList<ArrayList<Double>>();
+
+        for (int i = 0; i < this.size(); i++) {
+            GenModel m = this.get(i);
+            String[] features = m.getNames();
+            double[] model_data = new double[features.length];
+            double[] model_response = new double[m.getPredsSize()];
+            for(int j = 0; j < features.length; j++) {
+                model_data[j] = data[this._groupPredictors.get(features[j]).index];
             }
-        } catch (PredictException pe) {
-            pe.printStackTrace();
-            throw new RuntimeException();
+
+            // get and add prediction to result
+            double[] prediction = m.score0(model_data, model_response);
+            ArrayList<Double> p = new ArrayList<Double>();
+            for(double d: prediction) p.add(d);
+
+            result_set.add(p);
         }
         return result_set;
     }
 
     public String getColNamesString () {
         StringBuffer sb = new StringBuffer();
-        int i = 1;
-        for(String p: this._predixors) {
-            if (this._predixors.size() != i) {
-                i++;
-                sb.append(p + ",");
-            }
-            else {
-                sb.append(p);
-            }
+        for(int i = 0; i < this._groupIdxToColNames.size(); i++) {
+            sb.append(this._groupIdxToColNames.get(i));
+            if (i + 1 != this._groupIdxToColNames.size()) sb.append(",");
         }
-        String result = sb.toString();
-        return result;
+        return sb.toString();
     }
 
     /**
