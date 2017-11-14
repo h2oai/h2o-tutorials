@@ -13,6 +13,7 @@ import hex.genmodel.*;
 
 public class ModelGroup extends ArrayList<GenModel> {
 
+    //Create a predictor class which keeps track of indexes and domains
     class Predictor {
         public int index;
         public String[] domains;
@@ -28,14 +29,19 @@ public class ModelGroup extends ArrayList<GenModel> {
         }
     }
 
+    //Create a HashMap of Strings & Predictors. Make it linked as order matters.
     public LinkedHashMap<String, Predictor> _groupPredictors;
+
+    //Create an ArrayList of strings
     public ArrayList<String> _groupIdxToColNames;
 
+    //Create a constructor and initialize LinkedHashMap & Arraylist
     public ModelGroup() {
         this._groupPredictors = new LinkedHashMap<String, Predictor>();
         this._groupIdxToColNames = new ArrayList<String>();
     }
 
+    //Function to get MOJO names and store them in a string array
     public String[] getMOJONames() throws Exception {
         String[] mojo_names = getResourceListing(ModelGroup.class, "models/");
         ArrayList<String> tmp = new ArrayList<String>();
@@ -53,6 +59,7 @@ public class ModelGroup extends ArrayList<GenModel> {
         return tmp.toArray(new String[tmp.size()]);
     }
 
+    //Function to add MOJOs from JARs
     public void addMOJOsFromJARResource() {
         try {
             String[] mojo_names = this.getMOJONames();
@@ -67,6 +74,7 @@ public class ModelGroup extends ArrayList<GenModel> {
         }
     }
 
+    //Add models and add predictors to _groupPredictors and _groupIdxToColNames
     public void addModel(GenModel m) {
         String[] predictors = m.getNames();
         for(int i = 0; i < predictors.length; i++) {
@@ -85,6 +93,7 @@ public class ModelGroup extends ArrayList<GenModel> {
         return -1;
     }
 
+    //scoreAll function (this is where the actual scoring is done)
     public ArrayList<ArrayList<Double>> scoreAll(double[] data) {
         ArrayList<ArrayList<Double>> result_set = new ArrayList<ArrayList<Double>>();
 
