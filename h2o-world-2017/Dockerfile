@@ -54,15 +54,17 @@ RUN \
 USER h2o
 WORKDIR /home/h2o
 
-RUN wget https://repo.continuum.io/miniconda/Miniconda3-4.3.11-Linux-x86_64.sh
-RUN bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p /home/h2o/Miniconda3
-ENV PATH=/home/h2o/Miniconda3/bin:$PATH
-
-# Install Jupyter Notebook
-RUN conda install -y jupyter notebook
+RUN \
+  wget https://repo.continuum.io/miniconda/Miniconda3-4.3.11-Linux-x86_64.sh
 
 RUN \
-  pip install /h2o-${H2O_PROJECT_VERSION}/python/h2o*.whl
+  bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p /home/h2o/Miniconda3
+
+RUN \
+  /home/h2o/Miniconda3/bin/conda create -y --name h2o python=3.5 anaconda
+
+RUN \
+  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install /h2o-${H2O_PROJECT_VERSION}/python/h2o*.whl"
 
 RUN \
   R CMD INSTALL /h2o-${H2O_PROJECT_VERSION}/R/h2o*.gz
@@ -92,7 +94,7 @@ USER h2o
 WORKDIR /home/h2o
 
 RUN \
-  jupyter notebook --generate-config && \
+  /home/h2o/Miniconda3/envs/h2o/bin/jupyter notebook --generate-config && \
   sed -i "s/#c.NotebookApp.token = '<generated>'/c.NotebookApp.token = 'h2o'/" .jupyter/jupyter_notebook_config.py
 
 USER root
