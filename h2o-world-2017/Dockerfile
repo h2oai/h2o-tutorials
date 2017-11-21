@@ -52,15 +52,6 @@ RUN \
   echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections && \
   apt-get -y install oracle-java8-installer
 
-# H2O
-ENV H2O_BRANCH_NAME=rel-weierstrass
-ENV H2O_BUILD_NUMBER=7
-ENV H2O_PROJECT_VERSION=3.14.0.${H2O_BUILD_NUMBER}
-RUN \
-  wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
-  unzip h2o-${H2O_PROJECT_VERSION}.zip && \
-  rm h2o-${H2O_PROJECT_VERSION}.zip
-
 # Log directory used by run.sh
 RUN \
   mkdir /log && \
@@ -87,17 +78,25 @@ USER h2o
 WORKDIR /home/h2o
 
 # Miniconda
+ENV MINICONDA_FILE=Miniconda3-4.3.11-Linux-x86_64.sh
 RUN \
-  wget https://repo.continuum.io/miniconda/Miniconda3-4.3.11-Linux-x86_64.sh && \
-  bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p /home/h2o/Miniconda3 && \
+  wget https://repo.continuum.io/miniconda/${MINICONDA_FILE} && \
+  bash ${MINICONDA_FILE} -b -p /home/h2o/Miniconda3 && \
   /home/h2o/Miniconda3/bin/conda create -y --name h2o python=3.5 anaconda && \
   /home/h2o/Miniconda3/envs/h2o/bin/jupyter notebook --generate-config && \
-  sed -i "s/#c.NotebookApp.token = '<generated>'/c.NotebookApp.token = 'h2o'/" .jupyter/jupyter_notebook_config.py
+  sed -i "s/#c.NotebookApp.token = '<generated>'/c.NotebookApp.token = 'h2o'/" .jupyter/jupyter_notebook_config.py && \
+  rm ${MINICONDA_FILE}
 
-# H2O packages for different languages
+# H2O
+ENV H2O_BRANCH_NAME=rel-weierstrass
+ENV H2O_BUILD_NUMBER=7
+ENV H2O_PROJECT_VERSION=3.14.0.${H2O_BUILD_NUMBER}
 RUN \
-  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install /h2o-${H2O_PROJECT_VERSION}/python/h2o*.whl" && \
-  R CMD INSTALL /h2o-${H2O_PROJECT_VERSION}/R/h2o*.gz
+  wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
+  unzip h2o-${H2O_PROJECT_VERSION}.zip && \
+  rm h2o-${H2O_PROJECT_VERSION}.zip && \
+  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install h2o-${H2O_PROJECT_VERSION}/python/h2o*.whl" && \
+  R CMD INSTALL h2o-${H2O_PROJECT_VERSION}/R/h2o*.gz
 
 USER root
 WORKDIR /
