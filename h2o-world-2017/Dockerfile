@@ -119,10 +119,21 @@ RUN \
   unzip ${SPARKLING_WATER_DIRECTORY}.zip && \
   rm ${SPARKLING_WATER_DIRECTORY}.zip
 
-USER root
-WORKDIR /
+######################################################################
+# ADD CONTENT FOR INDIVIDUAL HANDS-ON SESSIONS HERE
+######################################################################
+
+RUN \
+  mkdir data && \
+  mkdir notebooks && \
+  mkdir rscripts
+
+######################################################################
 
 # ----- RUN INFORMATION -----
+
+USER root
+WORKDIR /
 
 # Entry point
 COPY run.sh /run.sh
