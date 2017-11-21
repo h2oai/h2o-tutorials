@@ -91,12 +91,33 @@ RUN \
 ENV H2O_BRANCH_NAME=rel-weierstrass
 ENV H2O_BUILD_NUMBER=7
 ENV H2O_PROJECT_VERSION=3.14.0.${H2O_BUILD_NUMBER}
+ENV H2O_DIRECTORY=h2o-${H2O_PROJECT_VERSION}
 RUN \
   wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
-  unzip h2o-${H2O_PROJECT_VERSION}.zip && \
-  rm h2o-${H2O_PROJECT_VERSION}.zip && \
-  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install h2o-${H2O_PROJECT_VERSION}/python/h2o*.whl" && \
-  R CMD INSTALL h2o-${H2O_PROJECT_VERSION}/R/h2o*.gz
+  unzip ${H2O_DIRECTORY}.zip && \
+  rm ${H2O_DIRECTORY}.zip && \
+  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install ${H2O_DIRECTORY}/python/h2o*.whl" && \
+  R CMD INSTALL ${H2O_DIRECTORY}/R/h2o*.gz
+
+# Spark
+ENV SPARK_VERSION=2.2.0
+ENV SPARK_HADOOP_VERSION=2.7
+ENV SPARK_DIRECTORY=spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}
+RUN \
+  wget http://mirrors.sonic.net/apache/spark/spark-${SPARK_VERSION}/${SPARK_DIRECTORY}.tgz && \
+  tar zxvf ${SPARK_DIRECTORY}.tgz && \
+  rm ${SPARK_DIRECTORY}.tgz
+
+# Sparkling Water
+ENV SPARKLING_WATER_BRANCH_NUMBER=2.2
+ENV SPARKLING_WATER_BRANCH_NAME=rel-${SPARKLING_WATER_BRANCH_NUMBER}
+ENV SPARKLING_WATER_BUILD_NUMBER=2
+ENV SPARKLING_WATER_PROJECT_VERSION=${SPARKLING_WATER_BRANCH_NUMBER}.${SPARKLING_WATER_BUILD_NUMBER}
+ENV SPARKLING_WATER_DIRECTORY=sparkling-water-${SPARKLING_WATER_PROJECT_VERSION}
+RUN \
+  wget http://h2o-release.s3.amazonaws.com/sparkling-water/${SPARKLING_WATER_BRANCH_NAME}/${SPARKLING_WATER_BUILD_NUMBER}/${SPARKLING_WATER_DIRECTORY}.zip && \
+  unzip ${SPARKLING_WATER_DIRECTORY}.zip && \
+  rm ${SPARKLING_WATER_DIRECTORY}.zip
 
 USER root
 WORKDIR /
