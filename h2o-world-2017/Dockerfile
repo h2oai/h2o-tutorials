@@ -128,6 +128,12 @@ RUN \
   mkdir notebooks && \
   mkdir rscripts
 
+# Megan #
+COPY megan notebooks
+RUN mkdir data/megan && \
+  wget -O data/megan/w2v.hex 'https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex' && \
+  wget -O data/megan/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv'
+
 ######################################################################
 
 # ----- RUN INFORMATION -----
