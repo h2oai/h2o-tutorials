@@ -138,13 +138,13 @@ RUN mkdir data/megan && \
 
 # ----- RUN INFORMATION -----
 
-USER root
-WORKDIR /
+USER h2o
+WORKDIR /home/h2o
 
 # Entry point
 COPY run.sh /run.sh
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["/run.sh"]
   
 EXPOSE 54321
 EXPOSE 8888
