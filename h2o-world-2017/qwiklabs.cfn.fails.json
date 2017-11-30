@@ -1,0 +1,152 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": " CloudFormation",
+
+  "Parameters": {
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type" : "String",
+      "Default" : "m4.4xlarge",
+      "NoEcho": "true",
+      "AllowedValues" : [ "m4.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+    "KeyName":{
+         "Description":"Name of an existing EC2 KeyPair to enable access to qwiklabInstance",
+         "Default":"generic-qwiklab",
+         "Type":"String"
+    },
+    "AdministratorUser": {
+            "Description": "Username the student logs into",
+            "Default": "ec2-user",
+            "Type": "String"
+    }
+  },
+
+  "Resources": {
+    "qwiklabInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId" : "ami-cb06dfb3",
+        "InstanceType": { "Ref": "InstanceType" },
+        "SecurityGroups": [ { "Ref": "qwiklabInstanceSecurityGroup" } ],
+        "KeyName": { "Ref": "KeyName" },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": ["", [
+              "#!/bin/bash -v\n",
+              "/bin/echo tomtest > /tmp/tomtest.txt\n",
+              "/opt/aws/bin/cfn-signal -e 0 -r \"qwiklabInstance Environment setup copmlete\" '", { "Ref": "WaitHandle" }, "'\n"
+            ]]
+          }
+        }
+      }
+    },
+
+    "WaitHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "WaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "DependsOn": "qwiklabInstance",
+      "Properties": {
+        "Handle": { "Ref": "WaitHandle" },
+        "Timeout": "3000"
+      }
+    },
+
+    "qwiklabInstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable ports",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    }
+
+  },
+
+  "Outputs":{
+      "qwikLAB":{
+         "Description":"Outputs to be used by qwiklab",
+         "Value":{
+            "Fn::Join":[
+               "",
+               [
+                  "{",
+                  "\"HostDNS\" : \"",
+                  {
+                     "Fn::GetAtt":[
+                        "qwiklabInstance",
+                        "PublicDnsName"
+                     ]
+                  },
+                  "\",",
+                  "\"InstanceId\" : \"",
+                  {
+                     "Ref":"qwiklabInstance"
+                  },
+                  "\",",
+                  "\"Connection\" : \"",
+                  "\"",
+                  "}"
+                ]
+            ]
+         }
+      },
+      "HostDNS":{
+         "Description":"PublicIP of the qwiklabInstance",
+         "Value":{
+            "Fn::GetAtt":[
+               "qwiklabInstance",
+               "PublicDnsName"
+            ]
+         }
+      },
+      "InstanceId":{
+         "Description":"InstanceId of the qwiklabInstance",
+         "Value":{
+            "Ref":"qwiklabInstance"
+         }
+      },
+      "Connection":{
+         "Description":"Any appropriate string to be displayed to the student for connecting",
+         "Value":{
+            "Fn::Join":[
+               "",
+               [
+                  {
+                     "Ref":"AdministratorUser"
+                  },
+                  "@",
+                  {
+                     "Fn::GetAtt":[
+                        "qwiklabInstance",
+                        "PublicDnsName"
+                     ]
+                  }
+               ]
+            ]
+         }
+      }
+   }
+}
