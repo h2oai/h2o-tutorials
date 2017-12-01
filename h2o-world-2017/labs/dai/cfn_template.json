@@ -95,26 +95,10 @@
     }
   },
 
-  "Outputs":{
+  "Outputs": {
     "DriverlessAI": {
       "Description": "Driverless AI URL",
       "Value": { "Fn::Join": [ "", ["http://", { "Fn::GetAtt": ["qwiklabInstance", "PublicIp"] }]]}
-    },
-    "RStudio": {
-      "Description": "RStudio URL",
-      "Value": { "Fn::Join": [ "", ["http://", { "Fn::GetAtt": ["qwiklabInstance", "PublicIp"] }, ":8787"]]}
-    },
-    "Jupyter": {
-      "Description": "Jupyter URL",
-      "Value": { "Fn::Join": [ "", ["http://", { "Fn::GetAtt": ["qwiklabInstance", "PublicIp"] }, ":8888"]]}
-    },
-    "H2O": {
-      "Description": "H2O URL",
-      "Value": { "Fn::Join": [ "", ["http://", { "Fn::GetAtt": ["qwiklabInstance", "PublicIp"] }, ":54321"]]}
-    },
-    "Connection" : {
-      "Description": "SSH connection information",
-      "Value": { "Fn::Join": [ "", [ { "Ref": "AdministratorUser" }, "@", { "Fn::GetAtt": ["qwiklabInstance", "PublicDnsName"]}]]}
     }
   }
 }
