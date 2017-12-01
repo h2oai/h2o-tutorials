@@ -138,7 +138,7 @@ COPY megan notebooks
 
 # Obtain data For Sparkling Water demo, it is againt AmazonReviews.csv, but the original one
 RUN mkdir data/kuba && \
-  wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews.csv'
+  wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/Reviews.csv'
 
 
 ######################################################################
