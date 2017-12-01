@@ -103,9 +103,13 @@ RUN \
 ENV SPARK_VERSION=2.2.0
 ENV SPARK_HADOOP_VERSION=2.7
 ENV SPARK_DIRECTORY=spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}
+ENV SPARK_HOME=/home/h2o/bin/spark
 RUN \
+  mkdir bin && \
+  cd bin && \
+  mkdir -p ${SPARK_HOME} && \
   wget http://mirrors.sonic.net/apache/spark/spark-${SPARK_VERSION}/${SPARK_DIRECTORY}.tgz && \
-  tar zxvf ${SPARK_DIRECTORY}.tgz && \
+  tar zxvf ${SPARK_DIRECTORY}.tgz -C ${SPARK_HOME} --strip-components 1 && \
   rm ${SPARK_DIRECTORY}.tgz
 
 # Sparkling Water
@@ -115,9 +119,16 @@ ENV SPARKLING_WATER_BUILD_NUMBER=4
 ENV SPARKLING_WATER_PROJECT_VERSION=${SPARKLING_WATER_BRANCH_NUMBER}.${SPARKLING_WATER_BUILD_NUMBER}
 ENV SPARKLING_WATER_DIRECTORY=sparkling-water-${SPARKLING_WATER_PROJECT_VERSION}
 RUN \
+  cd bin && \
   wget http://h2o-release.s3.amazonaws.com/sparkling-water/${SPARKLING_WATER_BRANCH_NAME}/${SPARKLING_WATER_BUILD_NUMBER}/${SPARKLING_WATER_DIRECTORY}.zip && \
   unzip ${SPARKLING_WATER_DIRECTORY}.zip && \
-  rm ${SPARKLING_WATER_DIRECTORY}.zip
+  mv ${SPARKLING_WATER_DIRECTORY} sparkling-water && \
+  rm ${SPARKLING_WATER_DIRECTORY}.zip && \
+  /home/h2o/Miniconda3/envs/h2o/bin/ipython profile create pyspark 
+
+COPY conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pyspark/startup/
+COPY conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
+ENV SPARKLING_WATER_HOME=/home/h2o/bin/sparkling-water
 
 ######################################################################
 # ADD CONTENT FOR INDIVIDUAL HANDS-ON SESSIONS HERE
