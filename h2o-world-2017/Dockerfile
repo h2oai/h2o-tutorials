@@ -132,7 +132,14 @@ RUN \
 RUN mkdir data/megan && \
   wget -O data/megan/w2v.hex 'https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex' && \
   wget -O data/megan/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv'
+
 COPY megan notebooks
+
+
+# Obtain data For Sparkling Water demo, it is againt AmazonReviews.csv, but the original one
+RUN mkdir data/kuba && \
+  wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews.csv'
+
 
 ######################################################################
 
