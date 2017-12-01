@@ -82,6 +82,7 @@ ENV MINICONDA_FILE=Miniconda3-4.3.11-Linux-x86_64.sh
 RUN \
   wget https://repo.continuum.io/miniconda/${MINICONDA_FILE} && \
   bash ${MINICONDA_FILE} -b -p /home/h2o/Miniconda3 && \
+  /home/h2o/Miniconda3/bin/conda create -y --name pysparkling python=2.7 anaconda && \
   /home/h2o/Miniconda3/bin/conda create -y --name h2o python=3.5 anaconda && \
   /home/h2o/Miniconda3/envs/h2o/bin/jupyter notebook --generate-config && \
   sed -i "s/#c.NotebookApp.token = '<generated>'/c.NotebookApp.token = 'h2o'/" .jupyter/jupyter_notebook_config.py && \
@@ -110,7 +111,9 @@ RUN \
   mkdir -p ${SPARK_HOME} && \
   wget http://mirrors.sonic.net/apache/spark/spark-${SPARK_VERSION}/${SPARK_DIRECTORY}.tgz && \
   tar zxvf ${SPARK_DIRECTORY}.tgz -C ${SPARK_HOME} --strip-components 1 && \
-  rm ${SPARK_DIRECTORY}.tgz
+  rm ${SPARK_DIRECTORY}.tgz && \
+  bash -c "source /home/h2o/Miniconda3/bin/activate pysparkling && pip install tabulate future colorama"
+
 
 # Sparkling Water
 ENV SPARKLING_WATER_BRANCH_NUMBER=2.2
@@ -124,7 +127,7 @@ RUN \
   unzip ${SPARKLING_WATER_DIRECTORY}.zip && \
   mv ${SPARKLING_WATER_DIRECTORY} sparkling-water && \
   rm ${SPARKLING_WATER_DIRECTORY}.zip && \
-  /home/h2o/Miniconda3/envs/h2o/bin/ipython profile create pyspark 
+  /home/h2o/Miniconda3/envs/pysparkling/bin/ipython profile create pyspark 
 
 COPY conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pyspark/startup/
 COPY conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
