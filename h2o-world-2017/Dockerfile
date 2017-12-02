@@ -137,28 +137,38 @@ ENV SPARKLING_WATER_HOME=/home/h2o/bin/sparkling-water
 # ADD CONTENT FOR INDIVIDUAL HANDS-ON SESSIONS HERE
 ######################################################################
 
+# Prologue
 RUN \
   mkdir data && \
   mkdir notebooks && \
   mkdir rscripts
 
-# Megan #
-RUN mkdir data/megan && \
+# Megan's NLP demo
+RUN \
+  mkdir data/megan && \
   wget -O data/megan/w2v.hex 'https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex' && \
   wget -O data/megan/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv'
-
 COPY megan notebooks
 
+# Kuba's pysparkling demo
 COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
-
-
-# Obtain data For Sparkling Water demo, it is againt AmazonReviews.csv, but the original one
 RUN mkdir data/kuba && \
   wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/Reviews.csv'
 
+# Erin's automl demo
+RUN \
+  mkdir data/automl && \
+  mkdir rscripts/automl
+COPY automl/automl_binary_classification_product_backorders.R rscripts/automl
+COPY automl/automl_binary_classification_product_backorders.Rmd rscripts/automl
+COPY automl/product_backorders.csv data/automl
+
+# Epilogue
 USER root
 RUN \
-  chown -R h2o:h2o /home/h2o/notebooks
+  chown -R h2o:h2o /home/h2o/data && \
+  chown -R h2o:h2o /home/h2o/notebooks && \
+  chown -R h2o:h2o /home/h2o/rscripts
 
 ######################################################################
 
