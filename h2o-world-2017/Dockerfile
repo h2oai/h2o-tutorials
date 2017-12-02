@@ -149,6 +149,8 @@ RUN mkdir data/megan && \
 
 COPY megan notebooks
 
+COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
+
 
 # Obtain data For Sparkling Water demo, it is againt AmazonReviews.csv, but the original one
 RUN mkdir data/kuba && \
