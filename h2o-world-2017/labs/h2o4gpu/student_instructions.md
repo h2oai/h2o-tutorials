@@ -1,4 +1,4 @@
-## Introduction to Driverless AI
+## Introduction to H2O4GPU
 
 ### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
 
