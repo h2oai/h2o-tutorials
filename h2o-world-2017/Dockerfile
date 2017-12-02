@@ -156,6 +156,9 @@ COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
 RUN mkdir data/kuba && \
   wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/Reviews.csv'
 
+USER root
+RUN \
+  chown -R h2o:h2o /home/h2o/notebooks
 
 ######################################################################
 
