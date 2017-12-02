@@ -6,16 +6,11 @@
 
 #### Step 2:  Click the green "Start Lab" button above.
 
-#### Step 3:  After the lab instance boots, copy the "RStudio" or "Jupyter" URL at the left, and paste it into a new browser tab.
+#### Step 3:  After the lab instance boots, copy "Jupyter" URL at the left, and paste it into a new browser tab.
 
-It can take several minutes for the RStudio and Jupyter pages to come up.  Just keep refreshing the page.
+It can take several minutes for the Jupyter page to come up.  Just keep refreshing the page.
 
 #### Step 4:  Log in.
-
-##### RStudio
-
-* username:  h2o
-* password:  h2o
 
 ##### Jupyter
 
