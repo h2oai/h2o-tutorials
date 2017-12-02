@@ -4,8 +4,8 @@ h2o.init()
 # Import a binary classfication dataset
 # We will use a subset of the Product Backorders dataset
 # Source: https://www.kaggle.com/haimfeld87/predict-product-backorders-with-smote-and-rf/data
-df <- h2o.importFile("/Users/me/h2oai/code/h2o-tutorials/h2o-world-2017/automl/product_backorders.csv")
-#df <- h2o.importFile("/home/h2o/data/automl/product_backorders.csv")
+#df <- h2o.importFile("/Users/me/h2oai/code/h2o-tutorials/h2o-world-2017/automl/product_backorders.csv")
+df <- h2o.importFile("/home/h2o/data/automl/product_backorders.csv")
 
 # For classification, the response should be encoded as categorical (aka. "factor" or "enum")
 # Let's take a look
