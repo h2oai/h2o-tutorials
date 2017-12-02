@@ -1,0 +1,54 @@
+---
+title: "H2O AutoML Binary Classification Demo"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(h2o)
+h2o.init()
+```
+
+```{r}
+# Import a binary classfication dataset
+# We will use a subset of the Product Backorders dataset
+# Source: https://www.kaggle.com/haimfeld87/predict-product-backorders-with-smote-and-rf/data
+df <- h2o.importFile("/Users/me/h2oai/code/h2o-tutorials/h2o-world-2017/automl/product_backorders.csv")
+#df <- h2o.importFile("/home/h2o/data/automl/product_backorders.csv")
+```
+
+
+For classification, the response should be encoded as categorical (aka. "factor" or "enum"). Let's take a look.
+```{r}
+h2o.describe(df)
+```
+
+Identify the response & predictor columns.
+```{r}
+y <- "went_on_backorder"
+x <- setdiff(names(df), c(y, "sku"))
+```
+
+Run AutoML (for 10 models).
+```{r}
+aml <- h2o.automl(y = y, x = x,
+                  training_frame = df,
+                  max_models = 10,
+                  seed = 1)
+```
+
+View the AutoML Leaderboard.  Since we did not specify a special `leaderboard_frame` for scoring and ranking the models, the AutoML leaderboard uses cross-validation metrics to rank the models.
+```{r}
+lb <- aml@leaderboard
+lb
+```
+
+The leader model is stored here:
+```{r}
+aml@leader
+```
+
+
