@@ -10,7 +10,7 @@ The current version of AutoML (in H2O 3.16.*) trains and cross-validates a defau
 
 ## Part 1: Binary Classification
 
-For the AutoML binary classification demo, we use a subset of the [Product Backorders](https://www.kaggle.com/haimfeld87/predict-product-backorders-with-smote-and-rf/data) dataset.  The goal here is to predict whether or not a product will be put on backorder status, given a number of product metrics such as current inventory, transit time, demand forecasts and prior sales.
+For the AutoML binary classification demo, we use a subset of the [Product Backorders](https://www.kaggle.com/tiredgeek/predict-bo-trial/data) dataset.  The goal here is to predict whether or not a product will be put on backorder status, given a number of product metrics such as current inventory, transit time, demand forecasts and prior sales.
 
 In this tutorial, you will:
 

@@ -3,9 +3,12 @@ title: "H2O AutoML Binary Classification Demo"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. To execute a code chunk, click *Run* (play) button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+### Start H2O
+
+Load the **h2o** R library and initiatize a local H2O cluster.
 
 ```{r}
 library(h2o)
