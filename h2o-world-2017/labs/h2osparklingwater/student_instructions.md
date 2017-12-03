@@ -1,4 +1,4 @@
-## H2O-3 and Sparkling Water
+## H2O and Sparkling Water
 
 ### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
 
