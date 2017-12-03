@@ -158,7 +158,7 @@ RUN mkdir data/kuba && \
 # Erin's AutoML R & Python demos
 RUN \
   mkdir data/automl && \
-  mkdir rscripts/automl
+  mkdir rscripts/automl && \
   mkdir notebooks/automl
 COPY automl/R/automl_binary_classification_product_backorders.Rmd rscripts/automl
 COPY automl/R/automl_regression_powerplant_output.Rmd rscripts/automl
