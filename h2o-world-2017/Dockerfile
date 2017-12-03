@@ -140,29 +140,32 @@ ENV SPARKLING_WATER_HOME=/home/h2o/bin/sparkling-water
 # Prologue
 RUN \
   mkdir data && \
-  mkdir notebooks && \
-  mkdir rscripts
+  mkdir Python && \
+  mkdir R
 
 # Megan's NLP demo
 RUN \
-  mkdir data/megan && \
-  wget -O data/megan/w2v.hex 'https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex' && \
-  wget -O data/megan/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv'
-COPY megan notebooks
+  mkdir data/nlp && \
+  mkdir Python/nlp && \
+  wget -O data/nlp/w2v.hex 'https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex' && \
+  wget -O data/nlp/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv'
+COPY nlp/AmazonReviews.ipynb Python/nlp
+COPY nlp/stopwords.csv data/nlp
+
 
 # Kuba's pysparkling demo
-COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
-COPY pysparkling/img/scenario.png notebooks/img/scenario.png
-RUN mkdir data/kuba
+COPY pysparkling/AmazonFineFoodPipeline.ipynb  Python
+COPY pysparkling/img/scenario.png Python/img/scenario.png
+RUN mkdir data/pysparkling
  
-RUN  wget -O data/kuba/AmazonReviews_Predictions.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Predictions.csv'
-RUN  wget -O data/kuba/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
+RUN  wget -O data/pysparkling/AmazonReviews_Predictions.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Predictions.csv'
+RUN  wget -O data/pysparkilng/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
 
 # Erin's AutoML R & Python demos
 RUN \
   mkdir data/automl && \
-  mkdir rscripts/automl && \
-  mkdir notebooks/automl
+  mkdir R/automl && \
+  mkdir Python/automl
 COPY automl/R/automl_binary_classification_product_backorders.Rmd rscripts/automl
 COPY automl/R/automl_regression_powerplant_output.Rmd rscripts/automl
 COPY automl/Python/automl_binary_classification_product_backorders.ipynb notebooks/automl
@@ -174,8 +177,8 @@ COPY automl/data/powerplant_output.csv data/automl
 USER root
 RUN \
   chown -R h2o:h2o /home/h2o/data && \
-  chown -R h2o:h2o /home/h2o/notebooks && \
-  chown -R h2o:h2o /home/h2o/rscripts
+  chown -R h2o:h2o /home/h2o/Python && \
+  chown -R h2o:h2o /home/h2o/R
 
 ######################################################################
 
