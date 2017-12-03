@@ -17,7 +17,7 @@ In this tutorial, you will:
 - Specify a training frame.
 - Specify the response variable and predictor variables.
 - Run AutoML where stopping is based on max number of models.
-- Evaluate the leaderboard (based on cross-validation metrics).
+- View the leaderboard (based on cross-validation metrics).
 - Explore the ensemble composition.
 - Save the leader model (binary format & MOJO format).
 
@@ -37,7 +37,7 @@ In this tutorial, you will:
 - Specify a training frame and leaderboard (test) frame.
 - Specify the response variable.
 - Run AutoML where stopping is based on max runtime.
-- Evaluate the leaderboard (based on test set metrics).
+- View the leaderboard (based on test set metrics).
 - Predict using the AutoML leader model.
 
 Demo Notebooks:
