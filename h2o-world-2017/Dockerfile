@@ -155,13 +155,17 @@ COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
 RUN mkdir data/kuba && \
   wget -O data/kuba/AmazonReviews.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/Reviews.csv'
 
-# Erin's automl demo
+# Erin's AutoML R & Python demos
 RUN \
   mkdir data/automl && \
   mkdir rscripts/automl
-COPY automl/automl_binary_classification_product_backorders.R rscripts/automl
-COPY automl/automl_binary_classification_product_backorders.Rmd rscripts/automl
-COPY automl/product_backorders.csv data/automl
+  mkdir notebooks/automl
+COPY automl/R/automl_binary_classification_product_backorders.Rmd rscripts/automl
+COPY automl/R/automl_regression_powerplant_output.Rmd rscripts/automl
+COPY automl/Python/automl_binary_classification_product_backorders.Rmd notebooks/automl
+COPY automl/Python/automl_regression_powerplant_output.Rmd notebooks/automl
+COPY automl/data/product_backorders.csv data/automl
+COPY automl/data/powerplant_output.csv data/automl
 
 # Epilogue
 USER root
