@@ -41,6 +41,7 @@ In this tutorial, you will:
 - View leaderboard (based on test set metrics).
 - Compare the leaderboards of the two AutoML runs.
 - Predict using the AutoML leader model.
+- Compute performance of the AutoML leader model on a test set.
 
 Demo Notebooks:
 
