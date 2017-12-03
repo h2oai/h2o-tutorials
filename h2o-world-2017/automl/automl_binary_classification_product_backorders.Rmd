@@ -38,7 +38,7 @@ For classification, the response should be encoded as categorical (aka. "factor"
 ```{r}
 h2o.describe(df)
 ```
-We will notice that it's already encoded as "enum", so there's nothing we need to do here.  If it were encoded as a 0/1 "int", then we'd have to convert the colum as follows:  `df[,y] <- as.factor[,y]`
+We will notice that the response column, `"went_on_backorder"`, is already encoded as "enum", so there's nothing we need to do here.  If it were encoded as a 0/1 "int", then we'd have to convert the column as follows:  `df[,y] <- as.factor[,y]`
 
 
 Next, let's identify the response & predictor columns by saving them as `x` and `y`.
@@ -61,9 +61,11 @@ aml <- h2o.automl(y = y, x = x,
 
 ## Leaderboard
 
-Next, we will view the AutoML Leaderboard.  Since we did not specify a `leaderboard_frame` in the `h2o.automl()` function for scoring and ranking the models, the AutoML leaderboard uses cross-validation metrics to rank the models.
+Next, we will view the AutoML Leaderboard.  Since we did not specify a `leaderboard_frame` in the `h2o.automl()` function for scoring and ranking the models, the AutoML leaderboard uses cross-validation metrics to rank the models.  
 
-The leaderboard is stored here:
+A default performance metric for each machine learning task (binary classification, multiclass classification, regression) is specified internally and the leaderboard will be sorted by that metric.  In the case of binary classfication, the default ranking metric is Area Under the ROC Curve (AUC).  In the future, the user will be able to specify any of the H2O metrics so that different metrics can be used to generate rankings on the leaderboard.
+
+The leader model is stored at `aml@leader` and the leaderboard is stored at `aml@leaderboard`.
 ```{r}
 lb <- aml@leaderboard
 ```
@@ -78,21 +80,16 @@ To view the entire leaderboard, specify the `n` argument of the `print.H2OFrame(
 print(lb, n = nrow(lb))
 ```
 
-The leader model is stored here:
-```{r}
-aml@leader
-```
-
 
 ## Ensemble Exploration
 
-To understand how the ensembles work, let's take a peek inside the Stacked Ensemble "All Models" model.
+To understand how the ensemble works, let's take a peek inside the Stacked Ensemble "All Models" model.  The "All Models" ensemble is an ensemble of all of the individual models in the AutoML run.  This is often the top performing model on the leaderboard.
 
 
 ```{r}
 # Get model ids for all models in the AutoML Leaderboard
 model_ids <- as.data.frame(aml@leaderboard$model_id)[,1]
-# Get the Stacked Ensemble model
+# Get the "All Models" Stacked Ensemble model
 se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_ids, value = TRUE)[1])
 # Get the Stacked Ensemble metalearner model
 meta <- h2o.getModel(se@model$metalearner$name)
