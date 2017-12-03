@@ -7,6 +7,7 @@ output:
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. To execute a code chunk, click *Run* (play) button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
 
+If you're viewing the Rmd file (code only), but you'd like to see the code *and* output rendered as an HTML document, an online HTML of this file is available [here](http://htmlpreview.github.io/?https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/R/automl_regression_powerplant_output.html).
 
 ### Start H2O
 
