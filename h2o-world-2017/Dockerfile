@@ -162,8 +162,8 @@ RUN \
   mkdir notebooks/automl
 COPY automl/R/automl_binary_classification_product_backorders.Rmd rscripts/automl
 COPY automl/R/automl_regression_powerplant_output.Rmd rscripts/automl
-COPY automl/Python/automl_binary_classification_product_backorders.Rmd notebooks/automl
-COPY automl/Python/automl_regression_powerplant_output.Rmd notebooks/automl
+COPY automl/Python/automl_binary_classification_product_backorders.ipynb notebooks/automl
+COPY automl/Python/automl_regression_powerplant_output.ipynb notebooks/automl
 COPY automl/data/product_backorders.csv data/automl
 COPY automl/data/powerplant_output.csv data/automl
 
