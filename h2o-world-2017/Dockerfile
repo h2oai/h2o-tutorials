@@ -152,12 +152,11 @@ COPY megan notebooks
 
 # Kuba's pysparkling demo
 COPY pysparkling/AmazonFineFoodPipeline.ipynb  notebooks
-RUN mkdir -p notebooks/img/scenario.png
 COPY pysparkling/img/scenario.png notebooks/img/scenario.png
 RUN mkdir data/kuba
  
-RUN  wget -O data/kuba/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
 RUN  wget -O data/kuba/AmazonReviews_Predictions.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Predictions.csv'
+RUN  wget -O data/kuba/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
 
 # Erin's AutoML R & Python demos
 RUN \
