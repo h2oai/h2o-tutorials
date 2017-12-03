@@ -11,7 +11,7 @@ If you're viewing the Rmd file (code only), but you'd like to see the code *and*
 
 ### Start H2O
 
-Load the **h2o** R library and initiatize a local H2O cluster.
+Load the **h2o** R library and initialize a local H2O cluster.
 
 ```{r}
 library(h2o)
@@ -47,7 +47,7 @@ Next, let's identify the response column and save the column name as `y`.  In th
 y <- "HourlyEnergyOutputMW"
 ```
 
-Lastly, let's split the data into two frames, a `train` (80%) and a `test` frame (20%).  The `test` frame will be used to score the leaderboard and to demonstrate how to generate preditions using an AutoML leader model.
+Lastly, let's split the data into two frames, a `train` (80%) and a `test` frame (20%).  The `test` frame will be used to score the leaderboard and to demonstrate how to generate predictions using an AutoML leader model.
 ```{r}
 splits <- h2o.splitFrame(df, ratios = 0.8, seed = 1)
 train <- splits[[1]]
