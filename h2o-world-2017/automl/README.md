@@ -23,7 +23,7 @@ In this tutorial, you will:
 
 Demo Notebooks:
 
- - [R/automl\_binary\_classification\_product\_backorders.Rmd](./R/automl_binary_classification_product_backorders.R)  [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
+ - [R/automl\_binary\_classification\_product\_backorders.Rmd](./R/automl_binary_classification_product_backorders.Rmd)  [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
  - [Python/automl\_binary\_classification\_product\_backorders.ipynb](./Python/automl_binary_classification_product_backorders.ipynb) [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
 
 
