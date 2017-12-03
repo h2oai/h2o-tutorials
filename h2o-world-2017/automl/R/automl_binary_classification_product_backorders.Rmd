@@ -22,11 +22,11 @@ For the AutoML binary classification demo, we use a subset of the [Product Backo
 
 ```{r}
 # Use local data file or download from GitHub
-docker_data_path <- "/home/h2o/data/automl/product_backorders.csv"
+docker_data_path <- "/home/h2o/data/automl/data/product_backorders.csv"
 if (file.exists(docker_data_path)) {
   data_path <- docker_data_path
 } else {
-  data_path <- "https://github.com/h2oai/h2o-tutorials/raw/master/h2o-world-2017/automl/product_backorders.csv"
+  data_path <- "https://github.com/h2oai/h2o-tutorials/raw/master/h2o-world-2017/automl/data/product_backorders.csv"
 }
 
 # Load data into H2O
