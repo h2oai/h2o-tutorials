@@ -21,10 +21,10 @@ In this tutorial, you will:
 - Explore the ensemble composition.
 - Save the leader model (binary format & MOJO format).
 
-Demo Scripts:
+Demo Notebooks:
 
- - R: [automl\_binary\_classification\_product\_backorders.R](automl_binary_classification_product_backorders.R)
- - **TO DO** Python: [automl\_binary\_classification\_product\_backorders.ipynb]()
+ - [R/automl\_binary\_classification\_product\_backorders.Rmd](./R/automl_binary_classification_product_backorders.R)  [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
+ - [Python/automl\_binary\_classification\_product\_backorders.ipynb](./Python/automl_binary_classification_product_backorders.ipynb) [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
 
 
 ## Part 2: Regression
@@ -36,11 +36,11 @@ In this tutorial, you will:
 - Split the data into train/test sets.
 - Specify a training frame and leaderboard (test) frame.
 - Specify the response variable.
-- Run AutoML where stopping is based on max runtime (in seconds).
+- Run AutoML where stopping is based on max runtime.
 - Evaluate the leaderboard (based on test set metrics).
 - Predict using the AutoML leader model.
 
-Demo Scripts:
+Demo Notebooks:
 
- - R: [automl\_regression\_powerplant\_output.R](automl_regression_powerplant_output.R)
- - **TO DO** Python: [automl\_regression\_powerplant\_output.ipynb](automl_regression_powerplant_output.ipynb)
+ - [R/automl\_regression\_powerplant\_output.Rmd](automl_regression_powerplant_output.Rmd) [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
+ - [Python/automl\_regression\_powerplant\_output.ipynb](automl_regression_powerplant_output.ipynb) [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
