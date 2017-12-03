@@ -72,7 +72,7 @@ The leader model is stored at `aml@leader` and the leaderboard is stored at `aml
 lb <- aml@leaderboard
 ```
 
-Now we will view a snapshot of the top models.  Here we should see the two Stacked Ensembles at or near the top of the leaderboard.  Stacked Ensembles almost always outperform a single model.
+Now we will view a snapshot of the top models.  Here we should see the two Stacked Ensembles at or near the top of the leaderboard.  Stacked Ensembles can almost always outperform a single model.
 ```{r}
 print(lb)
 ```
