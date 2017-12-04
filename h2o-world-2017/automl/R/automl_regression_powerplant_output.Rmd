@@ -25,7 +25,7 @@ For the AutoML regression demo, we use the [Combined Cycle Power Plant](http://a
 
 ```{r}
 # Use local data file or download from GitHub
-docker_data_path <- "/home/h2o/data/automl/data/powerplant_output.csv"
+docker_data_path <- "/home/h2o/data/automl/powerplant_output.csv"
 if (file.exists(docker_data_path)) {
   data_path <- docker_data_path
 } else {
