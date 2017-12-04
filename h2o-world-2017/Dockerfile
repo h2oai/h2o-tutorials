@@ -159,7 +159,7 @@ COPY pysparkling/img/scenario.png Python/img/scenario.png
 RUN mkdir data/pysparkling
  
 RUN  wget -O data/pysparkling/AmazonReviews_Predictions.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Predictions.csv'
-RUN  wget -O data/pysparkilng/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
+RUN  wget -O data/pysparkling/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
 
 # Erin's AutoML R & Python demos
 RUN \
