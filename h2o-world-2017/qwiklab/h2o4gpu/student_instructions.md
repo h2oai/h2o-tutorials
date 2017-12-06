@@ -16,3 +16,9 @@ It can take several minutes for the Jupyter page to come up.  Just keep refreshi
 
 * token:  h2o
 
+---
+
+#### [Not part of the online lab, but for later]
+
+If you don't currently have access to the lab, you can find the example [here](https://github.com/h2oai/h2o4gpu/tree/master/examples/py/demos) in github.
+
