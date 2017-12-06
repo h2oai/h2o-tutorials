@@ -28,7 +28,7 @@
     "qwiklabInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "ImageId" : "ami-bc8058c4",
+        "ImageId" : "ami-b4548fcc",
         "InstanceType": { "Ref": "InstanceType" },
         "SecurityGroups": [ { "Ref": "qwiklabInstanceSecurityGroup" } ],
         "KeyName": { "Ref": "KeyName" },
