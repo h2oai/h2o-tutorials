@@ -16,3 +16,9 @@ It can take several minutes for the Jupyter page to come up.  Just keep refreshi
 
 * token:  h2o
 
+---
+
+#### [Not part of the online lab, but for later]
+
+If you don't currently have access to the lab, you can find the examples [here](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/pysparkling/AmazonFineFoodPipeline.ipynb) in github.
+
