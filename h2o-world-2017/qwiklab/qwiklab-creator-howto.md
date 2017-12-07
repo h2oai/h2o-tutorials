@@ -191,7 +191,11 @@ So far it has been convenient to have exactly one lab per course.  So just copyi
 
 Click the + at the to right to create a new classroom.
 
-Connect the right course to your classroom.
+* Connect the right course to your classroom.
+
+* Choose whether the classroom should be Open (anyone can choose it) or restricted by a token (access code) or credits (i.e. for purchase by the student).  A credit costs $1.
+
+* Add a filter to enable students access to the classroom.  A filter of `*` enables everybody.
 
 ---
 
