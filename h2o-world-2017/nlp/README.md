@@ -2,7 +2,7 @@
 
 The focus of this tutorial is to provide an introduction to H2O's Word2Vec algorithm. Word2Vec is an algorithm that trains a shallow neural network model to learn vector representations of words. These vector representations are able to capture the meanings of words. During the tutorial, we will use H2O's Word2Vec implementation to understand relationships between words in our text data. We will use the model results to find similar words and synonyms. We will also use it to showcase how to effectively represent text data for machine learning problems where we will highlight the impact this representation can have on accuracy. 
 
-- More information and code examples are available in the [Word2Vec Documentation](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/word2vec.html).
+- More information and code examples are available in the [Word2Vec Documentation](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/word2vec.html)
 
 ## Supervised Learning with Text Data
 
@@ -24,7 +24,7 @@ In this section, you will see how accurate your model is if you do not use any t
 In this section, you will see how much your model improves if you include the word embeddings from the reviews. You will:
 
 - Tokenize words in the review.
-- Train a Word2Vec model.
+- Train a Word2Vec model (or import the already trained Word2Vec model: <https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex>)
 - Find synonyms using the Word2Vec model.
 - Aggregate word embeddings - one word embedding per review.
 - Train a GBM model using our initial predictors plus the word embeddings of the reviews.
@@ -40,6 +40,8 @@ In this section, you will see if you can improve your model even more by also ad
 - Predict on new reviews using our third and final model.
 
 
-Demo Notebooks:
+## Resources
 
- - [AmazonReviews.ipynb](./AmazonReviews.ipynb)
+- Demo Notebooks: [AmazonReviews.ipynb](./AmazonReviews.ipynb)
+- The subset of the Amazon Reviews data used for this demo can be found here: <https://s3.amazonaws.com/tomk/h2o-world/megan/AmazonReviews.csv>
+- The word2vec model that was trained on this data can be found here: <https://s3.amazonaws.com/tomk/h2o-world/megan/w2v.hex>
