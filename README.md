@@ -1,6 +1,6 @@
 # H2O Tutorials
 
-This document contains tutorials and training materials for H2O-3.  For questions or feature requests, visit the H2O community forum at [https://community.h2o.ai](https://community.h2o.ai/index.html), or join the "H2O Stream" Google Group:
+This document contains tutorials and training materials for H2O-3.  Post questions on StackOverflow using the h2o tag at [http://stackoverflow.com/questions/tagged/h2o](http://stackoverflow.com/questions/tagged/h2o) or join the "H2O Stream" Google Group:
 
 * Web: <https://groups.google.com/forum/#!forum/h2ostream>
 * E-mail: <mailto:h2ostream@googlegroups.com>

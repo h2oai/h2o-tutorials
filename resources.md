@@ -36,4 +36,4 @@ More information about machine learning with H2O
 
 - **Download Spark**: http://spark.apache.org/downloads.html
 
-- **Sparkling Water Developer documentation**: https://github.com/h2oai/sparkling-water/blob/master/DEVEL.md
+- **Sparkling Water Developer documentation**: https://github.com/h2oai/sparkling-water/blob/master/doc/devel/devel.rst
