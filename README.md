@@ -20,6 +20,13 @@ Tutorials in the master branch are intended to work with the lastest stable vers
 
 Tutorial versions in named branches are snapshotted for specific events.  Scripts should work unchanged for the version of H2O used at that time.
 
+#### H2O World 2017 Training
+
+| | URL |
+| --- | --- |
+| Training material | <https://github.com/h2oai/h2o-tutorials/tree/master/h2o-world-2017/README.md> |
+| Wheeler-2 H2O release | <http://h2o-release.s3.amazonaws.com/h2o/rel-wheeler/2/index.html> |
+
 #### H2O World 2015 Training
 
 | | URL |
