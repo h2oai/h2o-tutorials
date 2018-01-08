@@ -2,6 +2,12 @@
 
 H2O Driverless AI is an artificial intelligence (AI) platform that automates some of the most difficult data science and machine learning workflows such as feature engineering, model validation, model tuning, model selection and model deployment. It aims to achieve the highest predictive accuracy, comparable to expert data scientists, but in much shorter time thanks to end-to-end automation. Driverless AI also offers automatic visualizations and machine learning interpretability (MLI). Especially in regulated industries, model transparency and explanation are just as important as predictive performance.
 
+### More Information
+
+The Driverless AI documentation (including the Driverless AI User Guide and the MLI booklet) is available on <http://docs.h2o.ai>. These docs can also be accessed directly within Driverless AI.
+
+Available Driverless AI webinars can be viewed here: [Driverless AI Webinars](https://www.gotostage.com/channel/4a90aa11b48f4a5d8823ec924e7bd8cf)
+
 ### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
 
 #### Step 1:  Find your Driverless AI license key.
@@ -28,16 +34,19 @@ You may see a "502 Bad Gateway" error message for several minutes while Driverle
 
 #### Step 7:  Enter a username and password.
 
+For example,
 * username:  h2o
 * password:  h2o
 
+Note that these credentials do not restrict access to Driverless AI; they are used to tie experiments to users. If you log in with different credentials, for example, then you will not see any previously run experiments.
+
 #### Step 8:  Click "Enter License". 
 
-Paste your license key into the UI and then click "Save".
+Paste your license key into the UI and then click **Save**.
 
 #### Step 9: Import datasets by clicking "Add Dataset".
 
-For this lab, we're going to import the CreditCard training and testing datasets. Select the "data/Kaggle/CreditCard" folder. Select the CreditCard-train.csv file and click the **Import** button. 
+For this lab, we're going to import the CreditCard training and testing datasets. Select the "data/Kaggle/CreditCard" folder. Select the CreditCard-train.csv file and then click the **Import** button. 
 
 Perform these same steps to import the CreditCard-test.csv file.
 
@@ -45,7 +54,25 @@ Perform these same steps to import the CreditCard-test.csv file.
 
 In the list of datasets, click on the **CreditCard-train** dataset and then click **Visualize** to start the internal visualization server. The graphs on the top row show you outliers or any information that’s unusual or that you might need to be aware of. The bottom row shows an overview of the data. 
 
-Click through the graphs to visualize your data.
+Available graphs vary depending on your data and include:
+
+- **Clumpy Scatterplots**: Clumpy scatterplots are 2D plots with evident clusters. These clusters are regions of high point density separated from other regions of points.
+- **Correlated Scatterplots**: Correlated scatterplots are 2D plots with large values of the squared Pearson correlation coefficient.
+- **Unusual Scatterplots**: Unusual scatterplots are 2D plots with features not found in other 2D plots of the data. 
+- **Spikey Histograms**: Spikey histograms are histograms with huge spikes that often indicate an inordinate number of single values (usually zeros) or highly similar values.
+- **Skewed Histograms**: Skewed histograms are histograms with especially large skewness (asymmetry). 
+- **Varying Boxplots**: Varying boxplots reveal unusual variability in a feature across the categories of a categorical variable. 
+- **Heteroscedastic Boxplots**: Heteroscedastic boxplots reveal unusual variability in a feature across the categories of a categorical variable.
+- **Biplots**: A Biplot is an enhanced scatterplot that uses both points and vectors to represent structure simultaneously for rows and columns of a data matrix. Rows are represented as points (scores), and columns are represented as vectors (loadings). 
+- **Outliers**: Outliers are variables with anomalous or outlying values.
+- **Correlation Graph**: The correlation network graph is constructed from all pairwise squared correlations between variables (features). 
+- **Radar Plot**: A Radar Plot is a two-dimensional graph that is used for comparing multiple variables, with variable having its own axis that starts from the center of the graph. 
+- **Data Heatmap**: The heatmap is constructed from the transposed data matrix. Rows of the heatmap represent variables, and columns represent cases (instances). 
+- **Missing Values Heatmap**: The missing values heatmap is constructed from the transposed data matrix. Rows of the heatmap represent variables and columns represent cases (instances). 
+
+Click the **Help** button in the graph to see a detailed description of each plot. You can also refer to the following section in the Driverless AI User Guide: <http://docs.h2o.ai/driverless-ai/latest-stable/docs/userguide/viewing-datasets.html>
+
+Click through the graphs to visualize your data. 
 
 #### Step 11. Run an experiment.
 
