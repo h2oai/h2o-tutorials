@@ -84,7 +84,7 @@ c. Select the CreditCard-test dataset as the test dataset. This will provide you
 
 d. Select a Target column. For this experiment, pick the last column, which is the “default payment next month” column. This will predict the chance of someone defaulting next month. Once selected, Driverless AI shows you that this column has two unique values – YES or NO, or 0 or 1. The model will be attempting to predict whether a person will default on a payment next month. So the model will be a credit card default prediction model, binary classification. 
 
-> **Note**: You can leave the remaining fields as their defaults, though you have the option to specify columns to drop (ignore), a fold column, a weight column, and a time column. You can specify a different accuracy or relative time tolerance or interpretability values. Hover over these fields or review the Driverless AI documentation for more information about these settings.
+> **Note**: You can leave the remaining fields as their defaults, though you have the option to specify columns to drop (ignore), a fold column, a weight column, and a time column. You can specify a different accuracy or relative time tolerance or interpretability values. Hover over these fields or review the [Driverless AI documentation](http://docs.h2o.ai/driverless-ai/latest-stable/docs/userguide/launching.html#experiment-settings) for more information about these settings. 
 
 e. Driverless AI allows you to select a scorer based on whether this is a classification or regression problem. For this lab, we'll select the Logloss scorer. 
 
@@ -104,7 +104,8 @@ Finally, the lower middle section shows the variable importance. In this experim
 
 After an experiment is complete, the top center of the UI provides you with a number of optional tasks that you can perform:
 
--	You can interpret this model, which we'll do in the next step.-	You can score on another dataset, which tells Driverless AI to give the predictions of credit card default probabilities for each individual person in that dataset. This is provided as a download.-	You can transform another dataset that you already imported. You select your data, and Driverless AI provides the munged one. Information about Driverless AI transformations is available in the Driverless AI User Guide.-	You can download the training dataset - the out-of-fold predictions. With this, you can do more model training with the out-of-fold predictions. -	You can download the test predictions.-	You can download the transformed training and test sets.-	You can download the logs.-  You can download the scoring package. The scoring package includes a scoring module and a scoring service that can be started in TCP or HTTP mode. If you have a Linux system, the scoring package will make a virtual environment that will run the examples included in the package. The examples are random data that is auto-generated with the same schema as this dataset.
+- You can interpret this model, which we'll do in the next step.- You can score on another dataset, which tells Driverless AI to give the predictions of credit card default probabilities for each individual person in that dataset. This is provided as a download.- You can transform another dataset that you already imported. You select your data, and Driverless AI provides the munged one. Information about Driverless AI transformations is available in the Driverless AI User Guide.- You can download the training dataset - the out-of-fold predictions. With this, you can do more model training with the out-of-fold predictions. - You can download the test predictions.- You can download the logs.- You can download the scoring package. The scoring package includes a scoring module and a scoring service that can be started in TCP or HTTP mode. If you have a Linux system, the scoring package will make a virtual environment that will run the examples included in the package. The examples are random data that is auto-generated with the same schema as this dataset.
+- You can down load the features and view their importance for the final model.
 
 The bottom right section, where CPU/GPU monitoring was previously now shows a summary of the experiment. 
 
@@ -112,7 +113,7 @@ The bottom right section, where CPU/GPU monitoring was previously now shows a su
 
 Click on the **Interpret This Model** button.
 
-The Model Interpretation page includes the following charts. More information about these is available by hovering over a chart to view the tooltips, in the Driverless AI User Guide, and in the MLI booklet.
+The Model Interpretation page includes the following charts. More information about these is available by click the tooltip in the UI. Information is also available in the MLI booklet and in the Driverless AI User Guide.
 
 - The Global Interpretable Model Explanation Plot in the upper-left corner shows Driverless AI model predictions and K-LIME model predictions in sorted order by the Driverless AI model predictions.
 - The Variable Importance plot in the upper-right corner shows the scaled global variable importance values for the features in the model. Driverless AI assigns local variable importance for every decision that the models makes. 
