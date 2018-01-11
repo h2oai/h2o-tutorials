@@ -1,5 +1,13 @@
 ## Introduction to AutoML in H2O
 
+---
+
+The material for this lab is available [here](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/README.md) in github.
+
+Please contact sales@h2o.ai to request a Qwiklab access code to run this lab.
+
+---
+
 ### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
 
 #### Step 1:  WAIT for the instructor's directions before doing anything.
