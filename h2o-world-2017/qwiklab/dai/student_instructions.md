@@ -1,14 +1,14 @@
 ## Introduction to Driverless AI
 
-H2O Driverless AI is an artificial intelligence (AI) platform that automates some of the most difficult data science and machine learning workflows such as feature engineering, model validation, model tuning, model selection and model deployment. It aims to achieve the highest predictive accuracy, comparable to expert data scientists, but in much shorter time thanks to end-to-end automation. Driverless AI also offers automatic visualizations and machine learning interpretability (MLI). Especially in regulated industries, model transparency and explanation are just as important as predictive performance.
+### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
 
-### More Information
+H2O Driverless AI is an artificial intelligence (AI) platform that automates some of the most difficult data science and machine learning workflows such as feature engineering, model validation, model tuning, model selection and model deployment. It aims to achieve the highest predictive accuracy, comparable to expert data scientists, but in much shorter time thanks to end-to-end automation. Driverless AI also offers automatic visualizations and machine learning interpretability (MLI). Especially in regulated industries, model transparency and explanation are just as important as predictive performance.
 
 The Driverless AI documentation (including the Driverless AI User Guide and the MLI booklet) is available on <http://docs.h2o.ai>. These docs can also be accessed directly within Driverless AI.
 
-Available Driverless AI webinars can be viewed here: [Driverless AI Webinars](https://www.gotostage.com/channel/4a90aa11b48f4a5d8823ec924e7bd8cf)
+Available Driverless AI webinars can be viewed here: [Driverless AI Webinars](https://www.gotostage.com/channel/4a90aa11b48f4a5d8823ec924e7bd8cf).
 
-### ***Caution:***  Do not navigate away from this page!  Open new browser tabs instead!
+### Lab Instructional Steps
 
 #### Step 1:  Find your Driverless AI license key.
 
@@ -128,6 +128,6 @@ The Model Interpretation page includes the following charts. More information ab
 
 Model interpretation aims to justify every decision that this black box machine learning model makes, including which features contributed to each decision that each model made and, to a certain extent, how much each feature contributed to that decision. This information is then written out in plain English in the Explanations. To view an example, click on any point in the Global Interpretable Model Explanation Plot graph and the click the **Explanations** button at the top. 
 
-#### Summary
+### Summary
 
 This concludes our overview of Driverless AI.  We encourage you to obtain a free trial license key so that you can try this out on your own data.  We welcome any feedback!
