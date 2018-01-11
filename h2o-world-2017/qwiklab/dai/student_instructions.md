@@ -94,7 +94,7 @@ f. Click **Launch Experiment** to start the experiment.
 
 You can see a status of what’s happening at the top of UI as the experiment is running. First, Driverless AI determines the backend (so whether GPUs are running). Then it starts parameter tuning. After that, Driverless AI performs feature engineering. Driverless AI uses early stopping and stops when overfitting starts. The number of trees is not fixed. You can click "Finish" at any time. This ends the experiment, then performs the ensembling, and generates the deployment package.
 
-The top left and top right sections show the current experiemnt settings. The right side also includes a Trace. You can click on the **Trace** button to see what’s happening. Each green bar is a GPU or CPU model, each gray bar is a method call, and the red lines are feature engineering. You can hover over each to see what’s happening. If you watch, you’ll see this running new features and models and new features and models and so on. This is how Driverless AI determines the best features.
+The top left and top right sections show the current experiment settings. The right side also includes a Trace. You can click on the **Trace** button to see what’s happening. Each green bar is a GPU or CPU model, each gray bar is a method call, and the red lines are feature engineering. You can hover over each to see what’s happening. If you watch, you’ll see this running new features and models and new features and models and so on. This is how Driverless AI determines the best features.
 
 The bottom left section shows a chart with performance metrics out of fold. This only shows you validation scores. You can mouse over this section to learn more about this section. 
 
@@ -104,8 +104,14 @@ Finally, the lower middle section shows the variable importance. In this experim
 
 After an experiment is complete, the top center of the UI provides you with a number of optional tasks that you can perform:
 
-- You can interpret this model, which we'll do in the next step.- You can score on another dataset, which tells Driverless AI to give the predictions of credit card default probabilities for each individual person in that dataset. This is provided as a download.- You can transform another dataset that you already imported. You select your data, and Driverless AI provides the munged one. Information about Driverless AI transformations is available in the Driverless AI User Guide.- You can download the training dataset - the out-of-fold predictions. With this, you can do more model training with the out-of-fold predictions. - You can download the test predictions.- You can download the logs.- You can download the scoring package. The scoring package includes a scoring module and a scoring service that can be started in TCP or HTTP mode. If you have a Linux system, the scoring package will make a virtual environment that will run the examples included in the package. The examples are random data that is auto-generated with the same schema as this dataset.
-- You can down load the features and view their importance for the final model.
+- You can interpret this model, which we'll do in the next step.
+- You can score on another dataset, which tells Driverless AI to give the predictions of credit card default probabilities for each individual person in that dataset. This is provided as a download.
+- You can transform another dataset that you already imported. You select your data, and Driverless AI provides the munged one. Information about Driverless AI transformations is available in the Driverless AI User Guide.
+- You can download the training dataset - the out-of-fold predictions. With this, you can do more model training with the out-of-fold predictions.
+- You can download the test predictions.
+- You can download the logs.
+- You can download the scoring package. The scoring package includes a scoring module and a scoring service that can be started in TCP or HTTP mode. If you have a Linux system, the scoring package will make a virtual environment that will run the examples included in the package. The examples are random data that is auto-generated with the same schema as this dataset.
+- You can download the features and view their importance for the final model.
 
 The bottom right section, where CPU/GPU monitoring was previously now shows a summary of the experiment. 
 
@@ -117,16 +123,11 @@ The Model Interpretation page includes the following charts. More information ab
 
 - The Global Interpretable Model Explanation Plot in the upper-left corner shows Driverless AI model predictions and K-LIME model predictions in sorted order by the Driverless AI model predictions.
 - The Variable Importance plot in the upper-right corner shows the scaled global variable importance values for the features in the model. Driverless AI assigns local variable importance for every decision that the models makes. 
-- The Decision Tree in the lower left corner shows an approximate flow-chart of the Driverless AI model’s decision making process. This displays the most important variables and interatctions in the model. 
-- The Partial Depencence chart in the lower right corner shows the partial dependence for a selected variable and the ICE values for a specific row. Select a point on the graph to see the specific value at that point. By default, this graph shows the partial dependence values for the top feature. Change this view by selecting a different feature in the feature drop-down. This graph is available for the top five features.
+- The Decision Tree in the lower left corner shows an approximate flow-chart of the Driverless AI model’s decision-making process. This displays the most important variables and interactions in the model.
+- The Partial Dependence chart in the lower right corner shows the partial dependence for a selected variable and the ICE values for a specific row. Select a point on the graph to see the specific value at that point. By default, this graph shows the partial dependence values for the top feature. Change this view by selecting a different feature in the feature drop-down. This graph is available for the top five features.
 
 Model interpretation aims to justify every decision that this black box machine learning model makes, including which features contributed to each decision that each model made and, to a certain extent, how much each feature contributed to that decision. This information is then written out in plain English in the Explanations. To view an example, click on any point in the Global Interpretable Model Explanation Plot graph and the click the **Explanations** button at the top. 
 
 #### Summary
 
-This concludes our overview of Driverless AI. We encourage you to obtain a 30-day trial so that you can try this out on your own data, and we welcome any feedback! 
-
- 
-
-
-
+This concludes our overview of Driverless AI.  We encourage you to obtain a free trial license key so that you can try this out on your own data.  We welcome any feedback!
