@@ -6,7 +6,21 @@ H2O Driverless AI is an artificial intelligence (AI) platform that automates som
 
 The Driverless AI documentation (including the Driverless AI User Guide and the MLI booklet) is available on <http://docs.h2o.ai>. These docs can also be accessed directly within Driverless AI.
 
-Available Driverless AI webinars can be viewed here: [Driverless AI Webinars](https://www.gotostage.com/channel/4a90aa11b48f4a5d8823ec924e7bd8cf).
+Here are some additional resources that may be referenced by the instructor during the lab:
+
+* [Default of Credit Card Clients Dataset](https://www.kaggle.com/uciml/default-of-credit-card-clients-dataset)
+* [Driverless AI User Guide](http://docs.h2o.ai/driverless-ai/latest-stable/docs/userguide/index.html)
+* [List of Driverless AI Feature Engineering Transformations](http://docs.h2o.ai/driverless-ai/latest-stable/docs/userguide/transformations.html)
+
+Here is more information about Driverless AI you might find interesting for later:
+
+* [InfoWorld Review of Driverless AI](https://www.infoworld.com/article/3236048/machine-learning/review-h2oai-automates-machine-learning.html)
+* [H2O World 2017 Video - AutoViz by Leland Wilkinson (from H2O.ai)](https://www.youtube.com/watch?v=bas3-Ue2qxc&index=16&list=PLNtMya54qvOHQs2ZmV-pPSW_etMUykE0_)
+* [H2O World 2017 Video - Driverless AI Hands-On by Arno Candel (from H2O.ai)](https://www.youtube.com/watch?v=niiibeHJtRo&list=PLNtMya54qvOHQs2ZmV-pPSW_etMUykE0_&index=6)
+* [H2O World 2017 Video - MLI Hands-On by Mark Chan, Navdeep Gill, Patrick Hall (from H2O.ai)](https://www.youtube.com/watch?v=axIqeaUhow0&index=32&list=PLNtMya54qvOHQs2ZmV-pPSW_etMUykE0_)
+* [H2O World 2017 Video - Drive Away Fraudsters with Driverless AI by Venkatesh Ramanathan (from PayPal)](https://www.youtube.com/watch?v=r9S3xchrzlY&list=PLNtMya54qvOHQs2ZmV-pPSW_etMUykE0_&index=24&t=1416s)
+* [Driverless AI Webinars](https://www.gotostage.com/channel/4a90aa11b48f4a5d8823ec924e7bd8cf)
+* [H2O4GPU Github Repository - Open Source Algorithms Used Inside Driverless AI](https://github.com/h2oai/h2o4gpu)
 
 ### Lab Instructional Steps
 
@@ -34,11 +48,8 @@ You may see a "502 Bad Gateway" error message for several minutes while Driverle
 
 #### Step 7:  Enter a username and password.
 
-For example,
 * username:  h2o
 * password:  h2o
-
-Note that these credentials do not restrict access to Driverless AI; they are used to tie experiments to users. If you log in with different credentials, for example, then you will not see any previously run experiments.
 
 #### Step 8:  Click "Enter License". 
 
@@ -98,7 +109,9 @@ The top left and top right sections show the current experiment settings. The ri
 
 The bottom left section shows a chart with performance metrics out of fold. This only shows you validation scores. You can mouse over this section to learn more about this section. 
 
-Finally, the lower middle section shows the variable importance. In this experiment you can see the features are pretty widely ranged. You can see a Pay times Pay, which are two different pay amounts that are multiplied. Driverless AI segments the payments columns into clusters and then computes the distance to cluster one. For example, these clusters could be high income and low income. This helps tell you why a decision is made. This is not a neural net that tells you a weight; this is instead telling you what the feature is.For Variable Importance, Driverless AI performs frequency encoding and cluster target encoding. So first the data is clustered and then grouped, which basically says that in each cluster, these people belong together. Then Driverless AI computes the mean of some other columns in all of these clusters. All of this is done with cross validation so it provides fair estimates.  
+Finally, the lower middle section shows the variable importance. In this experiment you can see the features are pretty widely ranged. You can see a Pay times Pay, which are two different pay amounts that are multiplied. Driverless AI segments the payments columns into clusters and then computes the distance to cluster one. For example, these clusters could be high income and low income. This helps tell you why a decision is made. This is not a neural net that tells you a weight; this is instead telling you what the feature is.
+
+For Variable Importance, Driverless AI performs frequency encoding and cluster target encoding. So first the data is clustered and then grouped, which basically says that in each cluster, these people belong together. Then Driverless AI computes the mean of some other columns in all of these clusters. All of this is done with cross validation so it provides fair estimates.
 
 #### Step 13. View completed experiment.
 
