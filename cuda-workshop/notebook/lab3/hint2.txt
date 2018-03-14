@@ -1,0 +1,1 @@
+"Kernel error: invalid configuration argument" usually means the arguments passed to <<< >>> are incorrect - remember what we said about the maximum number of threads per block?
