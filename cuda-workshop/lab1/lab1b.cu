@@ -13,7 +13,7 @@ int main( int argc, char** argv ) {
     
     // Thrust allows us to assign values easily from host code
     for (int i=0; i < N; i++) {
-        a[i] = i;
+        a[i] = 2*i;
         b[i] = -i;
     }
     

@@ -19,7 +19,7 @@ int main( int argc, char** argv ) {
 
     // Initialize arrays a and b with data
     for (int i=0; i < N; i++) {
-        a[i] = i;
+        a[i] = 2*i;
         b[i] = -i;
     }
     
