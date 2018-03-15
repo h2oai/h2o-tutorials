@@ -28,7 +28,7 @@
     "qwiklabInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "ImageId" : "TODO SUPPLY AMI",
+        "ImageId" : "ami-02f4677a",
         "InstanceType": { "Ref": "InstanceType" },
         "SecurityGroups": [ { "Ref": "qwiklabInstanceSecurityGroup" } ],
         "KeyName": { "Ref": "KeyName" },
