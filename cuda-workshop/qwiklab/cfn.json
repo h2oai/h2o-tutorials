@@ -28,17 +28,59 @@
     "qwiklabInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "ImageId" : "TODO SUPPLY AMI",
+        "ImageId" : "ami-0050c378",
         "InstanceType": { "Ref": "InstanceType" },
         "SecurityGroups": [ { "Ref": "qwiklabInstanceSecurityGroup" } ],
         "KeyName": { "Ref": "KeyName" },
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": ["", [
-              "#!/bin/bash -x\n",
+              "#!/bin/bash\n",
+
+              "set -x\n",
+
+              "SUCCESS=0\n",
+
+              "for (( i = 0; i < 3600; i++ ))\n",
+              "do\n",
+              "  /bin/echo ITERATION ${i} >> /tmp/userdata_iteration\n",
+              "  rm -f /tmp/curl.out\n",
+              "  curl -v http://localhost:8888 >& /tmp/curl.out\n",
+              "  if [ $? -ne 0 ]; then\n",
+              "    sleep 1\n",
+              "    continue\n",
+              "  fi\n",
+
+              "  grep 'HTTP/1.1 302 Found' /tmp/curl.out > /dev/null\n",
+              "  if [ $? -ne 0 ]; then\n",
+              "  sleep 1\n",
+              "    continue\n",
+              "  fi\n",
+
+              "  rm -f /tmp/curl.out\n",
+              "  SUCCESS=1\n",
+              "  break\n",
+              "done\n",
+
+              "if [ ${SUCCESS} -ne 1 ]; then\n",
+              "  /bin/echo FAILED >> /tmp/userdata_failed\n",
+              "  exit 1\n",
+              "fi\n",
+
+              "/bin/echo SUCCEDED >> /tmp/userdata_succeeded\n",
+              "/usr/local/bin/cfn-signal --exit-code 0",
+              "                          --stack ", { "Ref" : "AWS::StackName" },
+              "                          --resource qwiklabInstance",
+              "                          --region ", { "Ref" : "AWS::Region" }, "\n",
+
               "/bin/echo userdata_end > /tmp/userdata_end\n"
             ]]
           }
+        }
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : "PT15M"
         }
       }
     },
@@ -108,3 +150,4 @@
     }
   }
 }
+

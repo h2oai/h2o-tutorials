@@ -1,4 +1,4 @@
-## Introduction to H2O4GPU
+## CUDA C/C++ 101 Hands-on 
 
 ---
 
