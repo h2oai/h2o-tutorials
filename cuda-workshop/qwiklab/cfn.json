@@ -1,0 +1,153 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "CloudFormation",
+
+  "Parameters": {
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type" : "String",
+      "Default" : "p2.xlarge",
+      "NoEcho": "true",
+      "AllowedValues" : [ "p2.xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+    "KeyName":{
+      "Description":"Name of an existing EC2 KeyPair to enable access to qwiklabInstance",
+      "Default":"generic-qwiklab",
+      "Type":"String"
+    },
+    "AdministratorUser": {
+      "Description": "Username the student logs into",
+      "Default": "ubuntu",
+      "Type": "String"
+    }
+  },
+
+  "Resources": {
+    "qwiklabInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId" : "ami-0050c378",
+        "InstanceType": { "Ref": "InstanceType" },
+        "SecurityGroups": [ { "Ref": "qwiklabInstanceSecurityGroup" } ],
+        "KeyName": { "Ref": "KeyName" },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": ["", [
+              "#!/bin/bash\n",
+
+              "set -x\n",
+
+              "SUCCESS=0\n",
+
+              "for (( i = 0; i < 3600; i++ ))\n",
+              "do\n",
+              "  /bin/echo ITERATION ${i} >> /tmp/userdata_iteration\n",
+              "  rm -f /tmp/curl.out\n",
+              "  curl -v http://localhost:8888 >& /tmp/curl.out\n",
+              "  if [ $? -ne 0 ]; then\n",
+              "    sleep 1\n",
+              "    continue\n",
+              "  fi\n",
+
+              "  grep 'HTTP/1.1 302 Found' /tmp/curl.out > /dev/null\n",
+              "  if [ $? -ne 0 ]; then\n",
+              "  sleep 1\n",
+              "    continue\n",
+              "  fi\n",
+
+              "  rm -f /tmp/curl.out\n",
+              "  SUCCESS=1\n",
+              "  break\n",
+              "done\n",
+
+              "if [ ${SUCCESS} -ne 1 ]; then\n",
+              "  /bin/echo FAILED >> /tmp/userdata_failed\n",
+              "  exit 1\n",
+              "fi\n",
+
+              "/bin/echo SUCCEDED >> /tmp/userdata_succeeded\n",
+              "/usr/local/bin/cfn-signal --exit-code 0",
+              "                          --stack ", { "Ref" : "AWS::StackName" },
+              "                          --resource qwiklabInstance",
+              "                          --region ", { "Ref" : "AWS::Region" }, "\n",
+
+              "/bin/echo userdata_end > /tmp/userdata_end\n"
+            ]]
+          }
+        }
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : "PT15M"
+        }
+      }
+    },
+
+    "qwiklabInstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable ports",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 4040,
+            "ToPort": 4040,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 8787,
+            "ToPort": 8787,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 8888,
+            "ToPort": 8888,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 12345,
+            "ToPort": 12345,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 54321,
+            "ToPort": 54321,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    }
+  },
+
+  "Outputs": {
+    "Jupyter": {
+      "Description": "Jupyter URL",
+      "Value": { "Fn::Join": [ "", ["http://", { "Fn::GetAtt": ["qwiklabInstance", "PublicIp"] }, ":8888" ]]}
+    }
+  }
+}
+

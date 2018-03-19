@@ -1,0 +1,1 @@
+cudaMalloc(), cudaMemcpy() and cudaFree() can all be potential culprits and you should use error handling when using those in your production code but in this case you should focus on the error handling the add<<<blocks,threadsPerBlock>>>(dev_a, dev_b, dev_c); kernel launch.

@@ -1,0 +1,14 @@
+Hint: you can use this transform method to achieve our goal:
+
+OutputIterator thrust::transform(InputIterator1 first1_begin,
+    InputIterator1 last1_end,
+    InputIterator2 first2_begin,
+    OutputIterator result_begin,
+    BinaryFunction op 
+)
+
+The beginning/end of the iterator can be accessed just like in STL with iterator.begin() and iterator.end().
+
+The official documentation:
+
+https://thrust.github.io/doc/group__transformations.html#ga68a3ba7d332887f1332ca3bc04453792
