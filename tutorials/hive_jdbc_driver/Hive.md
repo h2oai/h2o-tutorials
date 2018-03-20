@@ -4,46 +4,46 @@ H2O can ingest data from Hive through the Hive v2 JDBC driver by providing H2O w
 **Note**: H2O can only load data from Hive v2 due to a limited implementation of the JDBC interface by Hive in earlier versions.
 
 ## Motivation
-Until now the only way to ingest data from Hive into H2O was to export the data from a Hive table to file system and later import it into H2O from a file. Now it is possible to directly import data from a Hive table where one can specify a select query describing the data.
+Until now, the only way to ingest data from Hive into H2O was to export the data from a Hive table to a file system and then import it into H2O from a file. Now it is possible to directly import data from a Hive table, where you can specify a select query describing the data.
 
 ## Prerequisities
 * JDBC connection url (i.e.: jdbc:hive2://hive-host:10000/db-name) 
 * An existing table in Hive DB
 
 ## Setting up table with data
-If you already have your data just skip this. 
+You can skip these steps if you already have your data. 
 
-1. Get this dataset on this [site](https://s3.amazonaws.com/h2o-public-test-data/smalldata/airlines/AirlinesTest.csv.zip)
+1. Get the AirlinesTest dataset from this [site](https://s3.amazonaws.com/h2o-public-test-data/smalldata/airlines/AirlinesTest.csv.zip).
 
 2. Run the CLI client for Hive:
 `./apache-hive-2.2.0-bin/bin/beeline -u jdbc:hive2://hive-host:10000/db-name`
 
 3. Create the DB table:
-```
-CREATE EXTERNAL TABLE IF NOT EXISTS AirlinesTest(
-  fYear STRING ,
-  fMonth STRING ,
-  fDayofMonth STRING ,
-  fDayOfWeek STRING ,
-  DepTime INT ,
-  ArrTime INT ,
-  UniqueCarrier STRING ,
-  Origin STRING ,
-  Dest STRING ,
-  Distance INT ,
-  IsDepDelayed STRING ,
-  IsDepDelayed_REC INT
-)
-    COMMENT 'stefan test table'
-    ROW FORMAT DELIMITED
-    FIELDS TERMINATED BY ','
-    LOCATION '/tmp';
-```
 
-4. Import the data from the dataset
+		CREATE EXTERNAL TABLE IF IT DOES NOT EXIST AirlinesTest(
+		  fYear STRING ,
+		  fMonth STRING ,
+		  fDayofMonth STRING ,
+		  fDayOfWeek STRING ,
+		  DepTime INT ,
+		  ArrTime INT ,
+		  UniqueCarrier STRING ,
+		  Origin STRING ,
+		  Dest STRING ,
+		  Distance INT ,
+		  IsDepDelayed STRING ,
+		  IsDepDelayed_REC INT
+		)
+		    COMMENT 'stefan test table'
+		    ROW FORMAT DELIMITED
+		    FIELDS TERMINATED BY ','
+		    LOCATION '/tmp';
+
+
+4. Import the data from the dataset:
 `LOAD DATA INPATH '/tmp/AirlinesTest.csv' OVERWRITE INTO TABLE AirlinesTest;`
 
-## Enable Hive JDBC driver in H2O
+## Enable Hive JDBC Driver in H2O
 
 ### Retrieve the Hive JDBC Client Jar
 
@@ -54,18 +54,21 @@ CREATE EXTERNAL TABLE IF NOT EXISTS AirlinesTest(
 ### Provide H2O with the JDBC Driver
 
 Based on the setup you can:
-1. Add the Hive JDBC driver to H2O's classpath for running stand-alone H2O from terminal:  
-   `java -cp hive-jdbc.jar:<path_to_h2o_jar>: water.H2OApp`
 
-2. Init from python
+* Add the Hive JDBC driver to H2O's classpath for running stand-alone H2O from terminal: 
+   `java -cp hive-jdbc.jar:<path_to_h2o_jar>: water.H2OApp`  
+
+* Init from python:
    `h2o.init(extra_classpath = "hive-jdbc.jar")`
-3. Init from R
+
+* Init from R
    `h2o.init(extra_classpath=["hive-jdbc.jar"])`
 
 After the jar file with JDBC driver is added, then data from the Hive databases can be pulled into H2O using the aforementioned ``import_sql_table`` and ``import_sql_select`` functions. 
 
 ## Putting it all together
-One needs to define the data that would be used as well as the credentials and connection url:
+You need to define the data that would be used as well as the credentials and the connection url:
+
 ```
 #python code:
 import h2o
@@ -75,11 +78,13 @@ select_query = "SELECT * FROM sys.AirlinesTest;"
 username = "root"
 password = "changeit"
 ```
+
 Load the dataset:
 `airlines_dataset = h2o.import_sql_select(connection_url, select_query, username, password)`
 
 And then utilize it:
-``` airlines_dataset["table_for_h2o_import.origin"] = airlines_dataset["table_for_h2o_import.origin"].asfactor()
+
+    airlines_dataset["table_for_h2o_import.origin"] = airlines_dataset["table_for_h2o_import.origin"].asfactor()
     airlines_dataset["table_for_h2o_import.fdayofweek"] = airlines_dataset["table_for_h2o_import.fdayofweek"].asfactor()
     airlines_dataset["table_for_h2o_import.uniquecarrier"] = airlines_dataset["table_for_h2o_import.uniquecarrier"].asfactor()
     airlines_dataset["table_for_h2o_import.dest"] = airlines_dataset["table_for_h2o_import.dest"].asfactor()
@@ -94,7 +99,7 @@ And then utilize it:
     gbm_v1 = H2OGradientBoostingEstimator(model_id="gbm_airlines_v1", seed=2000000)
     gbm_v1.train(airlines_X_col_names, airlines_y_col_name, training_frame=train, validation_frame=valid)
     gbm_v1.predict(test)
-```
+
 
 <!-- TODO:
  1. add a how-to section for hadoop
