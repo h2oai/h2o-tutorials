@@ -64,6 +64,8 @@ Based on the setup you can:
 * Init from R
    `h2o.init(extra_classpath=["hive-jdbc.jar"])`
 
+* Add the Hive JDBC driver to H2O's classpath for running clustered H2O on Hadoop from terminal: 
+   `hadoop jar h2odriver.jar -libjars hive-jdbc.jar -nodes 3 -mapperXmx 6g`
 After the jar file with JDBC driver is added, then data from the Hive databases can be pulled into H2O using the aforementioned ``import_sql_table`` and ``import_sql_select`` functions. 
 
 ## Putting it all together
