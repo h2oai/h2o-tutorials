@@ -59,7 +59,7 @@ Based on the setup you can:
    `java -cp hive-jdbc.jar:<path_to_h2o_jar>: water.H2OApp`  
 
 * Init from python:
-   `h2o.init(extra_classpath = "hive-jdbc.jar")`
+   `h2o.init(extra_classpath = ["hive-jdbc.jar"])`
 
 * Init from R
    `h2o.init(extra_classpath=["hive-jdbc.jar"])`
@@ -74,8 +74,7 @@ You need to define the data that would be used as well as the credentials and th
 ```
 #python code:
 import h2o
-
-connection_url = "jdbc:mysql://127.0.0.1:3306/sys?&useSSL=false"
+connection_url = "jdbc:hive2://localhost:10000/default"
 select_query = "SELECT * FROM sys.AirlinesTest;"
 username = "root"
 password = "changeit"
