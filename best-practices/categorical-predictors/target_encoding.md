@@ -143,9 +143,11 @@ The `holdout_type` parameter defines whether the target average should be constr
 
 The `h2o.target_encode_apply` function offers the options:
 
--   None: no holdout, mean is calculating on all rows of data \*\* this should be used for test data
--   LeaveOneOut: mean is calculating on all rows of data excluding the row itself \*\* this can be used for the training data - the target of the row itself is not included in the average to prevent overfitting
--   KFold: mean is calculating on out-of-fold data only (requires a fold column) \*\* this can be used for the training data - the target average is calculated on the out of fold data to prevent overfitting
+*   None: no holdout, mean is calculating on all rows of data \*\* this should be used for test data
+*   LeaveOneOut: mean is calculating on all rows of data excluding the row itself 
+	*   this can be used for the training data - the target of the row itself is not included in the average to prevent overfitting
+*   KFold: mean is calculating on out-of-fold data only (requires a fold column)
+	*   this can be used for the training data - the target average is calculated on the out of fold data to prevent overfitting
 
 ### Blended Average
 
