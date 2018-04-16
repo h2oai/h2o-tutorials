@@ -69,7 +69,7 @@ No overfitting (as train and test performance are the same), regularization is n
 
 This model is actually useful. It got 28% classification error, down from 51% obtained by predicting majority class only.
 
-##Binomial Model
+## Binomial Model
 Since multinomial models are difficult and time consuming, let's try a simpler binary classification. 
 We'll take a subset of the data with only `class_1` and `class_2` (the two majority classes) and build a binomial model deciding between them.
 

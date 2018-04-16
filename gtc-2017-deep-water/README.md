@@ -153,7 +153,7 @@ The prediction service builder is included as part of the Docker image.  The fol
 
 1.	__Start Prediction Service Builder__: The Prediction Service Builder is a web service itself.  You send the MOJO and the required dependencies to the web service and then you get a Web Archive (WAR) file back, which is a ready-to-run web service for Java that can be run with [Jetty](http://www.eclipse.org/jetty/) or tomcat or other web service systems.
 
-To start the Prediction Service Builder, you can use the `start-prediction-service-builder.sh` script.  The service builder will be running at `http://localhost:55000`.
+ To start the Prediction Service Builder, you can use the `start-prediction-service-builder.sh` script.  The service builder will be running at `http://localhost:55000`.
 
 2.	__Get Dependencies__: To build a WAR file, the Prediction Service Builder needs the MOJO and the appropriate dependencies.  In the case of Deep Water, this includes the `deepwater-all.jar` and `h2o-genmodel.jar`.  The example `get-all-dependencies-gtc.sh` script copies these dependencies from the container and pulls the example `model_mnist_lenet_mx.zip` MOJO from the `/models` directory.
 

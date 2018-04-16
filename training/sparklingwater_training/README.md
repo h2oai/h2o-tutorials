@@ -28,6 +28,7 @@ Prerequisites for using Sparkling Water is:
   # To launch a local Spark cluster with 3 worker nodes with 2 cores and 1g per node.
   export MASTER="local[*]" 
   ```
+
 3. From your terminal, run:
 
   ```bash
@@ -36,6 +37,7 @@ Prerequisites for using Sparkling Water is:
   cd sparkling-water-2.1.2
   bin/sparkling-shell --conf "spark.executor.memory=1g"
   ```
+
 4. Check to see that we can successfully start H2O cloud inside the Spark cluster.
 
   ```scala
@@ -43,6 +45,7 @@ Prerequisites for using Sparkling Water is:
   val h2oContext = H2OContext.getOrCreate(sc) 
   import h2oContext._ 
   ```
+
 5. If installation was successful, you can stop H2O and Spark services with the following command in the Spark shell:
   
   ```scala
@@ -69,7 +72,9 @@ Prerequisites for using PySparkling is:
   pip install future
   pip install ipython
   ```
+  
   **Troubleshooting Tip**: If you see that you are missing dependencies for ipython, try the following: 
+  
   ```
   pip install --upgrade setuptools pip
   pip uninstall ipython
@@ -163,6 +168,7 @@ Prerequisites for using Sparkling Water is:
     </property>
   </configuration>
   ```
+  
   > Note: you can also use Hive default scratch directory which is `\tmp\hive`. In this case, you need to create directory manually and call `winutils.exe chmod 777 \tmp\hive` to setup right permissions.
   
 7. Set `HADOOP_CONF_DIR` property
@@ -175,6 +181,7 @@ Prerequisites for using Sparkling Water is:
   ```bash
   bin\sparkling-shell --conf "spark.executor.memory=1g"
   ```
+  
 9. Check to see that we can successfully start H2O cloud inside the Spark cluster.
 
   ```scala
@@ -207,7 +214,9 @@ Prerequisites for using PySparkling is:
   pip install future
   pip install ipython
   ```
+  
   **Troubleshooting Tip**: If you see that you are missing dependencies for ipython, try the following: 
+  
   ```
   pip install --upgrade setuptools pip
   pip uninstall ipython
@@ -228,14 +237,16 @@ Prerequisites for using PySparkling is:
   SET MASTER="local[*]" 
   ```
 
-4. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.1.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)). 
+6. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.1.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)). 
 
-5. Put `winutils.exe` into a new directory `%SPARK_HOME%\hadoop\bin` and set:
+7. Put `winutils.exe` into a new directory `%SPARK_HOME%\hadoop\bin` and set:
+
   ```
   SET HADOOP_HOME=%SPARK_HOME%\hadoop
   ```
   
-6. Create a new file `%SPARK_HOME%\hadoop\conf\hive-site.xml` which setup default Hive scratch dir. The best location is a writable temporary directory, for example `%TEMP%\hive`:
+8. Create a new file `%SPARK_HOME%\hadoop\conf\hive-site.xml` which setup default Hive scratch dir. The best location is a writable temporary directory, for example `%TEMP%\hive`:
+
   ```
   <configuration>
     <property>
@@ -245,21 +256,22 @@ Prerequisites for using PySparkling is:
     </property>
   </configuration>
   ```
+  
   > Note: you can also use Hive default scratch directory which is `\tmp\hive`. In this case, you need to create directory manually and call `winutils.exe chmod 777 \tmp\hive` to setup right permissions.
   
-7. Set `HADOOP_CONF_DIR` property
+9. Set `HADOOP_CONF_DIR` property
   ```
   SET HADOOP_CONF_DIR=%SPARK_HOME%\hadoop\conf
   ```
 
-7. Go to the top of the sparkling water directory.  From the command line, run the PySparkling shell
+10. Go to the top of the sparkling water directory.  From the command line, run the PySparkling shell
   
   ```bash
   # Run the pysparkling shell
   bin\pysparkling
   ```
 
-8. In the python shell, check to see that we can successfully start H2O cloud inside the Spark cluster.
+11. In the python shell, check to see that we can successfully start H2O cloud inside the Spark cluster.
 
   ```python
   from pysparkling import *
@@ -267,7 +279,7 @@ Prerequisites for using PySparkling is:
   hc = H2OContext.getOrCreate(sc)
   ```
 
-9. If installation was successful, you can stop H2O and Spark services with the following command in python:
+12. If installation was successful, you can stop H2O and Spark services with the following command in python:
   
   ```python
   h2o.shutdown(prompt = False)
