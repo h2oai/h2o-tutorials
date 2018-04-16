@@ -21,7 +21,8 @@ You should have already successfully [installed Sparkling Water](../README.md) b
   ```bash
   PYSPARK_DRIVER_PYTHON="jupyter" PYSPARK_DRIVER_PYTHON_OPTS="notebook" bin/pysparkling
   ```
-  A notebook should open on your browser.
+  
+   A notebook should open on your browser.
 
 4. Click on the [Chicago Crime Demo](ChicagoCrimeDemo.ipynb) file to open the notebook.
 
