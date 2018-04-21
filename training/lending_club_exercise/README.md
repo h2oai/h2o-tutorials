@@ -61,7 +61,7 @@ Prerequisites for using H2O and Python is:
 
   ```python
   # Import H2O pacakge
-  import  h2o
+  import h2o
   # Initialize h2o cluster
   h2o.init()
   ```
