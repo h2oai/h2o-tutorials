@@ -1,10 +1,7 @@
 _book
-
+.DS_Store
 node_modules
 tutorials/deeplearning/.Rapp.history
-
 tutorials/deeplearning/.Rhistory
-
 H2OTutorialsBook.pdf
-
 cuda-workshop/*/*.out
