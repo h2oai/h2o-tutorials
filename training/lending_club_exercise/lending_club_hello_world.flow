@@ -35,23 +35,11 @@
     },
     {
       "type": "cs",
-      "input": "runAutoML"
-    },
-    {
-      "type": "cs",
       "input": "runAutoML {\"training_frame\":\"loan.hex\",\"response_column\":\"bad_loan\",\"seed\":2307,\"max_models\":0,\"max_runtime_secs\":300,\"stopping_metric\":\"AUTO\",\"stopping_rounds\":3,\"stopping_tolerance\":-1,\"nfolds\":5,\"ignored_columns\":[\"int_rate\"],\"exclude_algos\":[],\"project_name\":\"loan_auto_ml\"}"
     },
     {
       "type": "md",
       "input": "The **Leaderboard** for the autoML run has a GBM fit as the best single model according to the cross-validated logloss."
-    },
-    {
-      "type": "cs",
-      "input": "getLeaderboard \"AutoML_20180424_223436\""
-    },
-    {
-      "type": "cs",
-      "input": "getModel \"GBM_grid_0_AutoML_20180424_223436_model_0\""
     },
     {
       "type": "md",
