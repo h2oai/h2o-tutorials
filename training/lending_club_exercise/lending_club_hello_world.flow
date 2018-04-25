@@ -11,10 +11,6 @@
     },
     {
       "type": "cs",
-      "input": "importFiles"
-    },
-    {
-      "type": "cs",
       "input": "importFiles [ \"https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv\" ]"
     },
     {
