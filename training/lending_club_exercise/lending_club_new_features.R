@@ -4,7 +4,6 @@ h2o.init(max_mem_size = "6g")
 
 # Import data and manage data types
 train_path <- "https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv"
-train_path <- "/Users/patrickaboyoun/Downloads/loan.csv"
 train <- h2o.importFile(train_path, destination_frame = "loan_init")
 train["bad_loan"] <- h2o.asfactor(train["bad_loan"])
 
