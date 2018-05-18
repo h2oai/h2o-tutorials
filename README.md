@@ -1,11 +1,30 @@
 # H2O Tutorials
 
-This document contains tutorials and training materials for H2O-3.  Post questions on StackOverflow using the h2o tag at [http://stackoverflow.com/questions/tagged/h2o](http://stackoverflow.com/questions/tagged/h2o) or join the "H2O Stream" Google Group:
+This document contains tutorials and training materials for H2O-3.  If you find any problems with the tutorial code, please open an issue in this repository.
 
-* Web: <https://groups.google.com/forum/#!forum/h2ostream>
-* E-mail: <mailto:h2ostream@googlegroups.com>
+For general H2O questions, please post those to [Stack Overflow using the "h2o" tag](http://stackoverflow.com/questions/tagged/h2o) or join the [H2O Stream Google Group](https://groups.google.com/forum/#!forum/h2ostream) for questions that don't fit into the Stack Overflow format.
 
 ## Finding tutorial material in Github
+
+There are a number of tutorials on all sorts of topics in this repo.  To help you get started, here are some of the most useful topics in both R and Python.
+
+
+### R Tutorials
+
+- [Intro to H2O in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.R)
+- [H2O Grid Search & Model Selection in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.R)
+- [H2O Deep Learning in R](http://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html)
+- [H2O Stacked Ensembles in R](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
+- [H2O AutoML in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/README.md)
+
+
+### Python Tutorials
+
+- [Intro to H2O in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.ipynb)
+- [H2O Grid Search & Model Selection in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.ipynb)
+- [H2O Stacked Ensembles in Python](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
+- [H2O AutoML in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/README.md)
+
 
 ### Most current material
 
@@ -15,6 +34,8 @@ Tutorials in the master branch are intended to work with the lastest stable vers
 | --- | --- |
 | Training material | <https://github.com/h2oai/h2o-tutorials/blob/master/SUMMARY.md> |
 | Latest stable H2O release | <http://h2o.ai/download> |
+
+
 
 ### Historical events
 
@@ -35,22 +56,9 @@ Tutorial versions in named branches are snapshotted for specific events.  Script
 | Tibshirani-3 H2O release | <http://h2o-release.s3.amazonaws.com/h2o/rel-tibshirani/3/index.html> |
 
 
-### R Tutorials
+### Requirements:
 
-- [Intro to H2O in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.R)
-- [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.R)
-- [H2O Deep Learning in R](http://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html)
-- [H2O Stacked Ensembles](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
-- [h2oEnsemble R package](http://learn.h2o.ai/content/tutorials/ensembles-stacking/index.html)
-
-
-### Python Tutorials
-
-- [Intro to H2O in Python](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/intro-to-h2o.ipynb)
-- [H2O Grid Search & Model Selection](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-open-tour-2016/chicago/grid-search-model-selection.ipynb)
-- [H2O Stacked Ensembles](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
-
-For most tutorials using python you can install dependent modules to your environment by running the following commands.
+For most tutorials using Python you can install dependent modules to your environment by running the following commands.
 
 ```
 # As current user
