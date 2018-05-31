@@ -15,12 +15,12 @@ This session will cover a hands on training of H2O's Sparkling Water in Scala an
 Prerequisites for using Sparkling Water is: 
 
 * JDK version 7+
-* Spark release: 2.1.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
+* Spark release: 2.3.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
 
 #### Installation Instructions:
 
 
-1. Download [Sparkling Water 2.1.2](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.1/2/index.html)
+1. Download [Sparkling Water 2.3.5](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/5/index.html)
 2. In terminal, export the following environment variables:
 
   ```bash
@@ -33,8 +33,8 @@ Prerequisites for using Sparkling Water is:
 
   ```bash
   cd ~/Downloads
-  unzip sparkling-water-2.1.2.zip
-  cd sparkling-water-2.1.2
+  unzip sparkling-water-2.3.5.zip
+  cd sparkling-water-2.3.5
   bin/sparkling-shell --conf "spark.executor.memory=1g"
   ```
 
@@ -58,7 +58,7 @@ Prerequisites for using PySparkling is:
 
 * JDK version 7+
 * Python 2.7
-* Spark release: 2.1.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
+* Spark release: 2.3.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
 
 #### Installation Instructions:
 
@@ -83,14 +83,14 @@ Prerequisites for using PySparkling is:
 
 2. Close the terminal used to do pip install.
 
-3. Download [Sparkling Water 2.1.2](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.1/2/index.html)
+3. Download [Sparkling Water 2.3.5](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/5/index.html)
 
 4. From your terminal, run the following commands. This will take you to the sparkling water folder.
 
   ```bash
   cd ~/Downloads
-  unzip sparkling-water-2.1.2.zip
-  cd sparkling-water-2.1.2
+  unzip sparkling-water-2.3.5.zip
+  cd sparkling-water-2.3.5
   ```
 
 5. In terminal, export the following environment variables:
@@ -134,12 +134,12 @@ The Windows environments require several additional steps to make Spark and late
 Prerequisites for using Sparkling Water is: 
 
 * JDK version 7+
-* Spark release: 2.1.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
+* Spark release: 2.3.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
 
 #### Installation Instructions:
 
 
-1. Download [Sparkling Water 2.1.2](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.1/2/index.html)
+1. Download [Sparkling Water 2.3.5](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/5/index.html)
 
 2. Unzip the sparkling water folder.
 
@@ -151,7 +151,7 @@ Prerequisites for using Sparkling Water is:
   SET MASTER="local[*]" 
   ```
 
-4. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.1.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)).  
+4. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.3.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)).
 
 5. Put `winutils.exe` into a new directory `%SPARK_HOME%\hadoop\bin` and set:
   ```
@@ -201,7 +201,7 @@ Prerequisites for using PySparkling is:
 
 * JDK version 7+
 * Python 2.7
-* Spark release: 2.1.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
+* Spark release: 2.3.0 - [Spark Download Page](https://spark.apache.org/downloads.html)
 
 #### Installation Instructions:
 
@@ -225,7 +225,7 @@ Prerequisites for using PySparkling is:
 
 2. Close the terminal used to do pip install.
 
-3. Download [Sparkling Water 2.1.2](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.1/2/index.html).
+3. Download [Sparkling Water 2.3.5](http://h2o-release.s3.amazonaws.com/sparkling-water/rel-2.3/5/index.html).
 
 4. Unzip the sparkling water folder.
 
@@ -237,7 +237,7 @@ Prerequisites for using PySparkling is:
   SET MASTER="local[*]" 
   ```
 
-6. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.1.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)). 
+6. From https://github.com/steveloughran/winutils, download `winutils.exe` for Hadoop version which is referenced by your Spark distribution (for example, for `spark-2.3.0-bin-hadoop2.7.tgz` you need `wintutils.exe` for [hadoop2.7](https://github.com/steveloughran/winutils/blob/master/hadoop-2.7.1/bin/winutils.exe?raw=true)).
 
 7. Put `winutils.exe` into a new directory `%SPARK_HOME%\hadoop\bin` and set:
 
