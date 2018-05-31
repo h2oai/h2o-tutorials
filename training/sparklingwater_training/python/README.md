@@ -7,7 +7,7 @@ You should have already successfully [installed Sparkling Water](../README.md) b
 
 ## Launch Instructions
 
-1. Save the ChicagoCrimeDemo.ipynb in your sparkling water folder here: "~/Downloads/sparkling-water-2.1.2"
+1. Save the ChicagoCrimeDemo.ipynb in your sparkling water folder here: "~/Downloads/sparkling-water-2.3.5"
 
 2. In terminal, export the following environment variables:
 

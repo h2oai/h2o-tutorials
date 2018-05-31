@@ -14,7 +14,7 @@ You should have already successfully [installed Sparkling Water](../README.md) b
   # To launch a local Spark cluster with 3 worker nodes with 2 cores and 1g per node.
   export MASTER="local[*]" 
   ```
-2. Go to your sparkling-water-2.1.2 folder and from your terminal, run:
+2. Go to your sparkling-water-2.3.5 folder and from your terminal, run:
 
   ```bash
   bin/sparkling-shell --conf "spark.executor.memory=1g"
