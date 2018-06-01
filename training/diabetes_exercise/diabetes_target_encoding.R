@@ -18,7 +18,9 @@ x <- setdiff(x, c(y, "id", "patient_nbr"))
 # Create mean target encodings for categorical variables
 train[["fold"]] <- h2o.kfold_column(train, nfolds = 5, seed = 2018)
 categoricals <- as.list(setdiff(h2o.colnames(train)[h2o.columns_by_type(train, "categorical")], y))
-categoricals <- c(categoricals, list(c("diag_1", "diag_2", "diag_3")))
+categoricals <- c(categoricals,
+                  list(c("diag_1", "diag_2", "diag_3"),
+                       c("admission_type_id", "discharge_disposition_id")))
 train_encode <- h2o.target_encode_create(train, x = categoricals, y = y, fold_column = "fold")
 train <- h2o.target_encode_apply(train, x = categoricals, y = y, target_encode_map = train_encode,
                                  holdout_type = "KFold", fold_column = "fold", seed = 2018)
