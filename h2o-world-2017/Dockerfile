@@ -61,8 +61,8 @@ RUN \
 RUN \
   locale-gen en_US.UTF-8 && \
   update-locale LANG=en_US.UTF-8 && \
-  wget https://download2.rstudio.org/rstudio-server-1.1.383-amd64.deb && \
-  gdebi --non-interactive rstudio-server-1.1.383-amd64.deb && \
+  wget https://download2.rstudio.org/rstudio-server-1.1.453-amd64.deb && \
+  gdebi --non-interactive rstudio-server-1.1.453-amd64.deb && \
   echo "server-app-armor-enabled=0" >> /etc/rstudio/rserver.conf
 
 # ----- USER H2O -----
@@ -78,20 +78,20 @@ USER h2o
 WORKDIR /home/h2o
 
 # Miniconda
-ENV MINICONDA_FILE=Miniconda3-4.3.11-Linux-x86_64.sh
+ENV MINICONDA_FILE=Miniconda3-4.5.4-Linux-x86_64.sh
 RUN \
   wget https://repo.continuum.io/miniconda/${MINICONDA_FILE} && \
   bash ${MINICONDA_FILE} -b -p /home/h2o/Miniconda3 && \
   /home/h2o/Miniconda3/bin/conda create -y --name pysparkling python=2.7 anaconda && \
-  /home/h2o/Miniconda3/bin/conda create -y --name h2o python=3.5 anaconda && \
+  /home/h2o/Miniconda3/bin/conda create -y --name h2o python=3.6 anaconda && \
   /home/h2o/Miniconda3/envs/h2o/bin/jupyter notebook --generate-config && \
   sed -i "s/#c.NotebookApp.token = '<generated>'/c.NotebookApp.token = 'h2o'/" .jupyter/jupyter_notebook_config.py && \
   rm ${MINICONDA_FILE}
 
 # H2O
-ENV H2O_BRANCH_NAME=rel-wheeler
-ENV H2O_BUILD_NUMBER=2
-ENV H2O_PROJECT_VERSION=3.16.0.${H2O_BUILD_NUMBER}
+ENV H2O_BRANCH_NAME=rel-wolpert
+ENV H2O_BUILD_NUMBER=10
+ENV H2O_PROJECT_VERSION=3.18.0.${H2O_BUILD_NUMBER}
 ENV H2O_DIRECTORY=h2o-${H2O_PROJECT_VERSION}
 RUN \
   wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
@@ -101,7 +101,7 @@ RUN \
   R CMD INSTALL ${H2O_DIRECTORY}/R/h2o*.gz
 
 # Spark
-ENV SPARK_VERSION=2.2.0
+ENV SPARK_VERSION=2.3.0
 ENV SPARK_HADOOP_VERSION=2.7
 ENV SPARK_DIRECTORY=spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}
 ENV SPARK_HOME=/home/h2o/bin/spark
@@ -116,9 +116,9 @@ RUN \
 
 
 # Sparkling Water
-ENV SPARKLING_WATER_BRANCH_NUMBER=2.2
+ENV SPARKLING_WATER_BRANCH_NUMBER=2.3
 ENV SPARKLING_WATER_BRANCH_NAME=rel-${SPARKLING_WATER_BRANCH_NUMBER}
-ENV SPARKLING_WATER_BUILD_NUMBER=4
+ENV SPARKLING_WATER_BUILD_NUMBER=5
 ENV SPARKLING_WATER_PROJECT_VERSION=${SPARKLING_WATER_BRANCH_NUMBER}.${SPARKLING_WATER_BUILD_NUMBER}
 ENV SPARKLING_WATER_DIRECTORY=sparkling-water-${SPARKLING_WATER_PROJECT_VERSION}
 RUN \
@@ -152,7 +152,6 @@ RUN \
 COPY nlp/AmazonReviews.ipynb Python/nlp
 COPY nlp/stopwords.csv data/nlp
 
-
 # Kuba's pysparkling demo
 COPY pysparkling/AmazonFineFoodPipeline.ipynb  Python
 COPY pysparkling/img/scenario.png Python/img/scenario.png
@@ -172,6 +171,32 @@ COPY automl/Python/automl_binary_classification_product_backorders.ipynb Python/
 COPY automl/Python/automl_regression_powerplant_output.ipynb Python/automl
 COPY automl/data/product_backorders.csv data/automl
 COPY automl/data/powerplant_output.csv data/automl
+
+# GBM Deep Dive
+RUN \
+  mkdir data/gbm_deep_dive && \
+  mkdir R/gbm_deep_dive && \
+  mkdir Python/gbm_deep_dive
+COPY gbm_deep_dive/data/titanic.csv data/gbm_deep_dive
+COPY gbm_deep_dive/r/gbmTuning.r R/gbm_deep_dive
+COPY gbm_deep_dive/python/gbmTuning.ipynb Python/gbm_deep_dive
+
+# Lending Club
+RUN \
+  mkdir data/lending_club && \
+  mkdir R/lending_club && \
+  mkdir Python/lending_club
+COPY lending_club/loan.csv data/lending_club
+COPY lending_club/LoanStats3a.csv data/lending_club
+COPY lending_club/lending_club_handson.R R/lending_club
+COPY lending_club/lending_club_hello_world.R R/lending_club
+COPY lending_club/lending_club_new_features.R R/lending_club
+COPY lending_club/lending_club_solutions.R R/lending_club
+COPY lending_club/lending_club_tour.R R/lending_club
+COPY lending_club/lending_club_handson.ipynb Python/lending_club
+COPY lending_club/lending_club_hello_world.ipynb Python/lending_club
+COPY lending_club/lending_club_solutions.ipynb Python/lending_club
+COPY lending_club/lending_club_tour.ipynb Python/lending_club
 
 # Epilogue
 USER root

@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "cells": [
+    {
+      "type": "md",
+      "input": "# A First Analysis of Lending Club Loan Data using H2O Flow"
+    },
+    {
+      "type": "md",
+      "input": "This exploration of H2O will use a version of the Lending Club Loan Data that can be found on [Kaggle](https://www.kaggle.com/wendykan/lending-club-loan-data). This data consists of 15 variables:\n* **loan_amnt**: Requested loan amount (US dollars)\n* **term**: Loan term length (months)\n* **int_rate**: Recommended interest rate\n* **emp_length**: Employment length (years)\n* **home_ownership**: Housing status\n* **annual_inc**: Annual income (US dollars)\n* **purpose**: Purpose for the loan\n* **addr_state**: State of residence\n* **dti**: Debt to income ratio\n* **delinq_2yrs**: Number of delinquencies in the past 2 years\n* **revol_util**: Percent of revolving credit line utilized\n* **total_acc**: Number of active accounts\n* **bad_loan**: Bad loan indicator\n* **longest_credit_length**: Age of oldest active account\n* **verification_status**: Income verification status"
+    },
+    {
+      "type": "cs",
+      "input": "importFiles [ \"https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv\" ]"
+    },
+    {
+      "type": "md",
+      "input": "The default parse of this data file interprets the `bad_loan` 0/1 indicator as **Numeric**. Since this data are categorical in nature, we will change its data type to **Enum**."
+    },
+    {
+      "type": "cs",
+      "input": "setupParse source_frames: [ \"https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv\" ]"
+    },
+    {
+      "type": "cs",
+      "input": "parseFiles\n  source_frames: [\"https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv\"]\n  destination_frame: \"loan.hex\"\n  parse_type: \"CSV\"\n  separator: 44\n  number_columns: 15\n  single_quotes: false\n  column_names: [\"loan_amnt\",\"term\",\"int_rate\",\"emp_length\",\"home_ownership\",\"annual_inc\",\"purpose\",\"addr_state\",\"dti\",\"delinq_2yrs\",\"revol_util\",\"total_acc\",\"bad_loan\",\"longest_credit_length\",\"verification_status\"]\n  column_types: [\"Numeric\",\"Enum\",\"Numeric\",\"Numeric\",\"Enum\",\"Numeric\",\"Enum\",\"Enum\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Enum\",\"Numeric\",\"Enum\"]\n  delete_on_done: true\n  check_header: 1\n  chunk_size: 4194304"
+    },
+    {
+      "type": "cs",
+      "input": "getFrameSummary \"loan.hex\""
+    },
+    {
+      "type": "md",
+      "input": "We will now spend up to 5 minutes creating predictive models of `bad_loan` using automatic machine learning, taking care to remove `int_rate` from the predictors by ticking its checkbox in the *Ignored Columns* list"
+    },
+    {
+      "type": "cs",
+      "input": "runAutoML {\"training_frame\":\"loan.hex\",\"response_column\":\"bad_loan\",\"seed\":2307,\"max_models\":0,\"max_runtime_secs\":300,\"stopping_metric\":\"AUTO\",\"stopping_rounds\":3,\"stopping_tolerance\":-1,\"nfolds\":5,\"ignored_columns\":[\"int_rate\"],\"exclude_algos\":[],\"project_name\":\"loan_auto_ml\"}"
+    },
+    {
+      "type": "md",
+      "input": "The **Leaderboard** for the autoML run has a GBM fit as the best single model according to the cross-validated logloss."
+    },
+    {
+      "type": "md",
+      "input": "# Congratulations for going with the H2O Flow!"
+    }
+  ]
+}
