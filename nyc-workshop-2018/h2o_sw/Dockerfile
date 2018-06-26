@@ -125,7 +125,7 @@ RUN \
 COPY --chown=h2o h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
 
 # Sparkling Water Demo
-COPY --chown=h2o sparkling-water-hands-on/ForecastingVolumePrice.ipynb sparkling-water-hands-on/
+COPY --chown=h2o sparkling-water-hands-on/ForecastingVolume.ipynb sparkling-water-hands-on/
 COPY --chown=h2o sparkling-water-hands-on/*.png sparkling-water-hands-on/
 
 ######################################################################
