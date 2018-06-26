@@ -51,6 +51,9 @@ RUN \
   echo "h2o:h2o" | chpasswd && \
   echo 'h2o ALL=NOPASSWD: ALL' >> /etc/sudoers
 
+RUN \
+  apt-get -y install bzip2
+
 USER h2o
 WORKDIR /home/h2o
 
@@ -119,10 +122,10 @@ RUN \
   mkdir sparkling-water-hands-on
 
 # H2O-3 Demo
-COPY h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on
+COPY h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
 
-COPY sparkling-water-hands-on/ForecastingVolumePrice.ipynb sparkling-water-hands-on
-COPY sparkling-water-hands-on/*.png sparkling-water-hands-on
+COPY sparkling-water-hands-on/ForecastingVolumePrice.ipynb sparkling-water-hands-on/
+COPY sparkling-water-hands-on/*.png sparkling-water-hands-on/
 
 # Epilogue
 USER root
