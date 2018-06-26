@@ -108,8 +108,8 @@ RUN \
   rm ${SPARKLING_WATER_DIRECTORY}.zip && \
   /home/h2o/Miniconda3/envs/pysparkling/bin/ipython profile create pyspark 
 
-COPY conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pyspark/startup/
-COPY conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
+COPY --chown=h2o conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pyspark/startup/
+COPY --chown=h2o conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
 ENV SPARKLING_WATER_HOME=/home/h2o/bin/sparkling-water
 
 ######################################################################
@@ -122,15 +122,11 @@ RUN \
   mkdir sparkling-water-hands-on
 
 # H2O-3 Demo
-COPY h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
+COPY --chown=h2o h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
 
-COPY sparkling-water-hands-on/ForecastingVolumePrice.ipynb sparkling-water-hands-on/
-COPY sparkling-water-hands-on/*.png sparkling-water-hands-on/
-
-# Epilogue
-USER root
-RUN \
-  chown -R h2o:h2o /home/h2o
+# Sparkling Water Demo
+COPY --chown=h2o sparkling-water-hands-on/ForecastingVolumePrice.ipynb sparkling-water-hands-on/
+COPY --chown=h2o sparkling-water-hands-on/*.png sparkling-water-hands-on/
 
 ######################################################################
 
@@ -138,6 +134,7 @@ RUN \
 
 USER h2o
 WORKDIR /home/h2o
+ENV JAVA_HOME=/usr
 
 # Entry point
 COPY run.sh /run.sh
