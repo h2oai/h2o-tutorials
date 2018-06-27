@@ -121,6 +121,18 @@ RUN \
   mkdir h2o-3-hands-on && \
   mkdir sparkling-water-hands-on
 
+RUN \
+  cd h2o-3-hands-on && \
+  mkdir data && \
+  cd data && \
+  wget https://s3.amazonaws.com/h2o-public-test-data/bigdata/laptop/lending-club/LoanStats3a.csv
+
+RUN \
+  cd sparkling-water-hands-on && \
+  mkdir data && \
+  cd data && \
+  wget https://s3.amazonaws.com/h2o-training/events/h2o_world/TimeSeries/all_stocks_2006-01-01_to_2018-01-01.csv
+
 # H2O-3 Demo
 COPY --chown=h2o h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
 
