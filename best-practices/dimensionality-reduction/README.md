@@ -12,7 +12,7 @@ The data used for this tutorial is computer generated employee attributes.
 
 In the example below, we are seeing the decomposition of A when A consists of only numeric columns.
 
-![](GLRM.png)
+![](./images/GLRM.png)
 
 * *Y* = archetypal features created from columns of *A*
 * *X* = row of *A* in reduced feature space

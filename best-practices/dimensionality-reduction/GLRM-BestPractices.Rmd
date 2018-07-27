@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, message = F, eval = T, warning = F)
 
 In the example below, we are seeing the decomposition of A when A consists of only numeric columns.
 
-![](GLRM.png)
+![](./images/GLRM.png)
 
 * *Y* = archetypal features created from columns of *A*
 * *X* = row of *A* in reduced feature space
@@ -104,10 +104,8 @@ archetypes_y <- as.data.frame(t(Y))
 archetypes_y$attribute <- rownames(archetypes_y)
 ```
 
-```{r, echo = FALSE, eval = T}
-library(ggplot2)
-```
-```{r, echo = FALSE, eval = T}
+Plot the archetypes:
+```{r, echo = TRUE, eval = F}
 library('plotly')
 m <- archetypes_y[archetypes_y$attribute %in% c("sqft_lot", "sqft_lot15", "floors", "bedrooms", "price", "waterfront0", "waterfront1"), ]
 
@@ -122,12 +120,14 @@ plot_ly(data = archetypes_y, x = ~Arch1, y = ~Arch2, mode = "markers", text = ~a
   layout(annotations = a)
 ```
 
+![archetypes_y](./images/archetypes_y.png)
+
 Attributes that are close together are considered similar.  For example, `sqft_lot` and `sqft_lot15` are very close together.  This makes sense since `sqft_lot` is the sqft of the lot where as `sqft_lot15` is the sqft of the lot in 2015.  Additionally `floors`, `bedrooms`, and `price` are very close together.  The values `waterfront0` and `waterfront1` are far apart.
 
 
 Now let's visualize the first two archetypes of X.
 
-```{r, messages = FALSE}
+```{r, messages = TRUE, eval = FALSE}
 # Visualize first two archetypes of X
 archetypes_x <- as.data.frame(X)
 archetypes_x$id <- as.character(as.matrix(houses_data$id))
@@ -140,21 +140,27 @@ plot_ly(data = archetypes_x, x = ~Arch1, y = ~Arch2, mode = "markers",
         text = ~paste0("House: ", id))
 ```
 
+![archetypes_x](./images/archetypes_x.png)
 
 Houses that are close together are considered similar. If we examine the two houses next to each other at the bottom of the graph, we can see a lot of similarities.  The two houses are highlighted in red.
 
-```{r, echo = FALSE}
+```{r, echo = TRUE, eval = FALSE}
 house_ids <-  c(5379802181, 3046200125)
 archetypes_x$color <- ifelse(archetypes_x$id %in% house_ids, "A", "B")
 
 plot_ly(data = archetypes_x, x = ~Arch1, y = ~Arch2, mode = "markers", 
-        text = ~paste0("House: ", id), color = ~color, colors = "Set1") %>%
+        text = ~paste0("House: ", id), marker = list(
+    color = factor(archetypes_x$color,labels=c("#d62728","#1f77b4"))  
+  ) ) %>%
   layout(showlegend = FALSE)
 ```
+
+![archetypes_x_highlighted](./images/archetypes_x_highlighted.png)
 
 The houses are shown below: 
 ```{r, echo = FALSE}
 library('knitr')
+house_ids <-  c(5379802181, 3046200125)
 kable(as.data.frame(houses_data[houses_data$id == house_ids[[1]] | houses_data$id == house_ids[[2]], ]),
       row.names = FALSE)
 ```
@@ -180,12 +186,16 @@ We will add the clusters to our original visualization.
 clusters <- h2o.predict(kmeans_model, kmeans_data)
 colnames(clusters) <- "cluster"
 kmeans_data <- h2o.cbind(kmeans_data, clusters)
+```
 
+Let's visualize the clusters:
+```{r, eval = F}
 kmeans_df <- as.data.frame(kmeans_data[c("Arch1", "Arch2", "cluster", "id")])[sample_indices, ]
 kmeans_df$cluster <- as.factor(kmeans_df$cluster)
 plot_ly(data = kmeans_df, x = ~Arch1, y = ~Arch2, mode = "markers", text = ~paste0("House: ", id), color = ~cluster)
 ```
 
+![clusters](./images/clusters.png)
 There are two clusters found. If we examine these clusters, we can see that the top cluster represents more expensive and larger houses with a higher grade.
 
 ```{r}
@@ -287,9 +297,8 @@ k_models <- llply(k_range, function(k)
 
 Below we generate a scree plot of the numeric error for each model.
 
-```{r}
+```{r, eval = FALSE}
 # Plot Numeric Error and Rank
-library('plotly')
 
 k_error <- ldply(k_models, function(ml) 
   data.frame('k' = ml@parameters$k, 
@@ -301,6 +310,7 @@ k_error <- ldply(k_models, function(ml)
 plot_ly(data = k_error, x = ~k, y = ~numeric_error, mode = "markers+lines", color = ~type, text = ~paste0("k: ", k))
 ```
 
+![k_error](./images/k_error.png)
 Based on our scree plot, it looks like our optimal k is 17. After this value, the improvement plateaus.  If our aim was to lower the dimensionality of the data, we could choose the elbow of the graph as `k`.  In this case, the elbow is round `k = 5`.
 
 The scree plot of the validation error should helps us to determine the true rank of the data.  The true rank of the data should encompass the signal of the data, not the noise.  When we see that the validation error is increasing as k increases, the low rank matrix is beginning to capture not just the signal but also the noise.
@@ -329,7 +339,7 @@ gamma_models <- llply(gamma_range, function(g)
 
 Below we generate a scree plot of the numeric error for each model.
 
-```{r}
+```{r, eval = FALSE}
 # Plot Numeric Error and Regularization Strength/Gamma
 gamma_error <- ldply(gamma_models, function(ml) 
   data.frame('gamma' = ifelse(is.null(ml@parameters$gamma_x), 0,  ml@parameters$gamma_x),
@@ -341,6 +351,8 @@ gamma_error <- ldply(gamma_models, function(ml)
 plot_ly(data = gamma_error, x = ~gamma, y = ~numeric_error, mode = "markers+lines", 
         color = ~type, text = ~paste0("gamma: ", gamma))
 ```
+
+![k_error](./images/gamma_error.png)
 
 The relationship between regularization strength and validation error shows a different story than what we saw with rank. Some regularization helps improve the validation error but too much hurts the performance.  It looks like we have the best performance with a regularization strength around 1. 
 
