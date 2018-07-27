@@ -234,7 +234,61 @@ sum(is.na(miss_data))
 
 ### Determining Best Parameters
 
-We will build a model using the default parameters and evaluate it.  We will set the rank (`k`) of the model to 5 and the regularization strength to 2.  We will tune these parameters later on.  We will also tell the GLRM model to use Ordinal loss for our ordinal columns: `view`, `condition`, and `grade`.
+The main parameters in the GLRM  model are associated with rank, regularization, loss, and initialization:
+
+#### Rank 
+
+The size of the matrices *X* and *Y*.  In the diagram, the rank is denoted as `k`.
+
+
+![](./images/GLRM.png)
+
+
+
+#### Regularizations
+
+structure | regularization_x | regularization_y
+----------|------------------|-----------------
+small | Quadratic | Quadratic
+sparse | L1 | L1
+non negative | Non Negative | Non Negative
+clustered | Sparse | None
+
+#### Loss
+
+```{r, echo = FALSE}
+latexImg = function(latex){
+
+    link = paste0('http://latex.codecogs.com/gif.latex?',
+           gsub('\\=','%3D',URLencode(latex)))
+
+    link = gsub("(%..)","\\U\\1",link,perl=TRUE)
+    return(paste0('![](',link,')'))
+}
+
+```
+
+data type | loss | L(u, a)
+----------|------|--------
+real | quadratic | ![quadratic_loss](./images/quadratic_loss.gif)
+real | absolute | ![absolute_loss](./images/absolute_loss.gif)
+real | huber | ![huber_loss](./images/huber_loss.gif)
+boolean | hinge | ![hinge_loss](./images/hinge_loss.gif)
+boolean | logistic | ![logistic_loss](./images/logistic_loss.gif)
+integer | poisson | ![poisson_loss](./images/poisson_loss.gif)
+ordinal | ordinal hinge | ![ordinal_hinge_loss](./images/ordinal_hinge_loss.gif)
+categorical | one-vs-all | ![one_vs_all_loss](./images/one_vs_all_loss.gif)
+
+#### Initialization
+
+The `init` parameter specifies how the X and Y matrices are initially generated.
+
+* **Random:** random arrays from normal distribution
+* **PlusPlus:** initialization using teh clusters from k-means++ initialization.
+* **SVD:** initialization using the first k right singular values.  Helps with global convergence for matrix factorizations where global convergence not guaranteed (ex Non Negative Matrix Factorization)
+
+
+In this tutorial, we will start by building a model using the default parameters.  We will set the rank (`k`) of the model to 5 and the regularization strength to 2.  We will tune these parameters later on.  We will also tell the GLRM model to use Ordinal loss for our ordinal columns: `view`, `condition`, and `grade`.
 
 ```{r, results='hide'}
 glrm_k <- 5
@@ -319,9 +373,7 @@ The scree plot of the validation error should helps us to determine the true ran
 
 Regularization strength is especially important if there are a lot of missing values in the data to prevent overfitting.  Regularization is added to the loss function so that our new goal is to mimimize:
 
-$$
-L_j(x_i y_j, A_{ij}) + \gamma_x \sum_{i=1}^m r_i(x_i) + \gamma_y \sum_{j=1}^n \hat{r}_j(y_j)
-$$
+![loss_equation](./images/loss_equation.gif)
 
 We will examine how different regularization strengths effect the reconstruction error on the validation data when `k = 17`.  In a future version of this tutorial, we will run a grid search over both `k` and `gamma` since the effects of each parameter are dependent of each other.
 
