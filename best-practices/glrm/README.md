@@ -41,8 +41,7 @@ A projected into this reduced dimension feature space.
 For this tutorial, we will use data that contains attributes about a
 house and its price in King County. The data is a public dataset from
 Kaggle: <https://www.kaggle.com/harlfoxem/housesalesprediction>. We can
-use GLRM to reduce the dimensions of the data 2 columns. We can use this
-to visualize the houses in a 2 dimensional plot.
+use GLRM to reduce the dimensions of the data 2 columns. We can use GLRM to reduce the dimensions of the data to 2 columns in order to visualize the houses data in a 2 dimensional plot.
 
 We will begin by initializing the h2o cluster and importing the csv
 file.
@@ -341,7 +340,7 @@ The `init` parameter specifies how the X and Y matrices are initially
 generated.
 
 -   **Random:** random arrays from normal distribution
--   **PlusPlus:** initialization using teh clusters from k-means++
+-   **PlusPlus:** initialization using the clusters from k-means++
     initialization.
 -   **SVD:** initialization using the first k right singular values.
     Helps with global convergence for matrix factorizations where global
