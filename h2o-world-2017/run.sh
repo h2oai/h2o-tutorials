@@ -33,5 +33,8 @@ source /home/h2o/Miniconda3/bin/activate h2o
 (cd /home/h2o && \
  sudo rstudio-server start >> "$logdir"/rstudio-server.log)
 
+(cd /home/h2o/h2o-3.16.0.2 && \
+ sudo java -jar h2o.jar >> "$logdir"/h2o.log)
+
 # 10 years
 sleep 3650d

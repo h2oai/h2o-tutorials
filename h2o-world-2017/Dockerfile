@@ -12,7 +12,7 @@ RUN \
 
 # RStudio
 RUN \
-  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9 && \
   echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list
 
 # Java8
@@ -101,7 +101,7 @@ RUN \
   R CMD INSTALL ${H2O_DIRECTORY}/R/h2o*.gz
 
 # Spark
-ENV SPARK_VERSION=2.2.0
+ENV SPARK_VERSION=2.2.2
 ENV SPARK_HADOOP_VERSION=2.7
 ENV SPARK_DIRECTORY=spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}
 ENV SPARK_HOME=/home/h2o/bin/spark
@@ -127,7 +127,7 @@ RUN \
   unzip ${SPARKLING_WATER_DIRECTORY}.zip && \
   mv ${SPARKLING_WATER_DIRECTORY} sparkling-water && \
   rm ${SPARKLING_WATER_DIRECTORY}.zip && \
-  /home/h2o/Miniconda3/envs/pysparkling/bin/ipython profile create pyspark 
+  /home/h2o/Miniconda3/envs/pysparkling/bin/ipython profile create pyspark
 
 COPY conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pyspark/startup/
 COPY conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
@@ -157,7 +157,7 @@ COPY nlp/stopwords.csv data/nlp
 COPY pysparkling/AmazonFineFoodPipeline.ipynb  Python
 COPY pysparkling/img/scenario.png Python/img/scenario.png
 RUN mkdir data/pysparkling
- 
+
 RUN  wget -O data/pysparkling/AmazonReviews_Predictions.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Predictions.csv'
 RUN  wget -O data/pysparkling/AmazonReviews_Train.csv 'https://s3.amazonaws.com/tomk/h2o-world/kuba/AmazonReviews_Train.csv'
 
@@ -191,7 +191,7 @@ WORKDIR /home/h2o
 COPY run.sh /run.sh
 
 ENTRYPOINT ["/run.sh"]
-  
+
 EXPOSE 54321
 EXPOSE 8888
 EXPOSE 8787
