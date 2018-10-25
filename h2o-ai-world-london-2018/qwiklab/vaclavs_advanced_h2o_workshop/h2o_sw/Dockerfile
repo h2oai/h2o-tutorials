@@ -37,6 +37,29 @@ RUN \
   echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections && \
   apt-get -y install oracle-java8-installer
 
+# R
+RUN \
+  apt-get -y install \
+    r-base \
+    r-base-dev \
+    r-cran-jsonlite \
+    r-cran-rcurl && \
+  mkdir -p /usr/local/lib/R/site-library && \
+  chmod 777 /usr/local/lib/R/site-library
+
+# RStudio
+RUN \
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
+  echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list
+
+# RStudio
+RUN \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  wget https://download2.rstudio.org/rstudio-server-1.1.383-amd64.deb && \
+  gdebi --non-interactive rstudio-server-1.1.383-amd64.deb && \
+  echo "server-app-armor-enabled=0" >> /etc/rstudio/rserver.conf
+
 # Log directory used by run.sh
 RUN \
   mkdir /log && \
@@ -70,14 +93,15 @@ RUN \
 
 # H2O
 ENV H2O_BRANCH_NAME=rel-wright
-ENV H2O_BUILD_NUMBER=10
+ENV H2O_BUILD_NUMBER=2
 ENV H2O_PROJECT_VERSION=3.20.0.${H2O_BUILD_NUMBER}
 ENV H2O_DIRECTORY=h2o-${H2O_PROJECT_VERSION}
 RUN \
   wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
   unzip ${H2O_DIRECTORY}.zip && \
   rm ${H2O_DIRECTORY}.zip && \
-  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install ${H2O_DIRECTORY}/python/h2o*.whl"
+  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install ${H2O_DIRECTORY}/python/h2o*.whl" && \
+  R CMD INSTALL ${H2O_DIRECTORY}/R/h2o*.gz
 
 # Spark
 ENV SPARK_VERSION=2.3.1
@@ -135,6 +159,7 @@ RUN \
 
 # H2O-3 Demo
 COPY --chown=h2o h2o-3-hands-on/LendingClubTraining.ipynb h2o-3-hands-on/
+COPY --chown=h2o h2o-3-hands-on/LendingClubTraining.R h2o-3-hands-on/
 
 # Sparkling Water Demo
 COPY --chown=h2o sparkling-water-hands-on/ForecastingVolume.ipynb sparkling-water-hands-on/
@@ -156,3 +181,4 @@ EXPOSE 54321
 EXPOSE 54327
 EXPOSE 8888
 EXPOSE 4040
+EXPOSE 8787
