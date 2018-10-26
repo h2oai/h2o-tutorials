@@ -61,14 +61,14 @@ bad_loan_dist
 # Our machine learning models will have a greater ability to understand numeric 
 # features than strings.
 
-h2o.head(loans[c("int_rate", "revol_util", "emp_length")], 10)
+head(loans[c("int_rate", "revol_util", "emp_length")], 10)
 
 # Convert int_rate to numeric
 loans$int_rate = h2o.gsub(pattern = "%", replacement = "", x = loans$int_rate) # strip %
 loans$int_rate = h2o.trim(loans$int_rate) # trim ws
 loans$int_rate = as.numeric(loans$int_rate) # change to a numeric
 
-h2o.head(loans$int_rate, 10)
+head(loans$int_rate, 10)
 
 # Now that we have converted interest rate to numeric, we can use the hist 
 # function to see the distribution of interest rate for good loans and bad loans.
@@ -102,7 +102,7 @@ loans$emp_length = h2o.gsub(pattern = "< 1", replacement = "0", x = loans$emp_le
 loans$emp_length = h2o.gsub(pattern = "10\\\\+", replacement = "10", x = loans$emp_length)
 loans$emp_length = as.numeric(loans$emp_length)
 
-h2o.head(loans[c("int_rate", "revol_util", "emp_length")], 10)
+head(loans[c("int_rate", "revol_util", "emp_length")], 10)
 
 # We can also clean up the verification status column. There are multiple values
 # that mean verified: 'VERIFIED - income' and 'VERIFIED - income source'. We will 
@@ -326,3 +326,11 @@ print(perf)
 # Step 10 (of 10). Shutdown H2O cluster -----------------------------------
 
 h2o.shutdown(prompt = FALSE)
+
+# Bonus -------------------------------------------------------------------
+#
+# This tutorial: https://github.com/h2oai/h2o-tutorials/tree/master/training/h2o_3_hands_on/lending_club_loan_default
+# Other tutorials: https://github.com/h2oai/h2o-tutorials/
+# H2O Documentation: http://docs.h2o.ai/
+# Awesome H2O: https://github.com/h2oai/awesome-h2o
+
