@@ -37,6 +37,30 @@ RUN \
   echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections && \
   apt-get -y install oracle-java8-installer
 
+# R
+RUN \
+  apt-get -y update && \
+  apt-get -y install \
+    r-base \
+    r-base-dev \
+    r-cran-jsonlite \
+    r-cran-rcurl && \
+  mkdir -p /usr/local/lib/R/site-library && \
+  chmod 777 /usr/local/lib/R/site-library
+
+# RStudio
+RUN \
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
+  echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" >> /etc/apt/sources.list
+
+# RStudio
+RUN \
+  locale-gen en_US.UTF-8 && \
+  update-locale LANG=en_US.UTF-8 && \
+  wget https://download2.rstudio.org/rstudio-server-1.1.383-amd64.deb && \
+  gdebi --non-interactive rstudio-server-1.1.383-amd64.deb && \
+  echo "server-app-armor-enabled=0" >> /etc/rstudio/rserver.conf
+
 # Log directory used by run.sh
 RUN \
   mkdir /log && \
@@ -77,7 +101,8 @@ RUN \
   wget http://h2o-release.s3.amazonaws.com/h2o/${H2O_BRANCH_NAME}/${H2O_BUILD_NUMBER}/h2o-${H2O_PROJECT_VERSION}.zip && \
   unzip ${H2O_DIRECTORY}.zip && \
   rm ${H2O_DIRECTORY}.zip && \
-  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install ${H2O_DIRECTORY}/python/h2o*.whl"
+  bash -c "source /home/h2o/Miniconda3/bin/activate h2o && pip install ${H2O_DIRECTORY}/python/h2o*.whl" && \
+  R CMD INSTALL ${H2O_DIRECTORY}/R/h2o*.gz
 
 # Spark
 ENV SPARK_VERSION=2.3.2
