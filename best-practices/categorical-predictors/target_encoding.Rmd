@@ -250,5 +250,5 @@ h2o.varimp_plot(gbm_state_te)
 ## References
 
 * [Target Encoding in H2O-3 Demo](https://github.com/h2oai/h2o-3/blob/master/h2o-r/demos/rdemo.target_encode.R)
-* [Preprocessing Scheme for High-Cardinality Categorical Columns](https://kaggle2.blob.core.windows.net/forum-message-attachments/225952/7441/high%20cardinality%20categoricals.pdf)
+* Daniele Micci-Barreca. 2001. A preprocessing scheme for high-cardinality categorical attributes in classification and prediction problems. SIGKDD Explor. Newsl. 3, 1 (July 2001), 27-32.
 * [Automatic Feature Engineering Webinar](https://www.youtube.com/watch?v=VMTKcT1iHww)
