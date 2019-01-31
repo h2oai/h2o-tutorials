@@ -1,6 +1,6 @@
 # Isolation Forest
 
-In this section, we will discuss how to use the Isolation Forest to find anomlalies in a dataset and how to interpret the results.
+In this section, we will discuss how to use the Isolation Forest to find anomalies in a dataset and how to interpret the results.
 
 ## Contents
 
