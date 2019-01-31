@@ -23,7 +23,7 @@ reviews = h2o.importFile(s3_path)
 dim(reviews)
 
 # View head of the data
-head(reviews)
+View(head(reviews))
 
 # Create a histogram of the scores
 h2o.hist(reviews$Score)
@@ -34,7 +34,7 @@ summary_freq <- h2o.arrange(summary_freq, desc(Count))
 head(summary_freq)
 
 # Add Target Column: "PositiveReview"
-reviews$PositiveReview = h2o.ifelse(reviews$Score >= 4, "1", "0")
+reviews$PositiveReview <- h2o.ifelse(reviews$Score >= 4, "1", "0")
 
 h2o.table(reviews$PositiveReview)
 
@@ -82,12 +82,7 @@ sample_embeddings <- h2o.cbind(sample_embeddings, h2o.transform(w2v_len2_model, 
 head(sample_embeddings)
 
 # Get Word Embeddings for each unique word
-unique_words <- h2o.table(as.factor(words))
-colnames(unique_words) <- c("Word", "Count")
-word_embeddings <- h2o.transform(w2v_len2_model, as.character(unique_words["Word"]), aggregate_method = "None")
-word_embeddings <- h2o.cbind(unique_words, word_embeddings)
-word_embeddings <- word_embeddings[!is.na(word_embeddings$C1), ]
-head(word_embeddings)
+word_embeddings <- h2o.toFrame(w2v_len2_model)
 
 # Filter Word Embeddings to selected words
 selected_words <- c("coffee", "espresso", "starbucks", "sweet", "salty", "savory", "email", "support", "answered", 
@@ -100,7 +95,7 @@ plot_data <- as.data.frame(filtered_embeddings)
 # Plot Word Embeddings
 library('plotly')
 # View the words by hovering over the point in the scatter plot
-plot_ly(plot_data, x = ~C1, y = ~C2, type = 'scatter', mode = 'markers', text = ~Word)
+plot_ly(plot_data, x = ~V1, y = ~V2, type = 'scatter', mode = 'markers', text = ~Word)
 
 # Train Word2Vec Model for vec size = 100
 w2v_model <- h2o.word2vec(training_frame = words, vec_size = 100, model_id = "w2v.hex")
@@ -112,9 +107,7 @@ h2o.findSynonyms(w2v_model, "coffee", count = 5)
 h2o.findSynonyms(w2v_model, "stale", count = 5)
 
 # Cluster Word Embeddings
-word_embeddings <- h2o.transform(w2v_model, as.character(unique_words["Word"]), aggregate_method="None")
-word_embeddings <- h2o.cbind(unique_words, word_embeddings)
-word_embeddings <- word_embeddings[!is.na(word_embeddings$C1), ]
+word_embeddings <- h2o.toFrame(w2v_model)
 
 # Train K-Means Model
 kmeans <- h2o.kmeans(x = setdiff(colnames(word_embeddings), c("Word", "Count")),
