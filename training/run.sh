@@ -28,7 +28,7 @@ source /home/h2o/Miniconda3/bin/activate h2o
 
 (cd /home/h2o && \
  jupyter --paths >> "$logdir"/jupyter.log && \
- nohup jupyter notebook --ip='*' --no-browser --allow-root >> "$logdir"/jupyter.log 2>&1 &)
+ nohup jupyter notebook --ip='0.0.0.0' --no-browser --allow-root >> "$logdir"/jupyter.log 2>&1 &)
 
 (cd /home/h2o && \
  sudo rstudio-server start >> "$logdir"/rstudio-server.log)
