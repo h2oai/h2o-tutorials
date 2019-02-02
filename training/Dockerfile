@@ -137,6 +137,8 @@ COPY --chown=h2o conf/pyspark/00-pyspark-setup.py /home/h2o/.ipython/profile_pys
 COPY --chown=h2o conf/pyspark/kernel.json /home/h2o/Miniconda3/envs/h2o/share/jupyter/kernels/pyspark/
 ENV SPARKLING_WATER_HOME=/home/h2o/bin/sparkling-water
 
+RUN R -e 'chooseCRANmirror(graphics=FALSE, ind=1);install.packages("ggplot2");'
+
 ######################################################################
 # ADD CONTENT FOR INDIVIDUAL HANDS-ON SESSIONS HERE
 ######################################################################

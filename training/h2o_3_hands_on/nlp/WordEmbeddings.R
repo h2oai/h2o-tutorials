@@ -11,11 +11,11 @@
 
 # Start H2O Cluster
 library('h2o')
-h2o.init()
+h2o.init(max_mem_size = '8G', bind_to_localhost = FALSE)
 
 # Import data
-s3_path <- "https://s3-us-west-2.amazonaws.com/h2o-tutorials/data/topics/nlp/amazon_reviews/AmazonReviews.csv"
-reviews = h2o.importFile(s3_path)
+# https://s3-us-west-2.amazonaws.com/h2o-tutorials/data/topics/nlp/amazon_reviews/AmazonReviews.csv
+reviews = h2o.importFile("data/topics/nlp/amazon_reviews/AmazonReviews.csv")
 
 ###### Step 2 (of 10). Exploratory Analysis ###### 
 
@@ -25,8 +25,8 @@ dim(reviews)
 # View head of the data
 View(head(reviews))
 
-# Create a histogram of the scores
-h2o.hist(reviews$Score)
+# See how are the scores distributed
+h2o.table(reviews$Score)
 
 # View the most frequent review summaries
 summary_freq <- h2o.table(reviews$Summary)
@@ -41,9 +41,7 @@ h2o.table(reviews$PositiveReview)
 ###### Step 3 (of 10). Tokenize Words ###### 
 
 # Set Stop Words
-# We can import Stop Words from the tm library
-library('tm')
-STOP_WORDS <- stopwords('en')
+STOP_WORDS <- read.csv("/home/h2o/data/topics/nlp/amazon_reviews/stopwords.csv", stringsAsFactors = FALSE)$STOP_WORD
 head(STOP_WORDS)
 
 # Create a tokenize function that tokenizes the sentences and filters certain words
@@ -93,9 +91,8 @@ filtered_embeddings <- word_embeddings[word_embeddings$Word %in% selected_words,
 plot_data <- as.data.frame(filtered_embeddings)
 
 # Plot Word Embeddings
-library('plotly')
-# View the words by hovering over the point in the scatter plot
-plot_ly(plot_data, x = ~V1, y = ~V2, type = 'scatter', mode = 'markers', text = ~Word)
+library('ggplot2')
+ggplot(plot_data, aes(x=V1, y=V2, label=Word)) + geom_text(check_overlap = TRUE) + theme_bw()
 
 # Train Word2Vec Model for vec size = 100
 w2v_model <- h2o.word2vec(training_frame = words, vec_size = 100, model_id = "w2v.hex")
@@ -180,6 +177,7 @@ gbm_embeddings <- h2o.gbm(x = predictors, y = response,
                           training_frame = ext_train, validation_frame = ext_test,
                           stopping_metric = "AUC", stopping_tolerance = 0.001,
                           stopping_rounds = 5, score_tree_interval = 10,
+                          ntrees = 1000,
                           model_id = "gbm_embeddings.hex"
 )
 
@@ -191,6 +189,28 @@ h2o.confusionMatrix(gbm_embeddings, valid = TRUE)
 
 # Plot Variable Importance
 h2o.varimp_plot(gbm_embeddings)
+
+# Train a simpler GLM model using important word2vec features of the GBM model to generate interactions
+features_by_importance <- h2o.varimp(gbm_embeddings)$variable
+top_w2v_features <- features_by_importance[grepl("^C", features_by_importance)][1:10]
+print(top_w2v_features)
+
+glm_predictors <- c("HelpfulnessNumerator", "HelpfulnessDenominator", colnames(review_vecs))
+
+glm_embeddings <- h2o.glm(x = glm_predictors, y = response, 
+                          training_frame = ext_train, validation_frame = ext_test,
+                          interactions = top_w2v_features, family = "binomial")
+
+# Compare Performance
+print(paste0("Baseline AUC: ", round(h2o.auc(gbm_baseline, valid = TRUE), 3)))
+print(paste0("With Embeddings AUC (GBM): ", round(h2o.auc(gbm_embeddings, valid = TRUE), 3)))
+print(paste0("With Embeddings AUC (GLM): ", round(h2o.auc(glm_embeddings, valid = TRUE), 3)))
+
+
+h2o.confusionMatrix(glm_embeddings, valid = TRUE)
+
+# Plot Variable Importance
+h2o.varimp_plot(glm_embeddings, 10)
 
 ###### Step 8 (of 10). Run AutoML ######
 automl <- h2o.automl(x = predictors, y = response,
