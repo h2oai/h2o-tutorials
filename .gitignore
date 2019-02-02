@@ -5,3 +5,9 @@ tutorials/deeplearning/.Rapp.history
 tutorials/deeplearning/.Rhistory
 H2OTutorialsBook.pdf
 cuda-workshop/*/*.out
+training/sparkling_water_hands_on/sentiment_analysis/h2ologs/
+training/sparkling_water_hands_on/sentiment_analysis/metastore_db/
+training/sparkling_water_hands_on/sentiment_analysis/reviews_pipeline.model/
+training/sparkling_water_hands_on/sentiment_analysis/nohup.out
+training/sparkling_water_hands_on/sentiment_analysis/output/
+sparkling_water_hands_on/sentiment_analysis/derby.log
