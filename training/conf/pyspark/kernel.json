@@ -10,6 +10,8 @@
         "{connection_file}"
     ],
     "env": {
+        "PYSPARK_DRIVER_PYTHON": "/home/h2o/Miniconda3/envs/pysparkling/bin/python",
+        "PYSPARK_PYTHON": "/home/h2o/Miniconda3/envs/pysparkling/bin/python",
         "CAPTURE_STANDARD_OUT": "true",
         "CAPTURE_STANDARD_ERR": "true",
         "SEND_EMPTY_OUTPUT": "false",
