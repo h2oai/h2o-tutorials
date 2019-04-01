@@ -23,7 +23,7 @@ Starting H2O with the Hive Metastore client varies based on your setup:
 
 	 ```
      HIVE_CP=$(find /usr/hdp/current/hive-client/lib/ -type f | grep jar | tr '\n' ',')
-	 HIVE_CP=/etc/hive/conf/hive-site.xml,$HIVE_JARS
+	 HIVE_CP=/etc/hive/conf/hive-site.xml,$HIVE_CP
 	 hadoop jar h2odriver.jar -libjars $HIVE_CP -nodes 3 -mapperXmx 4g
 	 ```
 
