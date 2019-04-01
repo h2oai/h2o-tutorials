@@ -3,21 +3,23 @@
 H2O can ingest data directly from Hive tables when running on Hadoop.
 
 ## Motivation
-Reading data directly from Hive tables on HDFS provides an alternative to JDBC which may be slower (especially on Hive 1.x and older which does not support parallel JDBC import).
+
+Reading data directly from Hive tables on HDFS provides an alternative to JDBC, which may be slower (especially on Hive 1.x and older, which do not support parallel JDBC import).
 
 ## Prerequisities
-* Running Hive instance
+
+* A running Hive instance
 * Data in a Hive table
 
-### Start H2O with Hive Metastore Client on classpath
+### Start H2O with the Hive Metastore Client on Classpath
 
-Based on the setup you can:
+Starting H2O with the Hive Metastore client varies based on your setup:
 
-* If your Hadoop is configured with Hive configuration and client jars on classpath (i.e. via `yarn.application.classpath` property) you can start a H2O cluster as you normally would:
+* If your Hadoop is configured with Hive configuration and client jars on classpath (i.e. via `yarn.application.classpath` property), you can start an H2O cluster as you normally would:
    
 	 `hadoop jar h2odriver.jar -nodes 3 -mapperXmx 6g`
 
-* Otherwise you will need to provide Hive metastore classes and configuraion to the h2odriver
+* Otherwise you will need to provide Hive metastore classes and configuraion to the h2odriver:
 
 	 ```
      HIVE_CP=$(find /usr/hdp/current/hive-client/lib/ -type f | grep jar | tr '\n' ',')
@@ -25,7 +27,7 @@ Based on the setup you can:
 	 hadoop jar h2odriver.jar -libjars $HIVE_CP -nodes 3 -mapperXmx 4g
 	 ```
 
-After H2O is running on Hadoop data from the Hive databases can be pulled into H2O using the ``import_hive_table` function. 
+After H2O is running on Hadoop, data from the Hive databases can be pulled into H2O using the ``import_hive_table` function. 
 
 ## Putting it all together
 
