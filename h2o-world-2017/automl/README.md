@@ -23,8 +23,8 @@ In this tutorial, you will:
 
 Demo Notebooks:
 
- - [R/automl\_binary\_classification\_product\_backorders.Rmd](./R/automl_binary_classification_product_backorders.Rmd)  [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
- - [Python/automl\_binary\_classification\_product\_backorders.ipynb](./Python/automl_binary_classification_product_backorders.ipynb) [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
+ - [R/automl\_binary\_classification\_product\_backorders.Rmd](./R/automl_binary_classification_product_backorders.Rmd) [(html)](http://htmlpreview.github.io/?https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/R/automl_binary_classification_product_backorders.html) [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
+ - [Python/automl\_binary\_classification\_product\_backorders.ipynb](./Python/automl_binary_classification_product_backorders.ipynb)  [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
 
 
 ## Part 2: Regression
@@ -45,5 +45,5 @@ In this tutorial, you will:
 
 Demo Notebooks:
 
- - [R/automl\_regression\_powerplant\_output.Rmd](./R/automl_regression_powerplant_output.Rmd) [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
+ - [R/automl\_regression\_powerplant\_output.Rmd](./R/automl_regression_powerplant_output.Rmd) [(html)](http://htmlpreview.github.io/?https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/R/automl_regression_powerplant_output.html) [<img src="https://www.r-project.org//favicon-16x16.png" width=18>](https://www.r-project.org//favicon-16x16.png)
  - [Python/automl\_regression\_powerplant\_output.ipynb](./Python/automl_regression_powerplant_output.ipynb) [<img src="https://www.python.org/static/favicon.ico"  width=16>](https://www.python.org/static/favicon.ico)
