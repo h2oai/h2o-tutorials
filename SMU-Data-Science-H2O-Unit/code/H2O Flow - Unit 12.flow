@@ -1,0 +1,141 @@
+{
+  "version": "1.0.0",
+  "cells": [
+    {
+      "type": "cs",
+      "input": "assist"
+    },
+    {
+      "type": "cs",
+      "input": "importFiles"
+    },
+    {
+      "type": "cs",
+      "input": "importFiles [ \"https://s3.amazonaws.com/h2o-public-test-data/smalldata/chicago/chicagoCrimes10k.csv.zip\" ]"
+    },
+    {
+      "type": "cs",
+      "input": "setupParse source_frames: [ \"https://s3.amazonaws.com/h2o-public-test-data/smalldata/chicago/chicagoCrimes10k.csv.zip\" ]"
+    },
+    {
+      "type": "cs",
+      "input": "parseFiles\n  source_frames: [\"https://s3.amazonaws.com/h2o-public-test-data/smalldata/chicago/chicagoCrimes10k.csv.zip\"]\n  destination_frame: \"chicago.crime.hex\"\n  parse_type: \"CSV\"\n  separator: 44\n  number_columns: 22\n  single_quotes: false\n  column_names: [\"ID\",\"Case Number\",\"Date\",\"Block\",\"IUCR\",\"Primary Type\",\"Description\",\"Location Description\",\"Arrest\",\"Domestic\",\"Beat\",\"District\",\"Ward\",\"Community Area\",\"FBI Code\",\"X Coordinate\",\"Y Coordinate\",\"Year\",\"Updated On\",\"Latitude\",\"Longitude\",\"Location\"]\n  column_types: [\"Numeric\",\"String\",\"Time\",\"Enum\",\"Numeric\",\"Enum\",\"Enum\",\"Enum\",\"Enum\",\"Enum\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Time\",\"Numeric\",\"Numeric\",\"Enum\"]\n  delete_on_done: true\n  check_header: 1\n  chunk_size: 23025140"
+    },
+    {
+      "type": "cs",
+      "input": "getFrameSummary \"chicago.crime.hex\""
+    },
+    {
+      "type": "cs",
+      "input": "assist buildModel, null, training_frame: \"chicago.crime.hex\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel 'glm', {\"model_id\":\"flow-chicago-glm\",\"training_frame\":\"chicago.crime.hex\",\"nfolds\":\"3\",\"seed\":\"75205\",\"response_column\":\"Arrest\",\"ignored_columns\":[],\"ignore_const_cols\":true,\"family\":\"binomial\",\"solver\":\"AUTO\",\"alpha\":[],\"lambda\":[],\"lambda_search\":false,\"standardize\":true,\"non_negative\":false,\"obj_reg\":-1,\"fold_assignment\":\"AUTO\",\"score_each_iteration\":false,\"compute_p_values\":false,\"remove_collinear_columns\":false,\"max_iterations\":-1,\"link\":\"family_default\",\"export_checkpoints_dir\":\"\",\"max_runtime_secs\":0,\"custom_metric_func\":\"\",\"keep_cross_validation_models\":true,\"keep_cross_validation_predictions\":false,\"keep_cross_validation_fold_assignment\":false,\"missing_values_handling\":\"MeanImputation\",\"intercept\":true,\"objective_epsilon\":-1,\"beta_epsilon\":0.0001,\"gradient_epsilon\":-1,\"prior\":-1,\"max_active_predictors\":-1,\"interactions\":[],\"interaction_pairs\":[]}"
+    },
+    {
+      "type": "cs",
+      "input": "getModel \"flow-chicago-glm\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel \"drf\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel 'drf', {\"model_id\":\"flow-rf-chicago-crime\",\"training_frame\":\"chicago.crime.hex\",\"nfolds\":\"3\",\"response_column\":\"Arrest\",\"ignored_columns\":[],\"ignore_const_cols\":true,\"ntrees\":50,\"max_depth\":20,\"min_rows\":1,\"nbins\":20,\"seed\":\"75205\",\"mtries\":-1,\"sample_rate\":\"0.6320000290870667\",\"score_each_iteration\":false,\"score_tree_interval\":0,\"fold_assignment\":\"AUTO\",\"balance_classes\":false,\"nbins_top_level\":1024,\"nbins_cats\":1024,\"r2_stopping\":\"1.7976931348623157e+308\",\"stopping_rounds\":0,\"stopping_metric\":\"AUTO\",\"stopping_tolerance\":0.001,\"max_runtime_secs\":0,\"checkpoint\":\"\",\"col_sample_rate_per_tree\":1,\"min_split_improvement\":0.00001,\"histogram_type\":\"AUTO\",\"categorical_encoding\":\"AUTO\",\"distribution\":\"AUTO\",\"custom_metric_func\":\"\",\"export_checkpoints_dir\":\"\",\"keep_cross_validation_models\":true,\"keep_cross_validation_predictions\":false,\"keep_cross_validation_fold_assignment\":false,\"build_tree_one_node\":false,\"sample_rate_per_class\":[],\"binomial_double_trees\":false,\"col_sample_rate_change_per_level\":1,\"calibrate_model\":false,\"check_constant_response\":true}"
+    },
+    {
+      "type": "cs",
+      "input": "getModel \"flow-rf-chicago-crime\""
+    },
+    {
+      "type": "cs",
+      "input": "splitFrame"
+    },
+    {
+      "type": "cs",
+      "input": "splitFrame \"chicago.crime.hex\", [0.8], [\"chicago.crime.train\",\"chicago.crime.test\"], 75205"
+    },
+    {
+      "type": "cs",
+      "input": "getFrameSummary \"chicago.crime.train\""
+    },
+    {
+      "type": "cs",
+      "input": "runAutoML"
+    },
+    {
+      "type": "cs",
+      "input": "runAutoML {\"training_frame\":\"chicago.crime.train\",\"response_column\":\"Arrest\",\"leaderboard_frame\":\"chicago.crime.test\",\"seed\":75205,\"max_models\":0,\"max_runtime_secs\":120,\"stopping_metric\":\"AUTO\",\"sort_metric\":null,\"stopping_rounds\":3,\"stopping_tolerance\":-1,\"nfolds\":3,\"balance_classes\":false,\"class_sampling_factors\":[],\"max_after_balance_size\":5,\"keep_cross_validation_predictions\":false,\"keep_cross_validation_models\":false,\"keep_cross_validation_fold_assignment\":false,\"export_checkpoints_dir\":\"\",\"ignored_columns\":[],\"exclude_algos\":[\"XGBoost\",\"DeepLearning\"],\"project_name\":\"flow-automl-chicago-crime\"}"
+    },
+    {
+      "type": "cs",
+      "input": "getLeaderboard \"flow-automl-chicago-crime\""
+    },
+    {
+      "type": "cs",
+      "input": "importFiles"
+    },
+    {
+      "type": "cs",
+      "input": "importFiles [ \"https://s3.amazonaws.com/h2o-public-test-data/smalldata/wine/winequality-redwhite.csv\" ]"
+    },
+    {
+      "type": "cs",
+      "input": "setupParse source_frames: [ \"https://s3.amazonaws.com/h2o-public-test-data/smalldata/wine/winequality-redwhite.csv\" ]"
+    },
+    {
+      "type": "cs",
+      "input": "parseFiles\n  source_frames: [\"https://s3.amazonaws.com/h2o-public-test-data/smalldata/wine/winequality-redwhite.csv\"]\n  destination_frame: \"wine.hex\"\n  parse_type: \"CSV\"\n  separator: 44\n  number_columns: 13\n  single_quotes: false\n  column_names: [\"﻿fixed acidity\",\"volatile acidity\",\"citric acid\",\"residual sugar\",\"chlorides\",\"free sulfur dioxide\",\"total sulfur dioxide\",\"density\",\"pH\",\"sulphates\",\"alcohol\",\"quality\",\"type\"]\n  column_types: [\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Enum\"]\n  delete_on_done: true\n  check_header: 1\n  chunk_size: 12204"
+    },
+    {
+      "type": "cs",
+      "input": "getFrameSummary \"wine.hex\""
+    },
+    {
+      "type": "cs",
+      "input": "getColumnSummary \"wine.hex\", \"quality\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel \"glm\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel 'glm', {\"model_id\":\"wine-glm-flow\",\"training_frame\":\"wine.hex\",\"nfolds\":\"3\",\"seed\":\"75205\",\"response_column\":\"quality\",\"ignored_columns\":[],\"ignore_const_cols\":true,\"family\":\"gaussian\",\"solver\":\"AUTO\",\"alpha\":[],\"lambda\":[],\"lambda_search\":false,\"standardize\":true,\"non_negative\":false,\"obj_reg\":-1,\"fold_assignment\":\"AUTO\",\"score_each_iteration\":false,\"compute_p_values\":false,\"remove_collinear_columns\":false,\"max_iterations\":-1,\"link\":\"family_default\",\"export_checkpoints_dir\":\"\",\"max_runtime_secs\":0,\"custom_metric_func\":\"\",\"keep_cross_validation_models\":false,\"keep_cross_validation_predictions\":false,\"keep_cross_validation_fold_assignment\":false,\"missing_values_handling\":\"MeanImputation\",\"intercept\":true,\"objective_epsilon\":-1,\"beta_epsilon\":0.0001,\"gradient_epsilon\":-1,\"prior\":-1,\"max_active_predictors\":-1,\"interactions\":[],\"interaction_pairs\":[]}"
+    },
+    {
+      "type": "cs",
+      "input": "getModel \"wine-glm-flow\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel \"gbm\""
+    },
+    {
+      "type": "cs",
+      "input": "buildModel 'gbm', {\"model_id\":\"wine-gbm-flow\",\"training_frame\":\"wine.hex\",\"nfolds\":\"3\",\"response_column\":\"quality\",\"ignored_columns\":[],\"ignore_const_cols\":true,\"ntrees\":50,\"max_depth\":5,\"min_rows\":10,\"nbins\":20,\"seed\":\"75205\",\"learn_rate\":0.1,\"sample_rate\":1,\"col_sample_rate\":1,\"score_each_iteration\":false,\"score_tree_interval\":0,\"fold_assignment\":\"AUTO\",\"nbins_top_level\":1024,\"nbins_cats\":1024,\"r2_stopping\":\"1.7976931348623157e+308\",\"stopping_rounds\":0,\"stopping_metric\":\"AUTO\",\"stopping_tolerance\":0.001,\"max_runtime_secs\":0,\"learn_rate_annealing\":1,\"distribution\":\"AUTO\",\"huber_alpha\":0.9,\"checkpoint\":\"\",\"col_sample_rate_per_tree\":1,\"min_split_improvement\":0.00001,\"histogram_type\":\"AUTO\",\"categorical_encoding\":\"AUTO\",\"custom_metric_func\":\"\",\"export_checkpoints_dir\":\"\",\"monotone_constraints\":[],\"keep_cross_validation_models\":false,\"keep_cross_validation_predictions\":false,\"keep_cross_validation_fold_assignment\":false,\"build_tree_one_node\":false,\"sample_rate_per_class\":[],\"col_sample_rate_change_per_level\":1,\"max_abs_leafnode_pred\":\"1.7976931348623157e+308\",\"pred_noise_bandwidth\":0,\"calibrate_model\":false,\"check_constant_response\":true}"
+    },
+    {
+      "type": "cs",
+      "input": "getModel \"wine-gbm-flow\""
+    },
+    {
+      "type": "cs",
+      "input": "splitFrame"
+    },
+    {
+      "type": "cs",
+      "input": "splitFrame \"wine.hex\", [0.8], [\"wine.train\",\"wine.test\"], 75205"
+    },
+    {
+      "type": "cs",
+      "input": "runAutoML"
+    },
+    {
+      "type": "cs",
+      "input": "runAutoML {\"training_frame\":\"wine.train\",\"response_column\":\"quality\",\"leaderboard_frame\":\"wine.test\",\"seed\":75205,\"max_models\":0,\"max_runtime_secs\":60,\"stopping_metric\":\"AUTO\",\"sort_metric\":null,\"stopping_rounds\":3,\"stopping_tolerance\":-1,\"nfolds\":3,\"balance_classes\":false,\"class_sampling_factors\":[],\"max_after_balance_size\":5,\"keep_cross_validation_predictions\":true,\"keep_cross_validation_models\":true,\"keep_cross_validation_fold_assignment\":false,\"export_checkpoints_dir\":\"\",\"ignored_columns\":[],\"exclude_algos\":[\"XGBoost\",\"DeepLearning\"],\"project_name\":\"aml-wine-fllow\"}"
+    }
+  ]
+}

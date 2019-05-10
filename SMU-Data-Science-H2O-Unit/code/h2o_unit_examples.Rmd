@@ -1,0 +1,105 @@
+---
+title: "Intro to Data Science with H2O"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup}
+# Cleanup R environment 
+rm(list=ls())
+
+# Load the H2O library 
+library(h2o)
+```
+
+## Start or Connect to local H2O Cluster
+```{r startCluster}
+
+h2o.init(nthreads = -1, max_mem_size = "8G")
+print(h2o.clusterStatus())
+```
+
+## Classification (binomial) with H2O and R
+
+### Import Chicago crime data 
+```{r importChicagoCrime}
+chicago_crime_hex = h2o.importFile(path="https://s3.amazonaws.com/h2o-public-test-data/smalldata/chicago/chicagoCrimes10k.csv.zip", 
+                                   destination_frame = "chicago.crime.hex")  # 9,999 rows x 22 columns
+chicago_crime_hex = h2o.getFrame("chicago.crime.hex")
+dim(chicago_crime_hex)
+names(chicago_crime_hex)
+```
+
+### Build GLM classification model
+```{r crimeGlmModel, warning=FALSE}
+y = "Arrest"
+x = setdiff(names(chicago_crime_hex), 
+            c(y,"Case Number","Block","Description",
+              "Location Description","Location",
+              "Date","Updated On"))
+
+glm_crime_model = h2o.glm(x = x, y = y, 
+                    training_frame = chicago_crime_hex,
+                    model_id = "glm_crime_r_model",
+                    family = "binomial", nfolds = 3,
+                    seed = 75205)
+
+glm_crime_model@model$model_summary
+```
+
+### Classifictiaon model results
+```{r crimeglmresults, fig.height=7}
+h2o.std_coef_plot(glm_crime_model, num_of_features = NULL)
+h2o.varimp_plot(glm_crime_model, num_of_features = NULL)
+```
+
+```{r crimeglmresults2}
+glm_crime_model@model$model_summary
+glm_crime_model@model$coefficients_table
+glm_crime_model@model$cross_validation_metrics_summary
+```
+
+### Model AUC and R2
+```{r crimeglmaucr2}
+h2o.auc(h2o.performance(glm_crime_model, xval = TRUE)) 
+h2o.r2(h2o.performance(glm_crime_model, xval = TRUE))
+```
+### Build Random Forest model for Chicago Crime
+```{r crimeRFmodel, warning=FALSE}
+rf_crime_model = h2o.randomForest(x = x, y = y,
+                            training_frame = chicago_crime_hex,
+                            model_id = "rf_crime_r_model",
+                            nfolds = 3, seed = 75205)
+
+h2o.auc(h2o.performance(rf_crime_model, xval = TRUE)) 
+h2o.r2(h2o.performance(rf_crime_model, xval = TRUE))
+```
+
+## Chicago Crime AutoML model
+
+### Split data to training and test sets
+```{r crimedatasplit}
+splits = h2o.splitFrame(chicago_crime_hex, ratios = 0.8, seed = 75205,
+               destination_frames = c("chicago.crime.train", "chicago.crime.test"))
+chicago_crime_train = splits[[1]]
+chicago_crime_test = splits[[2]]
+```
+
+```{r crimeAutoML}
+automl_crime_model = h2o.automl(y = y, x = x,
+                            training_frame = chicago_crime_train,
+                            leaderboard_frame = chicago_crime_test,
+                            nfolds = 3, seed = 75205, 
+                            max_runtime_secs = 60,
+                            include_algos = c("GLM","DRF","GBM"),
+                            project_name = "automl_crime_r",
+                            keep_cross_validation_predictions = FALSE,
+                            keep_cross_validation_models = FALSE,
+                            keep_cross_validation_fold_assignment = FALSE)
+```
+
+```{r crimeAutoMLleaderboard}
+automl_crime_model@leaderboard
+```
+
