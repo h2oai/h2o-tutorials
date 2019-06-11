@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+    baseName = 'h2o-xgboost-mojo-predictor'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "ai.h2o:h2o-genmodel:3.24.0.4"
+    compile "ai.h2o:h2o-genmodel-ext-xgboost:3.24.0.4"
+
+    testCompile("junit:junit")
+}
