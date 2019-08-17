@@ -11,6 +11,7 @@ training/sparkling_water_hands_on/sentiment_analysis/reviews_pipeline.model/
 training/sparkling_water_hands_on/sentiment_analysis/nohup.out
 training/sparkling_water_hands_on/sentiment_analysis/output/
 sparkling_water_hands_on/sentiment_analysis/derby.log
+training/s3/
 SMU-Data-Science-H2O-Unit/.RData
 SMU-Data-Science-H2O-Unit/.Rhistory
 SMU-Data-Science-H2O-Unit/.Rproj.user
