@@ -1,0 +1,6 @@
+{
+    "plugins": [
+        "include"
+    ],
+    "pluginsConfig": {}
+}

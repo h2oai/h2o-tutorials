@@ -1,0 +1,118 @@
+---
+title: "H2O AutoML Regression Demo"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. To execute a code chunk, click *Run* (play) button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+If you're viewing the Rmd file (code only), but you'd like to see the code *and* output rendered as an HTML document, an online HTML of this file is available [here](http://htmlpreview.github.io/?https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/R/automl_regression_powerplant_output.html).
+
+### Start H2O
+
+Load the **h2o** R library and initialize a local H2O cluster.
+
+```{r}
+library(h2o)
+h2o.init()
+h2o.no_progress()  # Turn off progress bars for notebook readability
+```
+
+### Load Data
+
+For the AutoML regression demo, we use the [Combined Cycle Power Plant](http://archive.ics.uci.edu/ml/datasets/Combined+Cycle+Power+Plant) dataset.  The goal here is to predict the energy output (in megawatts), given the temperature, ambient pressure, relative humidity and exhaust vacuum values.  In this demo, you will use H2O's AutoML to outperform the [state of the art results](https://www.sciencedirect.com/science/article/pii/S0142061514000908) on this task.
+
+```{r}
+# Use local data file or download from GitHub
+docker_data_path <- "/home/h2o/data/automl/powerplant_output.csv"
+if (file.exists(docker_data_path)) {
+  data_path <- docker_data_path
+} else {
+  data_path <- "https://github.com/h2oai/h2o-tutorials/raw/master/h2o-world-2017/automl/data/powerplant_output.csv"
+}
+
+# Load data into H2O
+df <- h2o.importFile(data_path)
+```
+
+
+Let's take a look at the data.
+```{r}
+h2o.describe(df)
+```
+
+Next, let's identify the response column and save the column name as `y`.  In this dataset, we will use all columns except the response as predictors, so we can skip setting the `x` argument explicitly.
+```{r}
+y <- "HourlyEnergyOutputMW"
+```
+
+Lastly, let's split the data into two frames, a `train` (80%) and a `test` frame (20%).  The `test` frame will be used to score the leaderboard and to demonstrate how to generate predictions using an AutoML leader model.
+```{r}
+splits <- h2o.splitFrame(df, ratios = 0.8, seed = 1)
+train <- splits[[1]]
+test <- splits[[2]]
+```
+
+
+## Run AutoML 
+
+Run AutoML, stopping after 60 seconds.  The `max_runtime_secs` argument provides a way to limit the AutoML run by time.  When using a time-limited stopping criterion, the number of models train will vary between runs.  If different hardware is used or even if the same machine is used but the available compute resources on that machine are not the same between runs, then AutoML may be able to train more models on one run vs another. 
+
+The `test` frame is passed explicitly to the `leaderboard_frame` argument here, which means that instead of using cross-validated metrics, we use test set metrics for generating the leaderboard.
+```{r}
+aml <- h2o.automl(y = y,
+                  training_frame = train,
+                  leaderboard_frame = test,
+                  max_runtime_secs = 60,
+                  seed = 1,
+                  project_name = "powerplant_lb_frame")
+```
+
+
+For demonstration purposes, we will also execute a second AutoML run, this time providing the original, full dataset, `df` (without passing a `leaderboard_frame`).  This is a more efficient use of our data since we can use 100% of the data for training, rather than 80% like we did above.  This time our leaderboard will use cross-validated metrics.
+
+*Note: Using an explicit `leaderboard_frame` for scoring may be useful in some cases, which is why the option is available.*  
+
+```{r}
+aml2 <- h2o.automl(y = y,
+                   training_frame = df,
+                   max_runtime_secs = 60,
+                   seed = 1,
+                   project_name = "powerplant_full_data")
+```
+
+*Note: We specify a `project_name` here for clarity.*
+
+## Leaderboard
+
+Next, we will view the AutoML Leaderboard.  Since we specified a `leaderboard_frame` in the `h2o.automl()` function for scoring and ranking the models, the AutoML leaderboard uses the performance on this data to rank the models.  
+
+After viewing the `"powerplant_lb_frame"` AutoML project leaderboard, we compare that to the leaderboard for the `"powerplant_full_data"` project.  We can see that the results are better when the full dataset is used for training.  
+
+A default performance metric for each machine learning task (binary classification, multiclass classification, regression) is specified internally and the leaderboard will be sorted by that metric.  In the case of regression, the default ranking metric is mean residual deviance.  In the future, the user will be able to specify any of the H2O metrics so that different metrics can be used to generate rankings on the leaderboard.
+```{r}
+print(aml@leaderboard)
+```
+
+```{r}
+print(aml2@leaderboard)
+```
+
+This dataset comes from the [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets/Combined+Cycle+Power+Plant) of machine learning datasets.  The data was used in a [publication](https://www.sciencedirect.com/science/article/pii/S0142061514000908) in the *International Journal of Electrical Power & Energy Systems* in 2014.  In the paper, the authors achieved a mean absolute error (MAE) of 2.818 and a Root Mean-Squared Error (RMSE) of 3.787 on their best model.  So, with H2O's AutoML, we've already beaten the state-of-the-art in just 60 seconds of compute time!
+
+## Predict Using Leader Model
+
+If you need to generate predictions on a test set, you can make predictions on the `"H2OAutoML"` object directly, or on the leader model object.
+```{r}
+pred <- h2o.predict(aml, test)  # predict(aml, test) and h2o.predict(aml@leader, test) also work
+head(pred)
+```
+
+
+If needed, the standard `h2o.performance()` function can be applied to the AutoML leader model and a test set to generate an H2O model performance object.
+```{r}
+perf <- h2o.performance(aml@leader, test)
+perf
+```
+

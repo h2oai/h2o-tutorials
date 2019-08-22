@@ -1,0 +1,121 @@
+---
+title: "H2O AutoML Binary Classification Demo"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. To execute a code chunk, click *Run* (play) button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+If you're viewing the Rmd file (code only), but you'd like to see the code *and* output rendered as an HTML document, an online HTML of this file is available [here](http://htmlpreview.github.io/?https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/R/automl_binary_classification_product_backorders.html).
+
+### Start H2O
+
+Load the **h2o** R library and initialize a local H2O cluster.
+
+```{r}
+library(h2o)
+h2o.init()
+h2o.no_progress()  # Turn off progress bars for notebook readability
+```
+
+### Load Data
+
+For the AutoML binary classification demo, we use a subset of the [Product Backorders](https://www.kaggle.com/tiredgeek/predict-bo-trial/data) dataset.  The goal here is to predict whether or not a product will be put on backorder status, given a number of product metrics such as current inventory, transit time, demand forecasts and prior sales.
+
+```{r}
+# Use local data file or download from GitHub
+docker_data_path <- "/home/h2o/data/automl/product_backorders.csv"
+if (file.exists(docker_data_path)) {
+  data_path <- docker_data_path
+} else {
+  data_path <- "https://github.com/h2oai/h2o-tutorials/raw/master/h2o-world-2017/automl/data/product_backorders.csv"
+}
+
+# Load data into H2O
+df <- h2o.importFile(data_path)
+```
+
+
+For classification, the response should be encoded as categorical (aka. "factor" or "enum"). Let's take a look.
+```{r}
+h2o.describe(df)
+```
+We will notice that the response column, `"went_on_backorder"`, is already encoded as "enum", so there's nothing we need to do here.  If it were encoded as a 0/1 "int", then we'd have to convert the column as follows:  `df[,y] <- as.factor[,y]`
+
+
+Next, let's identify the response & predictor columns by saving them as `x` and `y`.  The `"sku"` column is a unique identifier so we'll want to remove that from the set of our predictors.
+```{r}
+y <- "went_on_backorder"
+x <- setdiff(names(df), c(y, "sku"))
+```
+
+
+## Run AutoML 
+
+Run AutoML, stopping after 10 models.  The `max_models` argument specifies the number of individual (or "base") models, and does not include the two ensemble models that are trained at the end.
+```{r}
+aml <- h2o.automl(y = y, x = x,
+                  training_frame = df,
+                  max_models = 10,
+                  seed = 1)
+```
+
+
+## Leaderboard
+
+Next, we will view the AutoML Leaderboard.  Since we did not specify a `leaderboard_frame` in the `h2o.automl()` function for scoring and ranking the models, the AutoML leaderboard uses cross-validation metrics to rank the models.  
+
+A default performance metric for each machine learning task (binary classification, multiclass classification, regression) is specified internally and the leaderboard will be sorted by that metric.  In the case of binary classification, the default ranking metric is Area Under the ROC Curve (AUC).  In the future, the user will be able to specify any of the H2O metrics so that different metrics can be used to generate rankings on the leaderboard.
+
+The leader model is stored at `aml@leader` and the leaderboard is stored at `aml@leaderboard`.
+```{r}
+lb <- aml@leaderboard
+```
+
+Now we will view a snapshot of the top models.  Here we should see the two Stacked Ensembles at or near the top of the leaderboard.  Stacked Ensembles can almost always outperform a single model.
+```{r}
+print(lb)
+```
+
+To view the entire leaderboard, specify the `n` argument of the `print.H2OFrame()` function as the total number of rows:
+```{r}
+print(lb, n = nrow(lb))
+```
+
+
+## Ensemble Exploration
+
+To understand how the ensemble works, let's take a peek inside the Stacked Ensemble "All Models" model.  The "All Models" ensemble is an ensemble of all of the individual models in the AutoML run.  This is often the top performing model on the leaderboard.
+
+
+```{r}
+# Get model ids for all models in the AutoML Leaderboard
+model_ids <- as.data.frame(aml@leaderboard$model_id)[,1]
+# Get the "All Models" Stacked Ensemble model
+se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_ids, value = TRUE)[1])
+# Get the Stacked Ensemble metalearner model
+metalearner <- h2o.getModel(se@model$metalearner$name)
+```
+
+Examine the variable importance of the metalearner (combiner) algorithm in the ensemble.  This shows us how much each base learner is contributing to the ensemble. The AutoML Stacked Ensembles use the default metalearner algorithm (GLM with non-negative weights), so the variable importance of the metalearner is actually the standardized coefficient magnitudes of the GLM. 
+```{r}
+h2o.varimp(metalearner)
+```
+
+We can also plot the base learner contributions to the ensemble.
+```{r}
+h2o.varimp_plot(metalearner)
+```
+
+## Save Leader Model
+
+There are two ways to save the leader model -- binary format and MOJO format.  If you're taking your leader model to production, then we'd suggest the MOJO format since it's optimized for production use.
+```{r}
+h2o.saveModel(aml@leader, path = "./product_backorders_model_bin")
+```
+
+```{r}
+h2o.download_mojo(aml@leader, path = "./")
+```
+
