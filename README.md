@@ -16,6 +16,7 @@ There are a number of tutorials on all sorts of topics in this repo.  To help yo
 - [H2O Deep Learning in R](http://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html)
 - [H2O Stacked Ensembles in R](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html)
 - [H2O AutoML in R](https://github.com/h2oai/h2o-tutorials/blob/master/h2o-world-2017/automl/README.md)
+- [LatinR 2019 H2O Tutorial](https://github.com/ledell/LatinR-2019-h2o-tutorial) (broad overview of all the above topics)
 
 
 ### Python Tutorials
