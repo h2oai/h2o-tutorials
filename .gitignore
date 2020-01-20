@@ -10,7 +10,11 @@ training/sparkling_water_hands_on/sentiment_analysis/metastore_db/
 training/sparkling_water_hands_on/sentiment_analysis/reviews_pipeline.model/
 training/sparkling_water_hands_on/sentiment_analysis/nohup.out
 training/sparkling_water_hands_on/sentiment_analysis/output/
-sparkling_water_hands_on/sentiment_analysis/derby.log
 SMU-Data-Science-H2O-Unit/.RData
 SMU-Data-Science-H2O-Unit/.Rhistory
 SMU-Data-Science-H2O-Unit/.Rproj.user
+
+# tmp or generated files
+.idea/
+.ipynb_checkpoints/
+.log
