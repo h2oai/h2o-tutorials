@@ -1,6 +1,6 @@
 
 PLUGIN := h2oautoml_plugin.jar
-H2O_JAR := ~/repos/h2o/h2o-3/build/h2o.jar
+H2O_JAR := "$(shell pip show h2o | grep Location | awk '{print $$2}')/h2o/backend/bin/h2o.jar"
 
 SRC := $(shell find ./src -name "*.java")
 
