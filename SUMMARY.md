@@ -10,7 +10,6 @@
 * [GLM](tutorials/glm/glm.md)
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
 * [AutoML](h2o-world-2017/automl/README.md)
-* [KMeans](tutorials/kmeans/kmeans.md)
 * [NLP with H2O](h2o-world-2017/nlp/README.md)
 * [Hive UDF POJO Example](tutorials/hive_udf_template/hive_udf_pojo_template/README.md)
 * [Hive UDF MOJO Example](tutorials/hive_udf_template/hive_udf_mojo_template/README.md)
