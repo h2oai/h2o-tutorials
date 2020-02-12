@@ -6,7 +6,6 @@
 * [Building a Smarter Application](tutorials/building-a-smarter-application/README.md)
 * [Deep Learning](tutorials/deeplearning/README.md)
 * [GBM & Random Forest](tutorials/gbm-randomforest/README.md)
-* [Isolation Forest](tutorials/isolation-forest/README.md)
 * [GLM](tutorials/glm/glm.md)
 * [GLRM](tutorials/glrm/glrm-tutorial.md)
 * [AutoML](h2o-world-2017/automl/README.md)
