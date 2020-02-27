@@ -101,8 +101,8 @@ install_github("h2oai/h2o-3/h2o-r/ensemble/h2oEnsemble-package")
 #If run from plain R, execute R in the directory of this script. If run from RStudio, be sure to setwd() to the location of this script. h2o.init() starts H2O in R's current working directory. h2o.importFile() looks for files from the perspective of where H2O was started.
 #
 #### Start H2O Cluster
-library(h2oEnsemble)  # This will load the `h2o` R package as well
-h2o.init(nthreads = -1)  # Start an H2O cluster with nthreads = num cores on your machine
+library(h2o)
+h2o.init()  
 h2o.removeAll() # Clean slate - just in case the cluster was already running
 #
 #
@@ -111,166 +111,119 @@ h2o.removeAll() # Clean slate - just in case the cluster was already running
 #First, import a sample binary outcome train and test set into the H2O cluster.
 train <- h2o.importFile(path = normalizePath("../data/higgs_10k.csv"))
 test <- h2o.importFile(path = normalizePath("../data/higgs_test_5k.csv"))
-y <- "C1"
+#
+#Identify predictors and response
+y <- "response"
 x <- setdiff(names(train), y)
 #
 #For binary classification, the response should be encoded as factor (also known as the [enum](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html) type in Java).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
-#
 train[,y] <- as.factor(train[,y])  
 test[,y] <- as.factor(test[,y])
 #
+#Number of CV folds (to generate level-one data for stacking)
+nfolds <- 5
 #
-#### Specify Base Learners & Metalearner
-#For this example, we will use the default base learner library for `h2o.ensemble`, which includes the default H2O GLM, Random Forest, GBM and Deep Neural Net (all using default model parameter values).  We will also use the default metalearner, the H2O GLM.
+#### There are a few ways to assemble a list of models to stack toegether:
+# 1. Train individual models and put them in a list
+# 2. Train a grid of models
+# 3. Train several grids of models
+# Note: All base models must have the same cross-validation folds and
+# the cross-validated predicted values must be kept.
 #
-learner <- c("h2o.glm.wrapper", "h2o.randomForest.wrapper", 
-             "h2o.gbm.wrapper", "h2o.deeplearning.wrapper")
-metalearner <- "h2o.glm.wrapper"
+#### 1. Generate a 2-model emsemble (GBM + RF)
 #
+#Train & Cross-validate a GBM
+my_gbm <- h2o.gbm(x = x,
+                  y = y,
+                  training_frame = train,
+                  distribution = "bernoulli",
+                  ntrees = 10,
+                  max_depth = 3,
+                  min_rows = 2,
+                  learn_rate = 0.2,
+                  nfolds = nfolds,
+                  fold_assignment = "Modulo",
+                  keep_cross_validation_predictions = TRUE,
+                  seed = 1)
 #
-#### Train an Ensemble
-#Train the ensemble (using 5-fold internal CV) to generate the level-one data.  Note that more CV folds will take longer to train, but should increase performance.
-fit <- h2o.ensemble(x = x, y = y, 
-                    training_frame = train, 
-                    family = "binomial", 
-                    learner = learner, 
-                    metalearner = metalearner,
-                    cvControl = list(V = 5))
+#Train & Cross-validate a RF
+my_rf <- h2o.randomForest(x = x,
+                          y = y,
+                          training_frame = training_frame,
+                          ntrees = 10,
+                          nfolds = nfolds,
+                          fold_assignment = "Modulo",
+                          keep_cross_validation_predictions = TRUE,
+                          seed = 1)
 #
+#### Train a stacked ensemble using the GBM and RF above
+ensemble <- h2o.stackedEnsemble(x = x,
+                                y = y,
+                                training_frame = train,
+                                model_id = "my_ensemble_binomial",
+                                base_models = list(my_gbm, my_rf))
 #
-#### Predict 
-#Generate predictions on the test set.
-pred <- predict(fit, test)
-predictions <- as.data.frame(pred$pred)[,3]  #third column is P(Y==1)
-labels <- as.data.frame(test[,y])[,1]
+#### Evaluate ensemble performance on a test set
+perf <- h2o.performance(ensemble, newdata = test)
 #
-#The `predict` method for an `h2o.ensemble` fit will return a list of two objects.  The `pred$pred` object contains the ensemble predictions, and `pred$basepred` is a matrix of predictions from each of the base learners.  In this particular example where we used four base learners, the `pred$basepred` matrix has four columns.  Keeping the base learner predictions around is useful for model inspection and will allow us to calculate performance of each of the base learners on the test set (for comparison to the ensemble).
+#Compare to base learner performance on the test set
+perf_gbm_test <- h2o.performance(my_gbm, newdata = test)
+perf_rf_test <- h2o.performance(my_rf, newdata = test)
+baselearner_best_auc_test <- max(h2o.auc(perf_gbm_test), h2o.auc(perf_rf_test))
+ensemble_auc_test <- h2o.auc(perf)
+print(sprintf("BEst Base-learner Test AUC: %s", baselearner_best_auc_test))
+print(sprintf("Ensemble Test AUC: %s", ensemble_auc_test))
 #
+#### Generate predictions on a test
 #
-#### Model Evaluation
+pred <- h2o.predict(ensemble, newdata = test)
 #
-#Since the response is binomial, we can use Area Under the ROC Curve ([AUC](https://www.kaggle.com/wiki/AUC)) to evaluate the model performance.  We first generate predictions on the test set and then calculate test set AUC using the [cvAUC](https://cran.r-project.org/web/packages/cvAUC/) R package.
-#
-##### Ensemble test set AUC
-library(cvAUC)
-cvAUC::AUC(predictions = predictions, labels = labels)
-# 0.7888723
-#
-##### Base learner test set AUC
-#We can compare the performance of the ensemble to the performance of the individual learners in the ensemble.  Again, we use the `AUC` utility function to calculate performance.
-#
-L <- length(learner)
-auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
-data.frame(learner, auc)
-#                    learner       auc
-# 1          h2o.glm.wrapper 0.6871288
-# 2 h2o.randomForest.wrapper 0.7711654
-# 3          h2o.gbm.wrapper 0.7817075
-# 4 h2o.deeplearning.wrapper 0.7425813
-#
-#So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.782, as compared to 0.789 for the ensemble.  At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable. 
-#
-#To increase the performance of the ensemble, we have several options.  One of them is to increase the number of internal cross-validation folds using the `cvControl` argument.  The other options are to change the base learner library or the metalearning algorithm.
-#
-#Note that the ensemble results above are not reproducible since `h2o.deeplearning` is not reproducible when using multiple cores, and we did not set a seed for `h2o.randomForest.wrapper`.
-#
-#Additional note: In a future version, performance metrics such as AUC will be computed automatically, as in the other H2O algos.
-#
-#
-#### Specifying new learners
-#
-#Now let's try again with a more extensive set of base learners.  The **h2oEnsemble** packages comes with four functions by default that can be customized to use non-default parameters. 
-#
-#Here is an example of how to generate a custom learner wrappers:
-#
-h2o.glm.1 <- function(..., alpha = 0.0) h2o.glm.wrapper(..., alpha = alpha)
-h2o.glm.2 <- function(..., alpha = 0.5) h2o.glm.wrapper(..., alpha = alpha)
-h2o.glm.3 <- function(..., alpha = 1.0) h2o.glm.wrapper(..., alpha = alpha)
-h2o.randomForest.1 <- function(..., ntrees = 200, nbins = 50, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, nbins = nbins, seed = seed)
-h2o.randomForest.2 <- function(..., ntrees = 200, sample_rate = 0.75, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, sample_rate = sample_rate, seed = seed)
-h2o.randomForest.3 <- function(..., ntrees = 200, sample_rate = 0.85, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, sample_rate = sample_rate, seed = seed)
-h2o.randomForest.4 <- function(..., ntrees = 200, nbins = 50, balance_classes = TRUE, seed = 1) h2o.randomForest.wrapper(..., ntrees = ntrees, nbins = nbins, balance_classes = balance_classes, seed = seed)
-h2o.gbm.1 <- function(..., ntrees = 100, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, seed = seed)
-h2o.gbm.2 <- function(..., ntrees = 100, nbins = 50, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, nbins = nbins, seed = seed)
-h2o.gbm.3 <- function(..., ntrees = 100, max_depth = 10, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, max_depth = max_depth, seed = seed)
-h2o.gbm.4 <- function(..., ntrees = 100, col_sample_rate = 0.8, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
-h2o.gbm.5 <- function(..., ntrees = 100, col_sample_rate = 0.7, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
-h2o.gbm.6 <- function(..., ntrees = 100, col_sample_rate = 0.6, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, col_sample_rate = col_sample_rate, seed = seed)
-h2o.gbm.7 <- function(..., ntrees = 100, balance_classes = TRUE, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, balance_classes = balance_classes, seed = seed)
-h2o.gbm.8 <- function(..., ntrees = 100, max_depth = 3, seed = 1) h2o.gbm.wrapper(..., ntrees = ntrees, max_depth = max_depth, seed = seed)
-h2o.deeplearning.1 <- function(..., hidden = c(500,500), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-h2o.deeplearning.2 <- function(..., hidden = c(200,200,200), activation = "Tanh", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-h2o.deeplearning.3 <- function(..., hidden = c(500,500), activation = "RectifierWithDropout", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-h2o.deeplearning.4 <- function(..., hidden = c(500,500), activation = "Rectifier", epochs = 50, balance_classes = TRUE, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, balance_classes = balance_classes, seed = seed)
-h2o.deeplearning.5 <- function(..., hidden = c(100,100,100), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-h2o.deeplearning.6 <- function(..., hidden = c(50,50), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-h2o.deeplearning.7 <- function(..., hidden = c(100,100), activation = "Rectifier", epochs = 50, seed = 1)  h2o.deeplearning.wrapper(..., hidden = hidden, activation = activation, seed = seed)
-#
-#
-#Let's grab a subset of these learners for our base learner library and re-train the ensemble.
-#
-#### Customized base learner library
-learner <- c("h2o.glm.wrapper",
-             "h2o.randomForest.1", "h2o.randomForest.2",
-             "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8",
-             "h2o.deeplearning.1", "h2o.deeplearning.6", "h2o.deeplearning.7")
-#
-#Train with new library:
-fit <- h2o.ensemble(x = x, y = y, 
-                    training_frame = train,
-                    family = "binomial", 
-                    learner = learner, 
-                    metalearner = metalearner,
-                    cvControl = list(V = 5))
+#### 2. Generate a random grid of models and stack them together
+#GBM Hyperparameters
+learn_rate_opt <- c(0.01, 0.03)
+max_depth_opt <- c(3, 4, 5, 6, 9)
+sample_rate_opt <- c(0.7, 0.8, 0.9, 1.0)
+col_sample_rate_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+hyper_params <- list(learn_rate = learn_rate_opt,
+                     max_depth = max_depth_opt,
+                     sample_rate = sample_rate_opt,
+                     col_sample_rate = col_sample_rate_opt)
 
-# Generate predictions on the test set:
-pred <- predict(fit, test)
-predictions <- as.data.frame(pred$pred)[,3]
-labels <- as.data.frame(test[,y])[,1]
-#
-#Evaluate the test set performance: 
-cvAUC::AUC(predictions = predictions , labels = labels)
-# 0.7904223
-#We see an increase in performance by including a more diverse library.
-#
-#Base learner test AUC (for comparison)
-L <- length(learner)
-auc <- sapply(seq(L), function(l) cvAUC::AUC(predictions = as.data.frame(pred$basepred)[,l], labels = labels)) 
-data.frame(learner, auc)
+search_criteria <- list(strategy = "RandomDiscrete",
+                        max_models = 3,
+                        seed = 1)
 
-# learner       auc
-# 1    h2o.glm.wrapper 0.6871288
-# 2 h2o.randomForest.1 0.7809140
-# 3 h2o.randomForest.2 0.7835352
-# 4          h2o.gbm.1 0.7816863
-# 5          h2o.gbm.6 0.7821683
-# 6          h2o.gbm.8 0.7804483
-# 7 h2o.deeplearning.1 0.7160903
-# 8 h2o.deeplearning.6 0.7272538
-# 9 h2o.deeplearning.7 0.7379495
-#
-#So what happens to the ensemble if we remove some of the weaker learners?  Let's remove the GLM and DL from the learner library and see what happens...
-#
-#Here is a more stripped down version of the base learner library used above:
-learner <- c("h2o.randomForest.1", "h2o.randomForest.2",
-             "h2o.gbm.1", "h2o.gbm.6", "h2o.gbm.8")
-#
-#Again re-train the ensemble:
-fit <- h2o.ensemble(x = x, y = y, 
+gbm_grid <- h2o.grid(algorithm = "gbm",
+                     grid_id = "gbm_grid_binomial",
+                     x = x,
+                     y = y,
                      training_frame = train,
-                     family = "binomial", 
-                     learner = learner, 
-                     metalearner = metalearner,
-                     cvControl = list(V = 5))
-
-# Generate predictions on the test set
-pred <- predict(fit, test)
-predictions <- as.data.frame(pred$pred)[,3]  #third column, p1 is P(Y==1)
-labels <- as.data.frame(test[,y])[,1]
-
-# Ensemble test AUC 
-cvAUC::AUC(predictions = predictions , labels = labels)
-# 0.7887694
+                     ntrees = 10,
+                     seed = 1,
+                     nfolds = nfolds,
+                     fold_assignment = "Modulo",
+                     keep_cross_validation_predictions = TRUE,
+                     hyper_params = hyper_params,
+                     search_criteria = search_criteria)
+#
+#### Train a stacked ensemble using the GBM grid
+ensemble <- h2o.stackedEnsemble(x = x,
+                                y = y,
+                                training_frame = train,
+                                model_id = "ensemble_gbm_grid_binomial",
+                                base_models = gbm_grid@model_ids)
+#
+#### Evaluate ensemble performance on a test set
+perf <- h2o.performance(ensemble, newdata = test)
+#
+#Compare to base learner performance on the test set
+.getauc <- function(mm) h2o.auc(h2o.performance(h2o.getModel(mm), newdata = test))
+baselearner_aucs <- sapply(gbm_grid@model_ids, .getauc)
+baselearner_best_auc_test <- max(baselearner_aucs)
+ensemble_auc_test <- h2o.auc(perf)
+print(sprintf("Best Base-learner Test AUC: %s", baselearner_best_auc_test))
+print(sprintf("Ensemble Test AUC: %s", ensemble_auc_test))
+#
 #
 #We actually lose performance by removing the weak learners!  This demonstrates the power of stacking.
 #
