@@ -71,7 +71,7 @@ class H2ORuleFit():
             rf_models[model_idx] = rf_model
 
             paths = rf_model.predict_leaf_node_assignment(training_frame)
-            paths.col_names = ["rf_" + str(model_idx) +"."+ x for x in paths.col_names]
+            paths.col_names = ["rf_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
             paths_frame = paths_frame.cbind(paths)
 
         # Extract important paths
@@ -120,12 +120,47 @@ class H2ORuleFit():
         for model_idx in self.rf_models.keys():
 
             paths = self.rf_models.get(model_idx).predict_leaf_node_assignment(test_data)
-            paths.col_names = ["rf_" + str(model_idx) +"."+ x for x in paths.col_names]
+            paths.col_names = ["rf_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
             paths_frame = paths_frame.cbind(paths)
             
         paths_frame = paths_frame[1::]
         
         return self.glm.predict(paths_frame)
+    
+    def filter_by_rule(self, test_data, rule):
+        """
+        Returns records that match a provided rule.
+
+        :param H2OFrame test_data: Data on which to find rule assignment.
+        :param rule: The rule to use.
+
+        :returns: A new H2OFrame of records that match the rule.
+        """
+        family = self.glm.params.get('family').get('actual')
+        model_idx, tree_num, tree_class, path = _map_column_name(rule, family)
+        paths = self.rf_models.get(model_idx).predict_leaf_node_assignment(test_data)
+        
+        paths_col = ".".join(rule.split(".")[1:-1])
+        paths_path = rule.split(".")[-1]
+        
+        return paths[paths[paths_col] == paths_path]
+    
+    def coverage_table(self, test_data):
+        """
+        Returns table of coverage per rule
+
+        :param H2OFrame test_data: Data on which to find rule assignment.
+
+        :returns: A new table with rule coefficients plus coverage
+        """
+        rules = self.rule_importance.copy(deep = True)
+        coverage = [len(self.filter_by_rule(test_data, x)) for x in rules.variable.values]
+        coverage_percent = [x/len(test_data) for x in coverage]
+        
+        rules["coverage_count"] = coverage
+        rules["coverage_percent"] = coverage_percent
+        
+        return rules
     
     def varimp_plot(self, num_rules = 10):
         """
@@ -140,7 +175,7 @@ class H2ORuleFit():
         >>> rulefit.varimp_plot()
         """
         import plotly.graph_objects as go
-        plot_data = self.rule_importance
+        plot_data = self.rule_importance.copy(deep = True)
         if len(plot_data) > num_rules:
             plot_data = plot_data.iloc[0:num_rules]
         plot_data["color"] = np.where(plot_data.coefficient > 0, 'crimson', 'lightslategray')
@@ -169,7 +204,7 @@ class H2ORuleFit():
         # save glm model
         h2o.save_model(self.glm, path=path)
         
-        return full_path
+        return path
 
     def load(self, path):
         """
@@ -276,9 +311,10 @@ def _consolidate_rules(rules):
     
     return consolidated_rules
 
-
 def _get_intercept(glm):
-    
+    """
+    Get Intercept from GLM model
+    """    
     family = glm.params.get('family').get('actual')
     # Get paths
     if family == "multinomial":
@@ -288,6 +324,9 @@ def _get_intercept(glm):
     return intercept
         
 def _get_rules(glm, rf_models):
+    """
+    Get Rules from GLM model
+    """
     
     family = glm.params.get('family').get('actual')
     
@@ -310,12 +349,8 @@ def _get_rules(glm, rf_models):
         class_rules = []
         if len(v) > 0:
             for i in v.variable:
-                if family == "binomial" or family == "multinomial":
-                    model_num, tree_num, tree_class, path = i.replace("rf_", "").replace("T", "").replace("C", "").split(".")
-                else:
-                    model_num, tree_num, path = i.replace("rf_", "").replace("T", "").split(".")
-
-                tree = H2OTree(rf_models[int(model_num)], int(tree_num)-1, tree_class = int(tree_class) - 1)
+                model_idx, tree_num, tree_class, path = _map_column_name(i, family)
+                tree = H2OTree(rf_models[model_idx], tree_num, tree_class = tree_class)
                 class_rules = class_rules + [_tree_traverser(tree.root_node, path)]
         
             # Add rules and order by absolute coefficient
@@ -332,3 +367,15 @@ def _get_rules(glm, rf_models):
     
     return rule_importance
     
+def _map_column_name(column_name, family):
+    """
+    Take column name from paths frame and return the model_idx, tree_num, tree_class, and path 
+    """
+    if family == "binomial" or family == "multinomial":
+        model_idx, tree_num, tree_class, path = column_name.replace("rf_", "").replace("T", "").replace("C", "").split(".")
+        tree_class = int(tree_class) - 1
+    else:
+        model_idx, tree_num, path = column_name.replace("rf_", "").replace("T", "").split(".")
+        tree_class = None
+        
+    return int(model_idx), int(tree_num) - 1, tree_class, path
