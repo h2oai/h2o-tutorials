@@ -12,8 +12,11 @@ class H2ORuleFit():
     H2O RuleFit
     Builds a Distributed RuleFit model on a parsed dataset, for regression or 
     classification. 
-    :param min_depth: Minimum length of rules. Defaults to 1.
-    :param max_depth: Maximum length of rules. Defaults to 10.
+    :param min_rule_len: Minimum length of rules. Defaults to 1.
+    :param max_rule_len: Maximum length of rules. Defaults to 10.
+    :param max_num_rules: The maximum number of rules to return.
+            Defaults to None which means the number of rules is selected by diminishing returns in model deviance.
+    :param force_positive: Force all the rules to increase the prediction of y (positive coefficients.)
     :param nfolds: Number of folds for K-fold cross-validation. Defaults to 5.
     :param seed: Seed for pseudo random number generator. Defaults to -1.
     :returns: a set of rules and coefficients
@@ -26,15 +29,15 @@ class H2ORuleFit():
     >>> rulefit
     """
     
-    def __init__(self, min_depth=1, max_depth=10, nfolds=5, seed=-1, num_rules = None):
-        self.min_depth = min_depth
-        self.max_depth = max_depth
+    def __init__(self, min_rule_len=1, max_rule_len=10, max_num_rules = None, force_positive = False, nfolds=5, seed=-1):
+        self.min_rule_len = min_rule_len
+        self.max_rule_len = max_rule_len
+        self.max_num_rules = max_num_rules
+        self.force_positive = force_positive
         self.nfolds = nfolds
         self.seed = seed
-        self.num_rules = num_rules
         
-    def train(self, x=None, y=None, training_frame=None, offset_column=None, fold_column=None, weights_column=None,
-              validation_frame=None, **params):
+    def train(self, x=None, y=None, training_frame=None, **params):
         """
         Train the rulefit model.
         :param x: A list of column names or indices indicating the predictor columns.
@@ -49,6 +52,10 @@ class H2ORuleFit():
         >>> rulefit.train(x=x,y="survived",training_frame=training_data)
         >>> rulefit
         """
+        
+        if self.force_positive and self.max_num_rules is None:
+            raise H2OValueError("Number of rules must be specified to force rules to be positive")
+            
         family = "gaussian"
         if (training_frame.type(y) == "enum"):
             if training_frame[y].unique().nrow > 2:
@@ -59,7 +66,7 @@ class H2ORuleFit():
 
         # Get paths from random forest models
         paths_frame = training_frame[y]
-        depths = range(self.min_depth, self.max_depth + 1)
+        depths = range(self.min_rule_len, self.max_rule_len + 1)
         rf_models = dict()
         for model_idx in range(len(depths)):
 
@@ -75,27 +82,53 @@ class H2ORuleFit():
             paths_frame = paths_frame.cbind(paths)
 
         # Extract important paths
-        glm = H2OGeneralizedLinearEstimator(model_id = "glm.hex", 
-                                            nfolds = self.nfolds, 
-                                            seed = self.seed,
-                                            family = family,
-                                            alpha = 1, 
-                                            remove_collinear_columns=True,
-                                            lambda_search = True)
-        glm.train(y = y, training_frame=paths_frame)
+        if self.force_positive:
+            constraint_predictors = _get_ohe_predictors(paths_frame[list(set(paths_frame.col_names) - set([y]))])
+            
+            constraints = h2o.H2OFrame({'names':constraint_predictors, 
+                                        'lower_bounds': [0]*len(constraint_predictors),
+                                        'upper_bounds': [1e10]*len(constraint_predictors)})
+        else:
+            constraints = None
+            
+        if self.max_num_rules:
+            # Train GLM with chosen lambda
+            glm = H2OGeneralizedLinearEstimator(model_id = "glm.hex", 
+                                                seed = self.seed,
+                                                family = family,
+                                                alpha = 1, 
+                                                remove_collinear_columns=True,
+                                                max_active_predictors = self.max_num_rules + 1,
+                                                beta_constraints = constraints
+                                               )
+            glm.train(y = y, training_frame=paths_frame)
+            
+        else:
+            # Get optimal lambda
+            glm = H2OGeneralizedLinearEstimator(model_id = "glm.hex", 
+                                                nfolds = self.nfolds, 
+                                                seed = self.seed,
+                                                family = family,
+                                                alpha = 1, 
+                                                remove_collinear_columns=True,
+                                                lambda_search = True,
+                                                beta_constraints = constraints
+                                               )
+            glm.train(y = y, training_frame=paths_frame)
+            
+            lambda_ = _get_glm_lambda(glm)
 
-        lambda_ = _get_glm_lambda(glm, self.num_rules)
-        
-        # Train GLM with chosen lambda
-        glm = H2OGeneralizedLinearEstimator(model_id = "glm.hex", 
-                                            seed = self.seed,
-                                            family = family,
-                                            alpha = 1, 
-                                            remove_collinear_columns=True,
-                                            lambda_ = lambda_,
-                                            solver = "COORDINATE_DESCENT"
-                                           )
-        glm.train(y = y, training_frame=paths_frame)
+            # Train GLM with chosen lambda
+            glm = H2OGeneralizedLinearEstimator(model_id = "glm.hex", 
+                                                seed = self.seed,
+                                                family = family,
+                                                alpha = 1, 
+                                                remove_collinear_columns=True,
+                                                lambda_ = lambda_,
+                                                solver = "COORDINATE_DESCENT",
+                                                beta_constraints = constraints
+                                               )
+            glm.train(y = y, training_frame=paths_frame)
         
         # Get Intercept
         intercept = _get_intercept(glm)
@@ -218,7 +251,7 @@ class H2ORuleFit():
         glm = h2o.load_model(os.path.join(path, 'glm.hex'))
             
         # load RF models
-        depths = range(self.min_depth, self.max_depth + 1)
+        depths = range(self.min_rule_len, self.max_rule_len + 1)
         rf_models = dict()
         for model_idx in range(len(depths)):
             rf_models[model_idx] = h2o.load_model(os.path.join(path, "rf_{}.hex".format(model_idx)))
@@ -234,22 +267,30 @@ class H2ORuleFit():
         self.glm = glm
         self.rf_models = rf_models
 
-def _get_glm_lambda(glm, num_rules):
+def _get_glm_lambda(glm):
     """
     Get the best GLM lambda by choosing one diminishing returns on explained deviance
-    :param num_rules: The number of rules to use in rulefit model.
     """
     r = H2OGeneralizedLinearEstimator.getGLMRegularizationPath(glm)
     deviance = r.get('explained_deviance_train')
     rule_count = [len([k for k,v in x.items() if abs(v) > 0 and k != "Intercept"]) for x in r.get('coefficients')]
-    if num_rules is None:
-        lambda_index = [i*3 for i, x in enumerate(np.diff(np.sign(np.diff(deviance, 2)))) if x != 0 and i > 0][0]
-        
-    else:
-        lambda_index = [x for x, val in enumerate(rule_count)  if val > num_rules][0]
+    lambda_index = [i*3 for i, x in enumerate(np.diff(np.sign(np.diff(deviance, 2)))) if x != 0 and i > 0][0]
         
     return r.get('lambdas')[lambda_index]
 
+def _get_ohe_predictors(data):
+    """
+    Get the predictors of the dataset in one hot encoding format (e.x. SEX -> SEX.female, SEX.male)
+    Used to specify beta constraints to force all coefficients to be positive
+    """
+    predictors = [k for k,v in data.types.items() if v != "enum"]
+    cat_predictors = [k for k,v in data.types.items() if v == "enum"]
+    
+    for i in cat_predictors:
+        cat_values = list(data[i].unique().as_data_frame()["C1"])
+        predictors = predictors + ["{}.{}".format(i, x) for x in cat_values]
+        
+    return predictors
 
 def _tree_traverser(node, split_path):
     """
