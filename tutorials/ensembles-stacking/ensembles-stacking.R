@@ -109,8 +109,8 @@ h2o.removeAll() # Clean slate - just in case the cluster was already running
 #### Load Data into H2O Cluster
 #
 #First, import a sample binary outcome train and test set into the H2O cluster.
-train <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/testng/higgs_train_5k.csv")
-test <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/testng/higgs_test_5k.csv")
+train <- h2o.importFile(path = normalizePath("../data/higgs_10k.csv"))
+test <- h2o.importFile(path = normalizePath("../data/higgs_test_5k.csv"))
 #
 #Identify predictors and response
 y <- "response"
@@ -149,7 +149,7 @@ my_gbm <- h2o.gbm(x = x,
 #Train & Cross-validate a RF
 my_rf <- h2o.randomForest(x = x,
                           y = y,
-                          training_frame = train,
+                          training_frame = training_frame,
                           ntrees = 10,
                           nfolds = nfolds,
                           fold_assignment = "Modulo",
@@ -171,7 +171,7 @@ perf_gbm_test <- h2o.performance(my_gbm, newdata = test)
 perf_rf_test <- h2o.performance(my_rf, newdata = test)
 baselearner_best_auc_test <- max(h2o.auc(perf_gbm_test), h2o.auc(perf_rf_test))
 ensemble_auc_test <- h2o.auc(perf)
-print(sprintf("Best Base-learner Test AUC: %s", baselearner_best_auc_test))
+print(sprintf("BEst Base-learner Test AUC: %s", baselearner_best_auc_test))
 print(sprintf("Ensemble Test AUC: %s", ensemble_auc_test))
 #
 #### Generate predictions on a test
