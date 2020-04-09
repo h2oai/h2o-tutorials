@@ -79,13 +79,21 @@ This is an example of binary classification using the `h2o.stackedEnsemble` func
 
 If run from plain R, execute R in the directory of this script. if run from RStudio, be sure to `setwd()` to the location of this script. `h2o.init()` starts H2O in R’s current working directory. `h2o.importFile()` looks for files from the perspective of where H2O was started.
 
+#### Start H2O Cluster
+
+```r
+library(h2o)
+h2o.init(nthreads = -1) # Start an H2O cluster with nthreads = num cores on your machine
+h2o.removeAll() # (Optional) Remove all objects in H2O cluster
+```
+
 ### Load Data into H2O Cluster
 
 First, import a sample binary outcome train and test set into the H2O cluster.
 
 ```r
-train <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_train_5k.csv")
-test <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv")
+train <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/testng/higgs_train_5k.csv")
+test <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/testng/higgs_test_5k.csv")
 y <- "response"
 x <- setdiff(names(train), y)
 family <- "binomial"
@@ -152,12 +160,31 @@ ensemble <- h2o.stackedEnsemble(x = x,
 
  Evaluate the ensemble performance on a test set:
 
+Since the the response is binomial, we can use Area Under the ROC Curve (AUC) to evaluate the model performance. Compute test set performance, and sort by AUC (the default metric that is printed for a binomial classification):
+
 ```r
 perf <- h2o.performance(ensemble, newdata = test)
 ```
 
-Compare to the base learner performance on the test set. Since the response is binomial, we can use Area Under the ROC Curve ([AUC](https://www.kaggle.com/wiki/AUC)) to evaluate the model performance:
+Print the base learner and ensemble performance:
 
+```r
+Base learner performance, sorted by specified metric:
+            learner            AUC 
+1 h2o.auc(perf)      [1] 0.7735372
+2 h2o.auc(ensemble)  [1] 0.9991638
+3 h2o.auc(my_rf)     [1] 0.7430628
+4 h2o.auc(my_gbm)    [1] 0.773547
+```
+
+We can compare the performance of the ensemble to the performance of the individual learners in the ensemble.
+
+So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.773547, as compared to 0.7735372 for the ensemble. At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable.
+
+To increase the performance of the ensemble, we have several options. One of them is to increase the number of internal cross-validation folds using the cvControl argument. The other options are to change the base learner library or the metalearning algorithm.
+
+Compare to the base learner performance on the test set.
+ 
 ```r
 perf_gbm_test <- h2o.performance(my_gbm, newdata = test)
 perf_rf_test <- h2o.performance(my_rf, newdata = test)
@@ -169,6 +196,8 @@ print(sprintf(“Ensemble Test AUC: %s”, ensemble_auc_test))
 ```
 
 Generate predictions on a test set (if necessary):
+
+If you actually need to generate the predictions (instead of looking only at model performance), you can use the ``predict()`` function with a test set. 
 
 ```r
 pred <- h2o.predict(ensemble, newdata = test)
