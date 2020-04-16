@@ -12,7 +12,6 @@ In this tutorial, we will discuss ensemble learning with a focus on a type of en
 
 H2O’s Stacked Ensemble method is a supervised ensemble machine learning algorithm that finds the optimal combination of a collection of prediction algorithms using a process called stacking. like all supervised models in H2O, Stacked Ensemble supports regression, binary classification, and multiclass classification. The documentation for H2O Stacked Ensembles, including R and Python code examples, can be found [here](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html).
 
-The **h2oEnsemble** R package is the predecessor to the base H2O implementation; all new development efforts will be focused on the native H2O version of stacked ensembles, and for new projects we’d recommend only using native H2O.
 
 
 # What is Ensemble Learning?
