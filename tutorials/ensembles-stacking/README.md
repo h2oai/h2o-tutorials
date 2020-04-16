@@ -77,7 +77,7 @@ First you need to install the H2O R package if you don’t already have it insta
 
 This is an example of binary classification using the `h2o.stackedEnsemble` function. This demo uses a subset of the [HIGGS dataset](https://archive.ics.uci.edu/ml/datasets/HIGGS), which has 28 numeric features and a binary response.  The machine learning task in this example is to distinguish between a signal process which produces Higgs bosons (Y = 1) and a background process which does not (Y = 0).  The dataset contains approximately the same number of positive vs negative examples.  In other words, this is a balanced, rather than imbalanced, dataset.
 
-If run from plain R, execute R in the directory of this script. if run from RStudio, be sure to `setwd()` to the location of this script. `h2o.init()` starts H2O in R’s current working directory. `h2o.importFile()` looks for files from the perspective of where H2O was started.
+To run this script, be sure to `setwd()` to the location of this script. `h2o.init()` starts H2O in R’s current working directory. `h2o.importFile()` looks for files from the perspective of where H2O was started.
 
 #### Start H2O Cluster
 
