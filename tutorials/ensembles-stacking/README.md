@@ -66,7 +66,7 @@ Here is an outline of the tasks involved in training and testing a Super Learner
 - Feed those predictions into the metalearner to generate the ensemble prediction.
 
 
-# H2O Ensemble: Super Learning in H2O
+# H2O Stacked Ensemble
 
 ## Install H2O R Package
 
