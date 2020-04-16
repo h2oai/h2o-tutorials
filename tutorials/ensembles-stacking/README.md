@@ -78,11 +78,11 @@ This is an example of binary classification using the `h2o.stackedEnsemble` func
 
 To run this script, be sure to `setwd()` to the location of this script. `h2o.init()` starts H2O in R’s current working directory. `h2o.importFile()` looks for files from the perspective of where H2O was started.
 
-#### Start H2O Cluster
+### Start H2O Cluster
 
 ```r
 library(h2o)
-h2o.init() # Start an H2O cluster with nthreads = num cores on your machine
+h2o.init()
 ```
 
 ### Load Data into H2O Cluster
@@ -92,9 +92,13 @@ First, import a sample binary outcome train and test set into the H2O cluster.
 ```r
 train <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/testng/higgs_train_5k.csv")
 test <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/testng/higgs_test_5k.csv")
+```
+
+Identify predictors and response:
+
+```
 y <- "response"
 x <- setdiff(names(train), y)
-family <- "binomial"
 ```
 
 For binary classification, the response should be encoded as a [factor](http://stat.ethz.ch/R-manual/R-patched/library/base/html/factor.html) type (also known as the [enum](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html) type in Java or [categorial](http://pandas.pydata.org/pandas-docs/stable/categorical.html) in Python Pandas).  The user can specify column types in the `h2o.importFile` command, or you can convert the response column as follows:
@@ -104,7 +108,7 @@ train[,y] <- as.factor(train[,y])
 test[,y] <- as.factor(test[,y])
 ```
 
-Set the number of CV folds (to generate level-one data for stacking)
+Number of CV folds (to generate level-one data for stacking):
 
 ```r
 nfolds <- 5
@@ -112,13 +116,18 @@ nfolds <- 5
 
 ### Train an Ensemble
 
-There are a few ways to assemble a list of models to stack together. The first is to train individual models and put them in a list; the second is to train a grid of models; the third is to train several grids of models. **Note:** All base models must have the same cross-validation folds, and the cross-validated predicted values must be kept.
+There are a few ways to assemble a list of models to stack together: 
 
-#### Generate a 2-model ensemble (GBM + RF)
+1. Train individual models and put them in a list 
+2. Train a grid of models
+3. Train several grids of models 
 
-Train & Cross-validate a GBM:
+**Note:** All base models must have the same cross-validation folds, and the cross-validated predicted values must be kept.
+
+###1. Generate a 2-model ensemble (GBM + RF)
 
 ```r
+#Train & Cross-validate a GBM:
 my_gbm <- h2o.gbm(x = x, 
 				  y = y, 
 				  training_frame = train, 
@@ -128,35 +137,26 @@ my_gbm <- h2o.gbm(x = x,
 				  min_rows = 2, 
 				  learn_rate = 0.2, 
 				  nfolds = nfolds, 
-				  fold_assignment = “Modulo”, 
 				  keep_cross_validation_predictions = TRUE, 
 				  seed = 1)
-```
 
-Train & Cross-validate a RF:
-
-```r
+#Train & Cross-validate a RF:
 my_rf <- h2o.randomForest(x = x, 
 						  y = y, 
 						  training_frame = train, 
 						  ntrees = 50, 
 						  nfolds = nfolds, 
-						  fold_assignment = “Modulo”, 
 						  keep_cross_validation_predictions = TRUE, 
 						  seed = 1)
-```
 
-Train a stacked ensemble using the GBM and RF above:
-
-```r
+#Train a stacked ensemble using the GBM and RF above:
 ensemble <- h2o.stackedEnsemble(x = x, 
 								y = y, 
 								training_frame = train, 
-								model_id = “my_ensemble_binomial”, 
 								base_models = list(my_gbm, my_rf))
 ```
 
- Evaluate the ensemble performance on a test set:
+#### Eval the ensemble performance on a test set:
 
 Since the the response is binomial, we can use Area Under the ROC Curve (AUC) to evaluate the model performance. Compute test set performance, and sort by AUC (the default metric that is printed for a binomial classification):
 
@@ -169,19 +169,19 @@ Print the base learner and ensemble performance:
 ```r
 Base learner performance, sorted by specified metric:
             learner            AUC 
-1 h2o.auc(perf)      [1] 0.7735372
-2 h2o.auc(ensemble)  [1] 0.9991638
+1 h2o.auc(perf)      [1] 0.7735012
+2 h2o.auc(ensemble)  [1] 0.9991276
 3 h2o.auc(my_rf)     [1] 0.7430628
 4 h2o.auc(my_gbm)    [1] 0.773547
 ```
 
 We can compare the performance of the ensemble to the performance of the individual learners in the ensemble.
 
-So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.773547, as compared to 0.7735372 for the ensemble. At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable.
+So we see the best individual algorithm in this group is the GBM with a test set AUC of 0.773547, as compared to 0.7735012 for the ensemble. At first thought, this might not seem like much, but in many industries like medicine or finance, this small advantage can be highly valuable.
 
 To increase the performance of the ensemble, we have several options. One of them is to increase the number of internal cross-validation folds using the cvControl argument. The other options are to change the base learner library or the metalearning algorithm.
 
-Compare to the base learner performance on the test set.
+####Compare to the base learner performance on the test set.
  
 ```r
 perf_gbm_test <- h2o.performance(my_gbm, newdata = test)
@@ -191,24 +191,22 @@ baselearner_best_auc_test <- max(h2o.auc(perf_gbm_test),
 ensemble_auc_test <- h2o.auc(perf)
 print(sprintf(“Best Base-learner Test AUC: %s”, baselearner_best_auc_test))
 print(sprintf(“Ensemble Test AUC: %s”, ensemble_auc_test))
-```
+# [1] "Best Base-learner Test AUC:  0.76979821502548"
+# [1] "Ensemble Test AUC:  0.773501212640419"
 
-Generate predictions on a test set (if necessary):
 
-If you actually need to generate the predictions (instead of looking only at model performance), you can use the ``predict()`` function with a test set. 
-
-```r
+#Generate predictions on a test set (if necessary):
 pred <- h2o.predict(ensemble, newdata = test)
 ```
 
-#### Generate a Random Grid of Models and Stack Them Together
-
-Set the GBM Hyperparameters:
+###2. Generate a Random Grid of Models and Stack Them Together
 
 ```r
+#Set the GBM Hyperparameters:
 learn_rate_opt <- c(0.01, 0.03(
 max_depth_opt <- c(3, 4, 5, 6, 9)
-sample_rate_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+sample_rate_opt <- c(0.7, 0.8, 0.9, 1.0)
+col_sample_rate_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
 hyper_params <- list(learn_rate = learn_rate_opt, 
 					 max_depth = max_depth_opt, 
 					 sample_rate = sample_rate_opt, 
@@ -223,43 +221,31 @@ gbm_grid <- h2o.grid(algorithm = “gbm”,
 					 training_frame = train,
 					 ntrees = 10, 
 					 seed = 1, 
-					 nfolds = nfolds, 
-					 fold_assignment = “Modulo”, 
+					 nfolds = nfolds,  
 					 keep_cross_validation_predictions = TRUE, 
 					 hyper_params = hyper_params, 
 					 search_criteria = search_criteria)
-```
 
-Train a stacked ensemble using the GBM grid:
-
-```r
+#Train a stacked ensemble using the GBM grid:
 ensemble <- h2o.stackedEnsemble(x = x, 
 								y = y, 
 							   training_frame = train, 
-								model_id = “ensemble_gbm_grid_binomial”, 
 								base_models = gbm_grid@model_ids)
-```
 
-Evaluate the ensemble performance on a test set:
-
-```r
+#Evaluate the ensemble performance on a test set:
 perf <- h2o.performance(ensemble, newdata = test)
-```
 
-Compare to the base learner performance on a test set:
-
-```r
+#Compare to the base learner performance on a test set:
 .getauc <- function(mm) h2o.auc(h2o.performance(h2o.getModel(mm), newdata = test))
 baselearner_aucs <- sapply(gbm_grid@model_ids, .getauc)
 baselearner_best_auc_test <- max(baselearner_aucs)
 ensemble_auc_test <- h2o.auc(perf)
 print(sprintf("Best Base-learner Test AUC:  %s", baselearner_best_auc_test))
 print(sprintf("Ensemble Test AUC:  %s", ensemble_auc_test))
-```
+# [1] "Best Base-learner Test AUC:  0.748146530400473"
+# [1] "Ensemble Test AUC:  0.773501212640419"
 
-Generate predictions on a test set (if necessary):
-
-```r
+#Generate predictions on a test set (if necessary):
 pred <- h2o.predict(ensemble, newdata = test)
 ```
 
