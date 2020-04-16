@@ -71,7 +71,7 @@ Here is an outline of the tasks involved in training and testing a Super Learner
 
 ## Install H2O R Package
 
-First you need to install the H2O R package if you don’t already have it installed. The R installation instructions are at: [http://h2o.ai/download](http://h2o.ai/download). 
+First you need to install the H2O R package if you don’t already have it installed. It an be downloaded from CRAN or from the H2O website at: [http://h2o.ai/download](http://h2o.ai/download). 
 
 ## Higgs Demo
 
