@@ -4,7 +4,7 @@
 	- Bagging
 	- Boosting
 	- Stacking / Super Learning
-- H2O Ensemble: Super Learning in H2O
+- H2O Stacked Ensemble
 
 # Overview
 
