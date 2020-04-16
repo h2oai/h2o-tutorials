@@ -1,4 +1,4 @@
-# Ensembles: Stacking, Super Leaner
+# Ensembles: Stacking, Super Learner
 - Overview
 - What is Ensemble Learning?
 	- Bagging
@@ -274,4 +274,3 @@ h2o.shutdown()
 ## Roadmap for H2O Stacked Ensemble
 
 Open tickets for the native H2O version of Stacked Ensembles can be found [here](https://0xdata.atlassian.net/issues/?filter=14900) (JIRA tickets with the "h2oEnsemble" tag).
-
