@@ -83,7 +83,6 @@ To run this script, be sure to `setwd()` to the location of this script. `h2o.in
 ```r
 library(h2o)
 h2o.init() # Start an H2O cluster with nthreads = num cores on your machine
-h2o.removeAll() # (Optional) Remove all objects in H2O cluster
 ```
 
 ### Load Data into H2O Cluster
