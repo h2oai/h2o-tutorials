@@ -1,4 +1,4 @@
-# Best Practices - AutoML
+# Best Practices - H2O AutoML
 
 This tutorial focuses on two areas for the data scientist to ensure the best performance by AutoML: 
 
