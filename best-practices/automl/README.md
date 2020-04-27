@@ -1,4 +1,4 @@
-# Best Practices - AutoML
+# Best Practices - H2O AutoML
 
 This tutorial focuses on two areas for the data scientist to ensure the best performance by AutoML: 
 
@@ -9,4 +9,4 @@ This tutorial focuses on two areas for the data scientist to ensure the best per
 
 ## The Data
 
-For this tutorial, we want to use AutoML to build a model to predict the price of Airbnb's: <https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data>.
+For this tutorial, we want to use H2O AutoML to build a model to predict the price of Airbnb's: <https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data>.
