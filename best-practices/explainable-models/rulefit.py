@@ -1,8 +1,13 @@
+"""H2O-3 RuleFit"""
+
+# Contributors: Megan Kurka - megan.kurka@h2o.ai
+# Created: February 18th, 2020
+# Last Updated: April 30th, 2020
+
 import pandas as pd
 import numpy as np
 import h2o
 import os
-from h2o.estimators.random_forest import H2ORandomForestEstimator
 from h2o.estimators import H2OGeneralizedLinearEstimator
 from h2o.exceptions import H2OValueError
 from h2o.tree import H2OTree
@@ -12,11 +17,11 @@ class H2ORuleFit():
     H2O RuleFit
     Builds a Distributed RuleFit model on a parsed dataset, for regression or 
     classification. 
+    :param algorithm: The algorithm to use to generate rules.  Options are "DRF", "XGBoost", "GBM"
     :param min_rule_len: Minimum length of rules. Defaults to 1.
     :param max_rule_len: Maximum length of rules. Defaults to 10.
     :param max_num_rules: The maximum number of rules to return.
             Defaults to None which means the number of rules is selected by diminishing returns in model deviance.
-    :param force_positive: Force all the rules to increase the prediction of y (positive coefficients.)
     :param nfolds: Number of folds for K-fold cross-validation. Defaults to 5.
     :param seed: Seed for pseudo random number generator. Defaults to -1.
     :returns: a set of rules and coefficients
@@ -29,11 +34,17 @@ class H2ORuleFit():
     >>> rulefit
     """
     
-    def __init__(self, min_rule_len=1, max_rule_len=10, max_num_rules = None, force_positive = False, nfolds=5, seed=-1):
+    def __init__(self, algorithm,
+                 min_rule_len=1, max_rule_len=10, 
+                 max_num_rules = None, 
+                 nfolds=5, seed=-1):
+        
+        if algorithm not in ["DRF", "XGBoost", "GBM"]:
+            raise H2OValueError("{} is not a supported algorithm".format(algorithm))
+        self.algorithm = algorithm
         self.min_rule_len = min_rule_len
         self.max_rule_len = max_rule_len
         self.max_num_rules = max_num_rules
-        self.force_positive = force_positive
         self.nfolds = nfolds
         self.seed = seed
         
@@ -53,13 +64,11 @@ class H2ORuleFit():
         >>> rulefit
         """
         
-        if self.force_positive and self.max_num_rules is None:
-            raise H2OValueError("Number of rules must be specified to force rules to be positive")
-            
         family = "gaussian"
         if (training_frame.type(y) == "enum"):
             if training_frame[y].unique().nrow > 2:
                 family = "multinomial"
+                raise H2OValueError("multinomial use cases not yet supported")
             else:
                 family = "binomial"
 
@@ -67,29 +76,20 @@ class H2ORuleFit():
         # Get paths from random forest models
         paths_frame = training_frame[y]
         depths = range(self.min_rule_len, self.max_rule_len + 1)
-        rf_models = dict()
+        tree_models = dict()
         for model_idx in range(len(depths)):
 
-            # Train random forest models
-            rf_model = H2ORandomForestEstimator(seed = self.seed, 
-                                                model_id = "rf_{}.hex".format(str(model_idx)), 
-                                                max_depth = depths[model_idx])
-            rf_model.train(y = y, x = x, training_frame = training_frame)
-            rf_models[model_idx] = rf_model
+            # Train tree models
+            tree_model = _tree_model(self.algorithm, 
+                                     depths[model_idx], 
+                                     self.seed,
+                                     model_idx)
+            tree_model.train(y = y, x = x, training_frame = training_frame)
+            tree_models[model_idx] = tree_model
 
-            paths = rf_model.predict_leaf_node_assignment(training_frame)
-            paths.col_names = ["rf_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
+            paths = tree_model.predict_leaf_node_assignment(training_frame)
+            paths.col_names = ["tree_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
             paths_frame = paths_frame.cbind(paths)
-
-        # Extract important paths
-        if self.force_positive:
-            constraint_predictors = _get_ohe_predictors(paths_frame[list(set(paths_frame.col_names) - set([y]))])
-            
-            constraints = h2o.H2OFrame({'names':constraint_predictors, 
-                                        'lower_bounds': [0]*len(constraint_predictors),
-                                        'upper_bounds': [1e10]*len(constraint_predictors)})
-        else:
-            constraints = None
             
         if self.max_num_rules:
             # Train GLM with chosen lambda
@@ -98,8 +98,7 @@ class H2ORuleFit():
                                                 family = family,
                                                 alpha = 1, 
                                                 remove_collinear_columns=True,
-                                                max_active_predictors = self.max_num_rules + 1,
-                                                beta_constraints = constraints
+                                                max_active_predictors = self.max_num_rules + 1
                                                )
             glm.train(y = y, training_frame=paths_frame)
             
@@ -111,8 +110,7 @@ class H2ORuleFit():
                                                 family = family,
                                                 alpha = 1, 
                                                 remove_collinear_columns=True,
-                                                lambda_search = True,
-                                                beta_constraints = constraints
+                                                lambda_search = True
                                                )
             glm.train(y = y, training_frame=paths_frame)
             
@@ -125,8 +123,7 @@ class H2ORuleFit():
                                                 alpha = 1, 
                                                 remove_collinear_columns=True,
                                                 lambda_ = lambda_,
-                                                solver = "COORDINATE_DESCENT",
-                                                beta_constraints = constraints
+                                                solver = "COORDINATE_DESCENT"
                                                )
             glm.train(y = y, training_frame=paths_frame)
         
@@ -134,12 +131,12 @@ class H2ORuleFit():
         intercept = _get_intercept(glm)
         
         # Get Rules
-        rule_importance = _get_rules(glm, rf_models)
+        rule_importance = _get_rules(glm, tree_models, self.algorithm)
         
         self.intercept = intercept
         self.rule_importance = rule_importance
         self.glm = glm
-        self.rf_models = rf_models
+        self.tree_models = tree_models
         
     def predict(self, test_data):
         """
@@ -150,10 +147,10 @@ class H2ORuleFit():
         :returns: A new H2OFrame of predictions.
         """
         paths_frame = test_data[0]
-        for model_idx in self.rf_models.keys():
+        for model_idx in self.tree_models.keys():
 
-            paths = self.rf_models.get(model_idx).predict_leaf_node_assignment(test_data)
-            paths.col_names = ["rf_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
+            paths = self.tree_models.get(model_idx).predict_leaf_node_assignment(test_data)
+            paths.col_names = ["tree_{0}.{1}".format(str(model_idx), x) for x in paths.col_names]
             paths_frame = paths_frame.cbind(paths)
             
         paths_frame = paths_frame[1::]
@@ -170,8 +167,8 @@ class H2ORuleFit():
         :returns: A new H2OFrame of records that match the rule.
         """
         family = self.glm.params.get('family').get('actual')
-        model_idx, tree_num, tree_class, path = _map_column_name(rule, family)
-        paths = self.rf_models.get(model_idx).predict_leaf_node_assignment(test_data)
+        model_idx, tree_num, tree_class, path = _map_column_name(rule, family, self.algorithm)
+        paths = self.tree_models.get(model_idx).predict_leaf_node_assignment(test_data)
         
         paths_col = ".".join(rule.split(".")[1:-1])
         paths_path = rule.split(".")[-1]
@@ -231,8 +228,8 @@ class H2ORuleFit():
         >>> rulefit.save(dir_path = "/home/user/my_rulefit/")
         """
         # save random forest models
-        for rf_model in self.rf_models.values():
-            h2o.save_model(rf_model, path=path)
+        for tree_model in self.tree_models.values():
+            h2o.save_model(tree_model, path=path)
             
         # save glm model
         h2o.save_model(self.glm, path=path)
@@ -250,23 +247,51 @@ class H2ORuleFit():
         # load GLM model
         glm = h2o.load_model(os.path.join(path, 'glm.hex'))
             
-        # load RF models
+        # load tree models
         depths = range(self.min_rule_len, self.max_rule_len + 1)
-        rf_models = dict()
+        tree_models = dict()
         for model_idx in range(len(depths)):
-            rf_models[model_idx] = h2o.load_model(os.path.join(path, "rf_{}.hex".format(model_idx)))
+            tree_models[model_idx] = h2o.load_model(os.path.join(path, "tree_{}.hex".format(model_idx)))
             
         # Get Intercept
         intercept = _get_intercept(glm)
         
         # Get Rules
-        rule_importance = _get_rules(glm, rf_models)
+        rule_importance = _get_rules(glm, tree_models, self.algorithm)
         
         self.intercept = intercept
         self.rule_importance = rule_importance
         self.glm = glm
-        self.rf_models = rf_models
+        self.tree_models = tree_models
 
+
+def _tree_model(algorithm, max_depth, seed, model_idx):
+    
+    if algorithm == "DRF":
+        # Train random forest models
+        from h2o.estimators.random_forest import H2ORandomForestEstimator
+        model = H2ORandomForestEstimator(seed = seed, 
+                                         model_id = "tree_{}.hex".format(str(model_idx)), 
+                                         max_depth = max_depth)
+    elif algorithm == "GBM":
+        
+        from h2o.estimators.gbm import H2OGradientBoostingEstimator
+        model = H2OGradientBoostingEstimator(seed = seed, 
+                                             model_id = "tree_{}.hex".format(str(model_idx)), 
+                                             max_depth = max_depth)
+        
+    elif algorithm == "XGBoost":
+        from h2o.estimators.xgboost import H2OXGBoostEstimator
+        model = H2OXGBoostEstimator(seed = seed, 
+                                    model_id = "tree_{}.hex".format(str(model_idx)), 
+                                    max_depth = max_depth)
+        
+    else:
+        raise H2OValueError("{} algorithm not supported".format(algorithm))
+        
+    return model
+    
+        
 def _get_glm_lambda(glm):
     """
     Get the best GLM lambda by choosing one diminishing returns on explained deviance
@@ -277,20 +302,6 @@ def _get_glm_lambda(glm):
     lambda_index = [i*3 for i, x in enumerate(np.diff(np.sign(np.diff(deviance, 2)))) if x != 0 and i > 0][0]
         
     return r.get('lambdas')[lambda_index]
-
-def _get_ohe_predictors(data):
-    """
-    Get the predictors of the dataset in one hot encoding format (e.x. SEX -> SEX.female, SEX.male)
-    Used to specify beta constraints to force all coefficients to be positive
-    """
-    predictors = [k for k,v in data.types.items() if v != "enum"]
-    cat_predictors = [k for k,v in data.types.items() if v == "enum"]
-    
-    for i in cat_predictors:
-        cat_values = list(data[i].unique().as_data_frame()["C1"])
-        predictors = predictors + ["{}.{}".format(i, x) for x in cat_values]
-        
-    return predictors
 
 def _tree_traverser(node, split_path):
     """
@@ -364,7 +375,7 @@ def _get_intercept(glm):
         intercept = {k: v for k, v in glm.coef().items() if k == 'Intercept'}
     return intercept
         
-def _get_rules(glm, rf_models):
+def _get_rules(glm, tree_models, algorithm):
     """
     Get Rules from GLM model
     """
@@ -390,8 +401,8 @@ def _get_rules(glm, rf_models):
         class_rules = []
         if len(v) > 0:
             for i in v.variable:
-                model_idx, tree_num, tree_class, path = _map_column_name(i, family)
-                tree = H2OTree(rf_models[model_idx], tree_num, tree_class = tree_class)
+                model_idx, tree_num, tree_class, path = _map_column_name(i, family, algorithm)
+                tree = H2OTree(tree_models[model_idx], tree_num, tree_class = tree_class)
                 class_rules = class_rules + [_tree_traverser(tree.root_node, path)]
         
             # Add rules and order by absolute coefficient
@@ -408,15 +419,20 @@ def _get_rules(glm, rf_models):
     
     return rule_importance
     
-def _map_column_name(column_name, family):
+def _map_column_name(column_name, family, algorithm):
     """
     Take column name from paths frame and return the model_idx, tree_num, tree_class, and path 
     """
-    if family == "binomial" or family == "multinomial":
-        model_idx, tree_num, tree_class, path = column_name.replace("rf_", "").replace("T", "").replace("C", "").split(".")
-        tree_class = int(tree_class) - 1
+    if family == "binomial":
+        if algorithm == "XGBoost":
+            model_idx, tree_num, path = column_name.replace("tree_", "").replace("T", "").split(".")
+            tree_class = int(0)
+        else:
+            model_idx, tree_num, tree_class, path = column_name.replace("tree_", "").replace("T", "").replace("C", "").split(".")
+            tree_class = int(tree_class) - 1
     else:
-        model_idx, tree_num, path = column_name.replace("rf_", "").replace("T", "").split(".")
+        model_idx, tree_num, path = column_name.replace("tree_", "").replace("T", "").split(".")
         tree_class = None
         
     return int(model_idx), int(tree_num) - 1, tree_class, path
+
