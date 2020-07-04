@@ -6,8 +6,10 @@
 
 import pandas as pd
 import numpy as np
-import h2o
 import os
+import warnings
+
+import h2o
 from h2o.estimators import H2OGeneralizedLinearEstimator
 from h2o.exceptions import H2OValueError
 from h2o.tree import H2OTree
@@ -24,6 +26,8 @@ class H2ORuleFit():
             Defaults to None which means the number of rules is selected by diminishing returns in model deviance.
     :param nfolds: Number of folds for K-fold cross-validation. Defaults to 5.
     :param seed: Seed for pseudo random number generator. Defaults to -1.
+    :param tree_params: Additional parameters that can be passed to the tree model. Defaults to None.
+    :param glm_params: Additional parameters that can be passed to the linear model. Defaults to None.
     :returns: a set of rules and coefficients
     :examples:
     >>> rulefit = H2ORuleFit()
@@ -35,9 +39,14 @@ class H2ORuleFit():
     """
     
     def __init__(self, algorithm,
-                 min_rule_len=1, max_rule_len=10, 
-                 max_num_rules = None, 
-                 nfolds=5, seed=-1):
+                 min_rule_len=1, 
+                 max_rule_len=10, 
+                 max_num_rules=None, 
+                 nfolds=5, 
+                 seed=-1,
+                 tree_params={},
+                 glm_params={}
+                ):
         
         if algorithm not in ["DRF", "XGBoost", "GBM"]:
             raise H2OValueError("{} is not a supported algorithm".format(algorithm))
@@ -48,7 +57,45 @@ class H2ORuleFit():
         self.nfolds = nfolds
         self.seed = seed
         
-    def train(self, x=None, y=None, training_frame=None, **params):
+        if tree_params:
+            tree_params.pop("model_id", None)
+            if 'max_depth' in tree_params.keys():
+                self.min_rule_len = tree_params.get("max_depth")
+                self.max_rule_len = tree_params.get("max_depth")
+                tree_params.pop("max_depth")
+                warnings.warn('max_depth provided in tree_params - min_rule_len and max_rule_len will be ignored')
+            if 'nfolds' in tree_params.keys():
+                tree_params.pop('nfolds')
+                warnings.warn('seed provided in tree_params but will be ignored')
+            if 'seed' in tree_params.keys():
+                tree_params.pop('seed')
+                warnings.warn('seed provided in tree_params but will be ignored')
+            
+                
+        if glm_params:
+            glm_params.pop("model_id", None)
+            if 'max_active_predictors' in glm_params.keys():
+                self.max_num_rules = glm_params.get("max_active_predictors") + 1
+                glm_params.pop("max_active_predictors")
+                warnings.warn('max_active_predictors provided in glm_params - max_num_rules will be ignored')
+            if 'nfolds' in glm_params.keys():
+                glm_params.pop('nfolds')
+                warnings.warn('seed provided in glm_params but will be ignored')
+            if 'seed' in glm_params.keys():
+                glm_params.pop('seed')
+                warnings.warn('seed provided in glm_params but will be ignored')
+            if 'alpha' in glm_params.keys():
+                glm_params.pop('alpha')
+                warnings.warn('alpha ignored - set to 1 by rulefit')
+            if 'lambda_' in glm_params.keys():
+                glm_params.pop('lambda_')
+                warnings.warn('lambda_ ignored by rulefit')
+                
+        self.tree_params = tree_params
+        self.glm_params = glm_params
+            
+        
+    def train(self, x=None, y=None, training_frame=None):
         """
         Train the rulefit model.
         :param x: A list of column names or indices indicating the predictor columns.
@@ -64,13 +111,18 @@ class H2ORuleFit():
         >>> rulefit
         """
         
-        family = "gaussian"
         if (training_frame.type(y) == "enum"):
             if training_frame[y].unique().nrow > 2:
                 family = "multinomial"
                 raise H2OValueError("multinomial use cases not yet supported")
             else:
                 family = "binomial"
+        else:
+            if self.glm_params.get("family") is not None:
+                family = self.glm_params.get("family")
+                self.glm_params.pop("family")
+            else:
+                family = "gaussian"
 
 
         # Get paths from random forest models
@@ -83,7 +135,9 @@ class H2ORuleFit():
             tree_model = _tree_model(self.algorithm, 
                                      depths[model_idx], 
                                      self.seed,
-                                     model_idx)
+                                     model_idx,
+                                     self.tree_params
+                                    )
             tree_model.train(y = y, x = x, training_frame = training_frame)
             tree_models[model_idx] = tree_model
 
@@ -97,8 +151,8 @@ class H2ORuleFit():
                                                 seed = self.seed,
                                                 family = family,
                                                 alpha = 1, 
-                                                remove_collinear_columns=True,
-                                                max_active_predictors = self.max_num_rules + 1
+                                                max_active_predictors = self.max_num_rules + 1,
+                                                **self.glm_params
                                                )
             glm.train(y = y, training_frame=paths_frame)
             
@@ -109,8 +163,8 @@ class H2ORuleFit():
                                                 seed = self.seed,
                                                 family = family,
                                                 alpha = 1, 
-                                                remove_collinear_columns=True,
-                                                lambda_search = True
+                                                lambda_search = True,
+                                                **self.glm_params
                                                )
             glm.train(y = y, training_frame=paths_frame)
             
@@ -121,9 +175,9 @@ class H2ORuleFit():
                                                 seed = self.seed,
                                                 family = family,
                                                 alpha = 1, 
-                                                remove_collinear_columns=True,
                                                 lambda_ = lambda_,
-                                                solver = "COORDINATE_DESCENT"
+                                                solver = "COORDINATE_DESCENT",
+                                                **self.glm_params
                                                )
             glm.train(y = y, training_frame=paths_frame)
         
@@ -265,26 +319,32 @@ class H2ORuleFit():
         self.tree_models = tree_models
 
 
-def _tree_model(algorithm, max_depth, seed, model_idx):
+def _tree_model(algorithm, max_depth, seed, model_idx, tree_params):
     
     if algorithm == "DRF":
         # Train random forest models
         from h2o.estimators.random_forest import H2ORandomForestEstimator
         model = H2ORandomForestEstimator(seed = seed, 
                                          model_id = "tree_{}.hex".format(str(model_idx)), 
-                                         max_depth = max_depth)
+                                         max_depth = max_depth,
+                                         **tree_params
+                                        )
     elif algorithm == "GBM":
         
         from h2o.estimators.gbm import H2OGradientBoostingEstimator
         model = H2OGradientBoostingEstimator(seed = seed, 
                                              model_id = "tree_{}.hex".format(str(model_idx)), 
-                                             max_depth = max_depth)
+                                             max_depth = max_depth,
+                                             **tree_params
+                                            )
         
     elif algorithm == "XGBoost":
         from h2o.estimators.xgboost import H2OXGBoostEstimator
         model = H2OXGBoostEstimator(seed = seed, 
                                     model_id = "tree_{}.hex".format(str(model_idx)), 
-                                    max_depth = max_depth)
+                                    max_depth = max_depth,
+                                    **tree_params
+                                   )
         
     else:
         raise H2OValueError("{} algorithm not supported".format(algorithm))
@@ -298,8 +358,10 @@ def _get_glm_lambda(glm):
     """
     r = H2OGeneralizedLinearEstimator.getGLMRegularizationPath(glm)
     deviance = r.get('explained_deviance_train')
-    rule_count = [len([k for k,v in x.items() if abs(v) > 0 and k != "Intercept"]) for x in r.get('coefficients')]
-    lambda_index = [i*3 for i, x in enumerate(np.diff(np.sign(np.diff(deviance, 2)))) if x != 0 and i > 0][0]
+    if len(deviance) < 5:
+        lambda_index = len(deviance) - 1
+    else:
+        lambda_index = [i*3 for i, x in enumerate(np.diff(np.sign(np.diff(deviance, 2)))) if x != 0 and i > 0][0]
         
     return r.get('lambdas')[lambda_index]
 
