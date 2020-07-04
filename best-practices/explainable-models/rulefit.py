@@ -75,7 +75,7 @@ class H2ORuleFit():
         if glm_params:
             glm_params.pop("model_id", None)
             if 'max_active_predictors' in glm_params.keys():
-                self.max_num_rules = glm_params.get("max_active_predictors") + 1
+                self.max_num_rules = glm_params.get("max_active_predictors") - 1
                 glm_params.pop("max_active_predictors")
                 warnings.warn('max_active_predictors provided in glm_params - max_num_rules will be ignored')
             if 'nfolds' in glm_params.keys():
