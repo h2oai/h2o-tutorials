@@ -1,0 +1,80 @@
+---
+title: "Explain Wine"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(h2o)
+h2o.no_progress()
+
+h2o.connect()
+df <-  h2o.importFile("https://h2o-public-test-data.s3.amazonaws.com/smalldata/wine/winequality-redwhite-no-BOM.csv")
+
+response <- "quality"
+
+predictors <- c(
+  "fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide",
+  "total sulfur dioxide", "density", "pH", "sulphates", "alcohol",  "type"
+)
+
+splits <- h2o.splitFrame(df, seed = 1)
+train <- splits[[1]]
+test <- splits[[2]]
+```
+
+
+```{r}
+aml <- h2o.automl(x = predictors, y = response, training_frame = train, max_runtime_secs = 600, seed = 1)
+```
+
+# Explain H2OAutoML
+
+## Global Explanation
+
+```{r results="asis"}
+h2o.explain(aml, test)
+```
+
+## Local Explanation
+
+```{r results="asis"}
+h2o.explain_row(aml, test, 1)
+```
+
+# Explain the leader model
+
+## Global Explanation
+
+```{r results="asis"}
+h2o.explain(aml@leader, test)
+```
+
+## Local Explanation
+
+```{r results="asis"}
+h2o.explain_row(aml@leader, test, 1)
+```
+
+
+# Explain a list of models
+
+```{r}
+# Get first five base models (i.e., not stacked ensembles)
+models <- head(Filter(function(model_id) !startsWith(model_id, "Stacked"),
+                      as.list(aml@leaderboard["model_id"])), n = 5)
+models <- lapply(models, h2o.getModel)
+```
+
+## Global Explanation
+
+```{r results="asis"}
+h2o.explain(models, test)
+```
+
+## Local Explanation
+
+```{r results="asis"}
+h2o.explain_row(models, test, 1)
+```
