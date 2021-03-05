@@ -95,7 +95,7 @@ model_ids <- as.data.frame(aml@leaderboard$model_id)[,1]
 # Get the "All Models" Stacked Ensemble model
 se <- h2o.getModel(grep("StackedEnsemble_AllModels", model_ids, value = TRUE)[1])
 # Get the Stacked Ensemble metalearner model
-metalearner <- h2o.getModel(se@model$metalearner$name)
+metalearner <- se@model$metalearner_model
 ```
 
 Examine the variable importance of the metalearner (combiner) algorithm in the ensemble.  This shows us how much each base learner is contributing to the ensemble. The AutoML Stacked Ensembles use the default metalearner algorithm (GLM with non-negative weights), so the variable importance of the metalearner is actually the standardized coefficient magnitudes of the GLM. 
