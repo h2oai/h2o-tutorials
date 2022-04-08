@@ -1,6 +1,6 @@
 # Best Practices - New Features
 
-This tutorial shows new features available in H2O-3 (written in April 2021). It covers:
+This tutorial shows new features available in H2O-3 (written in April 2022). It covers:
 
 * Feature Selection methods
 * Uplift Algorithm and RuleFit Algorithm
