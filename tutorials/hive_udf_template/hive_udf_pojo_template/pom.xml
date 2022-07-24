@@ -9,7 +9,7 @@
 	<url>http://maven.apache.org</url>
 	<properties>
 		<hive.version>0.13.0</hive.version>
-		<hadoop.version>2.8.0</hadoop.version>
+		<hadoop.version>2.10.0</hadoop.version>
                 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
                 <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
